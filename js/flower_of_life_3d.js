@@ -15,6 +15,8 @@ class CinematicStrucity3D {
         this.scene.fog = new THREE.FogExp2(0x030303, 0.005);
 
         this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // CRITICAL RESTORE: The camera must observe the isolated Layer 1 Rings Ecosystem.
+        this.camera.layers.enable(1);
         
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, premultipliedAlpha: false });
         this.renderer.setClearColor(0x000000, 0); // Explicitly enforce absolute 0 alpha to reveal the static CSS stars
@@ -91,20 +93,9 @@ class CinematicStrucity3D {
         });
 
         this.planet = new THREE.Mesh(geometry, material);
-        // CRITICAL FIX: The planet MUST receive shadows so the Rings can cast their intricate striped shadows across the globe.
+        // The planet MUST receive shadows so the Rings can uniquely cast their intricate striped shadows across the globe.
         this.planet.receiveShadow = true;
-        this.planet.castShadow = false; // Kept false to prevent the dreaded blocky terminator self-shadowing 
-
-        // 1.5 The Phantom Shadow Planet
-        // A slightly shrunken invisible clone. Because it is physically smaller than the visible planet,
-        // its shadow map depth is strictly deeper than the planet's surface, mathematically 
-        // preventing any self-shadowing acne on the planet, while flawlessly casting the vast planetary shadow 
-        // far out into space where it beautifully cuts across the back of the rings!
-        const shadowPlanetGeo = new THREE.SphereGeometry(this.planetRadius * 0.98, 64, 64);
-        const shadowPlanetMat = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
-        const shadowPlanet = new THREE.Mesh(shadowPlanetGeo, shadowPlanetMat);
-        shadowPlanet.castShadow = true;
-        this.planet.add(shadowPlanet);
+        this.planet.castShadow = false; // Kept false to permanently prevent the blocky terminator spherical self-shadowing 
         
         // 2. The Magnificent Rings
         const innerRad = this.planetRadius * 1.2;
@@ -156,13 +147,13 @@ class CinematicStrucity3D {
 
         const ringMat = new THREE.MeshStandardMaterial({
             map: ringColorTex,
-            emissiveMap: ringColorTex, // The secret Braid fix: uses the texture to illuminate the dark side perfectly
-            emissive: new THREE.Color(0x110d0a), // Dropped to a faint whisper to violently deepen the cast shadow to near-black
+            emissiveMap: ringColorTex, 
+            emissive: new THREE.Color(0x222222), // The Braid fix: a faint textured whisper simply to anchor the dark side from falling into absolute void.
             alphaMap: ringAlphaTex,
             transparent: true,
             depthWrite: false,
             side: THREE.DoubleSide,
-            color: 0x998a7a, // Shifted from pure matte gray to a dusty, warm orange-tinted gray
+            color: 0xdddddd, // Restored true diffuse reflectance.
             roughness: 0.8,
         });
 
@@ -170,6 +161,10 @@ class CinematicStrucity3D {
         rings.rotation.x = -Math.PI / 2;
         rings.castShadow = false;
         rings.receiveShadow = true;
+        // BRAID ISOLATION: The visible rings move completely into an isolated light-dimension (Layer 1).
+        // This stops the weak, grazing cinematic planet sun from mathematically dimming the flat ring mesh,
+        // allowing us to assign a custom high-angle 'Ring Sun' that lights them brilliantly.
+        rings.layers.set(1);
         this.planet.add(rings);
         
         // 3. The Physical Polar Hexagon Graft (Bypassing Spherical UV Pinching)
@@ -237,13 +232,41 @@ class CinematicStrucity3D {
         this.dirLight.shadow.camera.updateProjectionMatrix();
 
         this.dirLight.shadow.bias = -0.0005; // Proper microscopic offset as planned
-        this.dirLight.shadow.normalBias = 0; // Removed backface inversion bug 
+        this.dirLight.shadow.normalBias = 0.02; // A master stroke tweak. Softens self-shadow banding across the planetary curvature.
         
         this.scene.add(this.dirLight);
 
         // -----------------------------------------------------------------------------------------
-        // THE TRUE PLANETARY SUN
+        // THE RINGS ECOSYSTEM (Layer 1 Exclusive)
         // -----------------------------------------------------------------------------------------
+
+        // Dedicated Ring Sun
+        // Placed radically higher (Y=50) than the planet's atmospheric grazing sun (Y=10).
+        // Because the rings are flat on the XZ plane, this steep angle mathematically forces them to be brightly illuminated
+        // and perfectly reflective on their front face. It ignores the planet entirely.
+        this.ringSun = new THREE.DirectionalLight(0xffffff, 2.0);
+        this.ringSun.position.set(100, 50, -20);
+        this.ringSun.layers.set(1); // Exclusively hits the rings!
+        
+        // Let the Ring Sun cleanly generate the master cinematic shadow across the orbital plane.
+        this.ringSun.castShadow = true;
+        this.ringSun.shadow.mapSize.width = 4096;
+        this.ringSun.shadow.mapSize.height = 4096;
+        this.ringSun.shadow.camera.near = 1;
+        this.ringSun.shadow.camera.far = 600;
+        this.ringSun.shadow.camera.left = -this.planetRadius * 4.0;
+        this.ringSun.shadow.camera.right = this.planetRadius * 4.0;
+        this.ringSun.shadow.camera.top = this.planetRadius * 4.0;
+        this.ringSun.shadow.camera.bottom = -this.planetRadius * 4.0;
+        this.ringSun.shadow.updateProjectionMatrix = true;
+        this.ringSun.shadow.bias = -0.0005;
+        this.ringSun.shadow.normalBias = 0;
+        
+        // CRITICAL BRAID MAGIC:
+        // We explicitly command the Ring Sun's shadow algorithms to mathematically 'see' down into Layer 0 (the Planet).
+        // The Planet mathematically intercepts the light ray, flawlessly plunging the Layer 1 rings directly behind it into near-total darkness.
+        this.ringSun.shadow.camera.layers.enable(0);
+        this.scene.add(this.ringSun);
 
         // Soft Ring Shine (Fill Light for the planet's dark side)
         this.ringShineLight = new THREE.DirectionalLight(0xffeebb, 0.8);
