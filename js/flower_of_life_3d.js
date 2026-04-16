@@ -91,8 +91,20 @@ class CinematicStrucity3D {
         });
 
         this.planet = new THREE.Mesh(geometry, material);
-        this.planet.receiveShadow = false;
-        this.planet.castShadow = false;
+        // CRITICAL FIX: The planet MUST receive shadows so the Rings can cast their intricate striped shadows across the globe.
+        this.planet.receiveShadow = true;
+        this.planet.castShadow = false; // Kept false to prevent the dreaded blocky terminator self-shadowing 
+
+        // 1.5 The Phantom Shadow Planet
+        // A slightly shrunken invisible clone. Because it is physically smaller than the visible planet,
+        // its shadow map depth is strictly deeper than the planet's surface, mathematically 
+        // preventing any self-shadowing acne on the planet, while flawlessly casting the vast planetary shadow 
+        // far out into space where it beautifully cuts across the back of the rings!
+        const shadowPlanetGeo = new THREE.SphereGeometry(this.planetRadius * 0.98, 64, 64);
+        const shadowPlanetMat = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
+        const shadowPlanet = new THREE.Mesh(shadowPlanetGeo, shadowPlanetMat);
+        shadowPlanet.castShadow = true;
+        this.planet.add(shadowPlanet);
         
         // 2. The Magnificent Rings
         const innerRad = this.planetRadius * 1.2;
