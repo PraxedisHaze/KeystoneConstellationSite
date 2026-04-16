@@ -145,12 +145,12 @@ class CinematicStrucity3D {
         const ringMat = new THREE.MeshStandardMaterial({
             map: ringColorTex,
             emissiveMap: ringColorTex, // The secret Braid fix: uses the texture to illuminate the dark side perfectly
-            emissive: new THREE.Color(0x444444), // Calibrated exactly to eliminate utter void without causing glare
+            emissive: new THREE.Color(0x50443a), // Lifted slightly into warm amber/orange to tint the void without blowing it out
             alphaMap: ringAlphaTex,
             transparent: true,
             depthWrite: false,
             side: THREE.DoubleSide,
-            color: 0x888888, // Stepped down to a true matte gray to decisively crush the glaring white blowout on the sunlit side
+            color: 0x998a7a, // Shifted from pure matte gray to a dusty, warm orange-tinted gray
             roughness: 0.8,
         });
 
