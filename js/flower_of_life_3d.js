@@ -150,7 +150,7 @@ class CinematicStrucity3D {
             transparent: true,
             depthWrite: false,
             side: THREE.DoubleSide,
-            color: 0xcccccc, // Slightly dimmed base color to "split the difference" and avoid glaring whites on the sunlit side
+            color: 0x888888, // Stepped down to a true matte gray to decisively crush the glaring white blowout on the sunlit side
             roughness: 0.8,
         });
 
