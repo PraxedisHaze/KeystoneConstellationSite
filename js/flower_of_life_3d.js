@@ -157,7 +157,7 @@ class CinematicStrucity3D {
         const ringMat = new THREE.MeshStandardMaterial({
             map: ringColorTex,
             emissiveMap: ringColorTex, // The secret Braid fix: uses the texture to illuminate the dark side perfectly
-            emissive: new THREE.Color(0x50443a), // Lifted slightly into warm amber/orange to tint the void without blowing it out
+            emissive: new THREE.Color(0x110d0a), // Dropped to a faint whisper to violently deepen the cast shadow to near-black
             alphaMap: ringAlphaTex,
             transparent: true,
             depthWrite: false,
