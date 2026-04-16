@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAIA | Organic Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;600;800&family=Fraunces:opsz,wght@9..144,300;9..144,600&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #f7f5eb;
+            --text: #2f3e28;
+            --accent: #8fa876;
+            --highlight: #d6e0cc;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .serif {
+            font-family: 'Fraunces', serif;
+        }
+
+        /* Organic Shapes */
+        .blob {
+            position: absolute;
+            filter: blur(40px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, -20px) scale(1.1); }
+        }
+
+        .shape-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .shape-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Soft Button */
+        .btn-organic {
+            background-color: var(--text);
+            color: var(--bg);
+            border-radius: 9999px;
+            padding: 1rem 2.5rem;
+            font-family: 'Fraunces', serif;
+            transition: all 0.3s ease;
+        }
+
+        .btn-organic:hover {
+            background-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        /* Nav Link */
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 8px;
+            background: var(--highlight);
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --accent: #4a7c59;
+            --highlight: #d6e0cc;
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+    
+        /* Editor Overrides */
+        .apex-highlighted { outline: 3px solid #00ff00 !important; outline-offset: -3px !important; box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.4) !important; pointer-events: auto !important; }
+        body.edit-mode { cursor: none !important; }
+    </style>
+    
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Blobs -->
+    <div class="blob w-96 h-96 bg-[#d6e0cc] rounded-full top-0 left-0"></div>
+    <div class="blob w-80 h-80 bg-[#e3dcd2] rounded-full bottom-0 right-0 animation-delay-2000"></div>
+
+    <!-- Nav -->
+    <nav class="flex justify-between items-center mb-20 px-4">
+        <div class="serif text-2xl font-semibold tracking-tight text-[var(--text)]">gaia.</div>
+        <div class="hidden md:flex gap-8 font-semibold items-center">
+            <a href="#roots" class="nav-link">Roots</a>
+            <a href="#growth" class="nav-link">Growth</a>
+            <a href="#canopy" class="nav-link">Canopy</a>
+            <button id="edit-mode-btn" class="nav-link font-semibold">Edit</button>
+            <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+        </div>
+        <a href="#connect" class="px-6 py-2 border-2 border-[var(--text)] rounded-full hover:bg-[var(--text)] hover:text-[var(--bg)] transition-colors font-semibold">
+            Connect
+        </a>
+    </nav>
+
+    <!-- Hero -->
+    <main class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center mb-32">
+        <div class="order-2 md:order-1">
+            <h1 class="text-5xl md:text-7xl serif font-light mb-8 leading-[1.1]">
+                Rooted in the <br>
+                <span class="italic text-[var(--accent)]">Real.</span>
+            </h1>
+            <p class="text-lg text-gray-600 mb-10 leading-relaxed max-w-md">
+                A digital ecosystem designed to breathe.
+                Soft lines, organic flow, and a commitment to sustainable growth.
+            </p>
+            <a href="#roots" class="btn-organic inline-block">Explore the Ecosystem</a>
+        </div>
+        
+        <div class="order-1 md:order-2 relative">
+            <div class="aspect-[4/5] bg-gray-200 rounded-[3rem] overflow-hidden rotate-2 hover:rotate-0 transition-transform duration-700 shadow-xl">
+                <img src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1527&auto=format&fit=crop" class="w-full h-full object-cover" alt="Fern">
+            </div>
+        </div>
+    </main>
+
+    <!-- Features -->
+    <section id="sec-roots" class="mb-32">
+        <div class="text-center mb-16">
+            <h2 class="serif text-4xl mb-4">Natural Principles</h2>
+            <div class="w-16 h-1 bg-[var(--accent)] mx-auto rounded-full"></div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="shape-card p-10">
+                <div class="text-4xl mb-6">🌱</div>
+                <h3 class="serif text-2xl mb-4">Sustainable</h3>
+                <p class="text-gray-600">Lightweight code means less energy. A website that respects the planet.</p>
+            </div>
+            <div class="shape-card p-10 mt-8">
+                <div class="text-4xl mb-6">🌿</div>
+                <h3 class="serif text-2xl mb-4">Organic</h3>
+                <p class="text-gray-600">No hard edges. A design language that mimics the flow of nature.</p>
+            </div>
+            <div class="shape-card p-10 mt-16">
+                <div class="text-4xl mb-6">🍂</div>
+                <h3 class="serif text-2xl mb-4">Grounded</h3>
+                <p class="text-gray-600">Built on solid foundations. Typography that feels like stone and earth.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Strip -->
+    <section id="sec-growth" class="mb-32 overflow-hidden rounded-[2rem]">
+        <div class="flex gap-4">
+            <div class="flex-1 h-96 bg-gray-200 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1470058869958-2a77ade41c02?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Nature 1">
+            </div>
+            <div class="flex-1 h-96 bg-gray-200 overflow-hidden hidden md:block">
+                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Nature 2">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="sec-contact" class="bg-[#2f3e28] text-[#f7f5eb] rounded-[3rem] p-12 md:p-24 text-center">
+        <h2 class="serif text-4xl md:text-6xl mb-12">Plant your seed.</h2>
+        <form action="mailto:gaia@axxilak.com" method="POST" enctype="text/plain" class="max-w-md mx-auto mb-12">
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Name</label>
+                <input type="text" name="name" required class="w-full bg-white/10 border border-white/20 p-3 outline-none focus:border-current transition-colors rounded text-sm">
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Email</label>
+                <input type="email" name="email" required class="w-full bg-white/10 border border-white/20 p-3 outline-none focus:border-current transition-colors rounded text-sm">
+            </div>
+            <div class="mb-6">
+                <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Message (Optional)</label>
+                <textarea name="message" rows="3" placeholder="Share your vision..." class="w-full bg-white/10 border border-white/20 p-3 outline-none focus:border-current transition-colors rounded text-sm resize-none"></textarea>
+            </div>
+            <button type="submit" onclick="showThanks(event)" class="btn-organic inline-block font-bold">Start Growing</button>
+            <div id="form-success" class="hidden mt-4 text-center p-4 border border-white/40 text-white bg-white/10 rounded">
+                <p class="text-sm font-bold">Seeds Received!</p>
+                <p class="text-xs opacity-80">Your growth will be nourished.</p>
+            </div>
+        </form>
+        <div class="mt-20 text-sm opacity-60">
+            © 2026 GAIA WEBLING / AXXILAK
+        </div>
+    </footer>
+
+    <script src="../engines/transitions/organic-root.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+    </script>
+
+    
+
+    
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'gaia-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('gaia-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>
+

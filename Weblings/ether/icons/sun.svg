@@ -1,0 +1,9 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Ethereal sun - minimal, breathy -->
+  <circle cx="12" cy="12" r="4.5" stroke="#e8f4f8" opacity="0.8"/>
+  <!-- Very subtle rays, almost breathing -->
+  <line x1="12" y1="2" x2="12" y2="4.5" stroke="#e8f4f8" opacity="0.6"/>
+  <line x1="12" y1="19.5" x2="12" y2="22" stroke="#e8f4f8" opacity="0.6"/>
+  <line x1="22" y1="12" x2="19.5" y2="12" stroke="#e8f4f8" opacity="0.6"/>
+  <line x1="4.5" y1="12" x2="2" y2="12" stroke="#e8f4f8" opacity="0.6"/>
+</svg>

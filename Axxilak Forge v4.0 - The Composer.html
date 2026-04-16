@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak Forge v4.0 | The Composer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* === SPATIAL UI SYSTEM === */
+        :root {
+            --gold: #d4af37;
+            --dark: #0f172a;
+            --panel: #1e293b;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Pseudo-Haptics */
+        .tactile-btn {
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1);
+        }
+
+        .tactile-btn:active {
+            transform: scale(0.97) translateY(1px);
+            opacity: 0.9;
+        }
+
+        /* Toggle Switch Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: var(--gold);
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: var(--gold);
+        }
+
+        .infinite-grid {
+            background-color: #050505;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            box-shadow: inset 0 0 100px #000;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--gold);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes goldenPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(212, 175, 55, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+            }
+        }
+
+        .buy-pulse {
+            animation: goldenPulse 2s infinite;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header
+        class="h-16 bg-[#0b1120] border-b border-white/5 flex items-center justify-between px-6 shrink-0 z-30 shadow-2xl">
+        <div class="flex items-center gap-4">
+            <a href="../index.html"
+                class="tactile-btn w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                title="Return to Marketplace">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-[#d4af37] to-[#8b7355] rounded-lg flex items-center justify-center font-bold text-slate-900 text-xl shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                A</div>
+            <div>
+                <h1 class="font-bold text-lg text-white tracking-wide leading-none">Axxilak <span
+                        class="text-[#d4af37]">Forge</span></h1>
+                <div
+                    class="flex items-center gap-2 text-[10px] text-slate-500 uppercase tracking-widest font-mono mt-1">
+                    <span>v4.0 Composer</span>
+                    <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
+                    <span id="save-status" class="text-green-500 transition-colors duration-500">System Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex bg-white/5 rounded-lg p-1 border border-white/5">
+                <button onclick="toggleHandedness()" title="Toggle Southpaw Layout (Shift+S)"
+                    class="tactile-btn w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors"><i
+                        class="fa-solid fa-hand text-xs"></i></button>
+            </div>
+            <button onclick="downloadHtmlOnly()"
+                class="tactile-btn text-slate-400 hover:text-white px-4 py-2 text-xs font-medium transition-colors border border-white/10 rounded hover:border-white/30 hidden md:flex items-center gap-2"><i
+                    class="fa-solid fa-code"></i> HTML Only</button>
+            <button onclick="buyAndDownload()"
+                class="tactile-btn buy-pulse bg-[#d4af37] hover:bg-[#b5952f] text-slate-900 font-bold py-2 px-6 rounded text-sm shadow-lg flex items-center gap-2"><i
+                    class="fa-solid fa-briefcase"></i> <span class="tracking-wide">Purchase License
+                    ($50)</span></button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main id="workspace" class="flex-1 flex overflow-hidden flex-row">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar-panel"
+            class="w-80 bg-[#0f172a] border-r border-white/5 flex flex-col shrink-0 z-20 shadow-xl transition-all duration-300">
+            <!-- Template Selector -->
+            <div class="p-5 border-b border-white/5 bg-[#141e33]">
+                <label class="text-[9px] text-[#d4af37] uppercase font-bold tracking-[0.2em] mb-3 block">Base
+                    Architecture</label>
+                <div class="relative group">
+                    <select id="template-selector" onchange="switchTemplate(this.value)"
+                        class="w-full bg-[#0b1120] text-gray-200 text-sm font-medium border border-white/10 rounded-lg p-3 appearance-none focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] outline-none cursor-pointer transition-all hover:border-white/20">
+                        <option value="liquid-gold">Liquid Gold (Premium)</option>
+                        <option value="velvet">Velvet (Minimalist)</option>
+                    </select>
+                    <div
+                        class="absolute right-3 top-3.5 text-slate-500 pointer-events-none group-hover:text-[#d4af37] transition-colors">
+                        <i class="fa-solid fa-chevron-down text-xs"></i></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll space-y-8">
+
+                <!-- NEW: Layout Composer -->
+                <div>
+                    <h2
+                        class="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2 opacity-80">
+                        <i class="fa-solid fa-layer-group text-[#d4af37]"></i> Layout Composer
+                    </h2>
+                    <div class="space-y-3 bg-[#0b1120] p-4 rounded-lg border border-white/5">
+                        <!-- Toggles -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-300">About Section</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer"
+                                    onchange="toggleSection('about', this.checked)" id="tog-about">
+                                <div
+                                    class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d4af37]">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-300">Services / Pricing</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer"
+                                    onchange="toggleSection('services', this.checked)" id="tog-services" checked>
+                                <div
+                                    class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d4af37]">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-300">Image Gallery</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer"
+                                    onchange="toggleSection('gallery', this.checked)" id="tog-gallery">
+                                <div
+                                    class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d4af37]">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-300">Testimonials</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer"
+                                    onchange="toggleSection('testimonials', this.checked)" id="tog-testimonials">
+                                <div
+                                    class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d4af37]">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-300">FAQ</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer"
+                                    onchange="toggleSection('faq', this.checked)" id="tog-faq">
+                                <div
+                                    class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d4af37]">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Identity -->
+                <div>
+                    <h2
+                        class="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2 opacity-80">
+                        <i class="fa-solid fa-pen-nib text-[#d4af37]"></i> Identity</h2>
+                    <div class="space-y-5">
+                        <div class="group"><label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1.5 block">Display
+                                Name</label><input type="text" id="ctrl-name"
+                                class="w-full bg-[#0b1120] border border-white/10 rounded-md p-2.5 text-sm text-white focus:border-[#d4af37] outline-none"
+                                oninput="updateState('text.name', this.value)"></div>
+                        <div class="group"><label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1.5 block">Role
+                                / Tagline</label><input type="text" id="ctrl-tagline"
+                                class="w-full bg-[#0b1120] border border-white/10 rounded-md p-2.5 text-sm text-white focus:border-[#d4af37] outline-none"
+                                oninput="updateState('text.tagline', this.value)"></div>
+                        <div class="group"><label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1.5 block">Professional
+                                Bio</label><textarea id="ctrl-bio" rows="4"
+                                class="w-full bg-[#0b1120] border border-white/10 rounded-md p-2.5 text-sm text-white focus:border-[#d4af37] outline-none"
+                                oninput="updateState('text.bio', this.value)"></textarea></div>
+                    </div>
+                </div>
+
+                <!-- Aesthetics -->
+                <div>
+                    <h2
+                        class="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2 opacity-80">
+                        <i class="fa-solid fa-palette text-[#d4af37]"></i> Aesthetics</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2 block">Primary</label>
+                            <div class="flex items-center gap-2 bg-[#0b1120] p-1.5 rounded-md border border-white/10">
+                                <input type="color" id="ctrl-primary"
+                                    class="w-6 h-6 rounded cursor-pointer border-none bg-transparent p-0"
+                                    oninput="updateState('colors.primary', this.value)"><span
+                                    class="text-[10px] font-mono text-slate-400 flex-1 text-right"
+                                    id="lbl-primary">#D4AF37</span></div>
+                        </div>
+                        <div><label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2 block">Canvas</label>
+                            <div class="flex items-center gap-2 bg-[#0b1120] p-1.5 rounded-md border border-white/10">
+                                <input type="color" id="ctrl-bg"
+                                    class="w-6 h-6 rounded cursor-pointer border-none bg-transparent p-0"
+                                    oninput="updateState('colors.background', this.value)"><span
+                                    class="text-[10px] font-mono text-slate-400 flex-1 text-right"
+                                    id="lbl-bg">#0A0A0A</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media -->
+                <div>
+                    <h2
+                        class="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2 opacity-80">
+                        <i class="fa-solid fa-image text-[#d4af37]"></i> Media</h2>
+                    <div class="relative group cursor-pointer">
+                        <input type="file" id="ctrl-img-upload" accept="image/*" class="hidden"
+                            onchange="handleSmartImageUpload(this)">
+                        <label for="ctrl-img-upload"
+                            class="flex flex-col items-center justify-center w-full h-28 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-[#d4af37] hover:bg-[#d4af37]/5 transition-all bg-[#0b1120]">
+                            <i
+                                class="fa-solid fa-cloud-arrow-up text-slate-500 mb-2 text-xl group-hover:text-[#d4af37] transition-colors"></i>
+                            <span class="text-xs text-slate-400 group-hover:text-white font-medium">Upload
+                                Portrait</span>
+                            <span class="text-[9px] text-slate-600 mt-1">Smart Compress Active</span>
+                        </label>
+                        <div id="compression-indicator"
+                            class="hidden absolute inset-0 bg-[#0f172a]/90 flex items-center justify-center rounded-lg z-10 backdrop-blur-sm">
+                            <div class="text-center">
+                                <div class="loader mb-2 mx-auto"></div><span
+                                    class="text-[9px] text-[#d4af37] uppercase tracking-widest">Optimizing...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="p-3 border-t border-white/5 bg-[#0b1120] flex justify-between items-center text-[9px] text-slate-500 font-mono">
+                <div class="flex items-center gap-2"><span
+                        class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span><span>MEMORY: <span
+                            id="state-size" class="text-slate-300">0.0 KB</span></span></div>
+                <span>SESSION: ACTIVE</span>
+            </div>
+        </aside>
+
+        <!-- CENTER -->
+        <div class="flex-1 flex flex-col relative infinite-grid transition-all duration-300">
+            <div
+                class="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 bg-[#0f172a]/90 backdrop-blur-md border border-white/10 p-1.5 rounded-full shadow-2xl">
+                <button onclick="setPreviewMode('desktop')" id="btn-desktop"
+                    class="tactile-btn px-4 py-1.5 rounded-full text-white text-xs font-medium bg-white/10 hover:bg-white/20 transition-all flex items-center gap-2"><i
+                        class="fa-solid fa-desktop"></i></button>
+                <button onclick="setPreviewMode('mobile')" id="btn-mobile"
+                    class="tactile-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-all text-xs font-medium flex items-center gap-2"><i
+                        class="fa-solid fa-mobile-screen"></i></button>
+                <div class="w-px h-4 bg-white/10 mx-1"></div>
+                <button onclick="resetTemplate()"
+                    class="tactile-btn w-8 h-8 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
+                    title="Reset"><i class="fa-solid fa-rotate-left text-xs"></i></button>
+            </div>
+            <div class="flex-1 flex items-center justify-center p-8 overflow-hidden">
+                <div id="preview-wrapper"
+                    class="w-full h-full bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out relative border border-[#333]">
+                    <iframe id="preview-frame" class="w-full h-full border-none bg-white"
+                        sandbox="allow-scripts allow-same-origin"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- === SAFE TEMPLATE STORAGE (FALLBACKS) === -->
+    <!-- Ideally logic fetches from external files, but these serve as reliable fallbacks -->
+    <script type="text/template"
+        id="tpl-consultant"><!DOCTYPE html><html lang="en"><head><title>Consultant</title></head><body><h1>Consultant Placeholder</h1></body></html></script>
+    <script type="text/template"
+        id="tpl-liquid-gold"><!DOCTYPE html><html lang="en"><head><title>Liquid</title></head><body><h1>Liquid Placeholder</h1></body></html></script>
+    <script type="text/template"
+        id="tpl-velvet"><!DOCTYPE html><html lang="en"><head><title>Velvet</title></head><body><h1>Velvet Placeholder</h1></body></html></script>
+
+    <!-- EDITOR SOURCE (THE QUINE) - SAFELY ESCAPED -->
+    <script type="text/template" id="tpl-editor-source">
+<!DOCTYPE html><html lang="en"><head><title>Axxilak Editor</title><style>body{margin:0;font-family:sans-serif;display:flex;height:100vh;background:#111;color:#fff}#sidebar{width:300px;background:#222;padding:20px;border-right:1px solid #333}input,textarea{width:100%;background:#333;border:1px solid #444;color:#fff;padding:8px;margin-bottom:10px}iframe{flex:1;border:none;background:#fff}.btn{width:100%;padding:10px;background:#d4af37;border:none;font-weight:bold;cursor:pointer;margin-top:20px}</style></head><body><div id="sidebar"><h3>Axxilak Editor</h3><div id="controls"></div><button class="btn" onclick="exportSite()">EXPORT HTML</button></div><iframe id="preview"></iframe><script>
+const state = '__STATE_PLACEHOLDER__';
+const template = `__TEMPLATE_PLACEHOLDER__`;
+const frame=document.getElementById('preview');const controls=document.getElementById('controls');
+function render(){
+    let h=template;
+    if(typeof state === 'object') {
+        for(let s in state){
+            if(s==='sections'){ for(let sec in state.sections) { if(state.sections[sec]===false) { h = h.replace(`id="sec-${sec}"`, `id="sec-${sec}" style="display:none !important"`); } } continue; }
+            for(let k in state[s]){h=h.replaceAll(`{{${s}.${k}}}`,state[s][k]);}
+        }
+        h=h.replaceAll('{{text.bio_short}}',state.text.bio.substring(0,50));
+    }
+    const d=frame.contentDocument;d.open();d.write(h);d.close();
+}
+function createControl(lbl,key,type='text'){
+    if(typeof state !== 'object') return;
+    const d=document.createElement('div');d.innerHTML=`<label style="font-size:10px;text-transform:uppercase;color:#888">${lbl}</label>`;const i=document.createElement(type==='textarea'?'textarea':'input');if(type==='color')i.type='color';const[s,k]=key.split('.');i.value=state[s][k];i.oninput=e=>{state[s][k]=e.target.value;render()};d.appendChild(i);controls.appendChild(d);
+}
+// Minimal Controls for the offline editor
+if(typeof state === 'object') {
+    createControl('Name','text.name');createControl('Bio','text.bio','textarea');
+}
+render();
+function exportSite(){const b=new Blob([frame.contentDocument.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='index.html';a.click();}
+<\/script></body></html>
+    </script>
+
+    <script>
+        // --- MASTER LOGIC V4.0 (COMPOSER) ---
+
+        const defaults = {
+            colors: { primary: "#d4af37", background: "#0a0a0a", text: "#f5f5f5" },
+            text: { name: "Alex Vayner", tagline: "Strategic Consultant", bio: "Helping businesses navigate complexity.", bio_short: "Strategy Meets Design", cta: "Work With Me" },
+            images: { profile: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&w=400&q=80" },
+            // NEW: Section Toggles
+            sections: { about: false, services: true, gallery: false, testimonials: false, faq: false },
+            activeTemplate: "liquid-gold"
+        };
+
+        let currentState = JSON.parse(JSON.stringify(defaults));
+        let southpawMode = false;
+        let currentTemplateHTML = "";
+
+        window.onload = function () {
+            const params = new URLSearchParams(window.location.search);
+            const tplParam = params.get('template');
+            const storedState = sessionStorage.getItem('axxilak_state');
+
+            if (tplParam) { switchTemplate(tplParam); }
+            else if (storedState) {
+                currentState = JSON.parse(storedState);
+                document.getElementById('template-selector').value = currentState.activeTemplate;
+                syncInputs();
+                loadTemplateSource(currentState.activeTemplate);
+            } else { loadTemplateSource('liquid-gold'); }
+
+            if (localStorage.getItem('southpaw') === 'true') toggleHandedness();
+        };
+
+        async function loadTemplateSource(tplName) {
+            currentState.activeTemplate = tplName;
+
+            if (window.location.protocol.startsWith('http') || window.location.protocol === 'file:') {
+                try {
+                    const response = await fetch(`./Weblings/${tplName}/index.html?t=${Date.now()}`);
+                    if (response.ok) {
+                        currentTemplateHTML = await response.text();
+                        console.log(`Loaded ${tplName}`);
+                    }
+                } catch (e) { console.warn(`Fetch unavailable for ${tplName}`); }
+            }
+
+            // Fallback
+            if (!currentTemplateHTML || currentTemplateHTML.length < 100) {
+                const fallbackEl = document.getElementById(`tpl-${tplName}`) || document.getElementById('tpl-liquid-gold');
+                currentTemplateHTML = fallbackEl.innerHTML;
+            }
+
+            renderPreview();
+            syncInputs();
+        }
+
+        function renderPreview() {
+            let tpl = currentTemplateHTML;
+
+            // 1. Handle Text/Color Replacements
+            for (const [section, data] of Object.entries(currentState)) {
+                if (typeof data === 'object' && section !== 'sections') {
+                    for (const [key, val] of Object.entries(data)) {
+                        const regex = new RegExp(`{{${section}.${key}}}`, 'g');
+                        tpl = tpl.replace(regex, val);
+                    }
+                }
+            }
+            tpl = tpl.replace(/{{text.bio_short}}/g, currentState.text.bio.substring(0, 50));
+
+            // 2. Handle Section Toggles (The Composer Logic)
+            // We look for ids like id="sec-about" and inject style="display:none" if state is false
+            for (const [secName, isVisible] of Object.entries(currentState.sections)) {
+                if (!isVisible) {
+                    // Regex to find the id and add display:none inline
+                    // Note: This assumes standard HTML formatting in templates
+                    tpl = tpl.replace(`id="sec-${secName}"`, `id="sec-${secName}" style="display:none !important"`);
+                }
+            }
+
+            const frame = document.getElementById('preview-frame');
+            try {
+                const doc = frame.contentDocument || frame.contentWindow.document;
+                // Insert base tag to fix relative paths
+                tpl = tpl.replace(/<head[^>]*>/, `$&<base href="${window.location.href.split('?')[0].substring(0, window.location.href.lastIndexOf('/'))}/Weblings/${currentState.activeTemplate}/">`);
+                doc.open();
+                doc.write(tpl);
+                doc.close();
+            } catch (e) {
+                console.warn('Preview render error:', e);
+            }
+
+            sessionStorage.setItem('axxilak_state', JSON.stringify(currentState));
+            updateStateSize();
+        }
+
+        function toggleSection(secName, isChecked) {
+            currentState.sections[secName] = isChecked;
+            renderPreview();
+        }
+
+        function updateState(path, value) {
+            const [sec, key] = path.split('.');
+            currentState[sec][key] = value;
+            if (sec === 'colors') document.getElementById(key === 'primary' ? 'lbl-primary' : 'lbl-bg').innerText = value.toUpperCase();
+            renderPreview();
+        }
+
+        async function handleSmartImageUpload(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('compression-indicator').classList.remove('hidden');
+                const reader = new FileReader();
+                reader.readAsDataURL(input.files[0]);
+                reader.onload = (e) => {
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                        const MAX = 800; let w = img.width, h = img.height;
+                        if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } } else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                        canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
+                        currentState.images.profile = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('compression-indicator').classList.add('hidden'); renderPreview();
+                    };
+                };
+            }
+        }
+
+        function switchTemplate(val) {
+            if (val === 'velvet') { currentState.colors.primary = "#ff3366"; currentState.colors.background = "#ffffff"; }
+            else if (val === 'liquid-gold') { currentState.colors.primary = "#d4af37"; currentState.colors.background = "#050505"; }
+            loadTemplateSource(val);
+        }
+
+        function syncInputs() {
+            document.getElementById('ctrl-primary').value = currentState.colors.primary;
+            document.getElementById('ctrl-bg').value = currentState.colors.background;
+            document.getElementById('ctrl-name').value = currentState.text.name;
+            document.getElementById('ctrl-tagline').value = currentState.text.tagline;
+            document.getElementById('ctrl-bio').value = currentState.text.bio;
+
+            // Sync template selector dropdown
+            document.getElementById('template-selector').value = currentState.activeTemplate;
+
+            // Sync Toggles
+            for (const [key, val] of Object.entries(currentState.sections)) {
+                const el = document.getElementById(`tog-${key}`);
+                if (el) el.checked = val;
+            }
+        }
+
+        function updateStateSize() {
+            const json = JSON.stringify(currentState);
+            document.getElementById('state-size').innerText = (new Blob([json]).size / 1024).toFixed(1) + " KB";
+        }
+
+        function toggleHandedness() {
+            southpawMode = !southpawMode;
+            localStorage.setItem('southpaw', southpawMode);
+            const ws = document.getElementById('workspace'); const sb = document.getElementById('sidebar-panel');
+            if (southpawMode) { ws.classList.add('flex-row-reverse'); sb.classList.add('border-l'); sb.classList.remove('border-r'); }
+            else { ws.classList.remove('flex-row-reverse'); sb.classList.remove('border-l'); sb.classList.add('border-r'); }
+        }
+        document.addEventListener('keydown', (e) => { if (e.shiftKey && e.key.toLowerCase() === 's') toggleHandedness(); });
+
+        function setPreviewMode(mode) {
+            const w = document.getElementById('preview-wrapper'); const db = document.getElementById('btn-desktop'); const mb = document.getElementById('btn-mobile');
+            if (mode === 'mobile') { w.style.maxWidth = '375px'; w.style.height = '80%'; w.style.borderRadius = '30px'; mb.classList.add('bg-white/10', 'text-white'); db.classList.remove('bg-white/10', 'text-white'); }
+            else { w.style.maxWidth = '100%'; w.style.height = '100%'; w.style.borderRadius = '0'; db.classList.add('bg-white/10', 'text-white'); mb.classList.remove('bg-white/10', 'text-white'); }
+        }
+
+        function resetTemplate() { if (confirm("Reset Workspace?")) { sessionStorage.clear(); location.reload(); } }
+
+        function buyAndDownload() {
+            const b64 = btoa(JSON.stringify(currentState));
+            window.location.href = `../download.html?custom=${b64}`;
+        }
+
+        function downloadHtmlOnly() {
+            const doc = document.getElementById('preview-frame').contentDocument;
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([doc.documentElement.outerHTML], { type: "text/html" }));
+            link.download = "my_webling.html";
+            link.click();
+        }
+    </script>
+</body>
+
+</html>

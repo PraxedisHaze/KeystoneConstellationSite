@@ -1,0 +1,21 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Neon Tokyo sun - glitch, bright, sharp -->
+  <circle cx="12" cy="12" r="5" stroke="#00ff88" stroke-width="1.5" filter="url(#glow)"/>
+  <!-- Sharp rays with slight offset for glitch effect -->
+  <line x1="12" y1="2" x2="12" y2="4" stroke="#00ff88" stroke-width="1.5" filter="url(#glow)"/>
+  <line x1="12" y1="20" x2="12" y2="22" stroke="#ff00ff" stroke-width="1" opacity="0.7" filter="url(#glow)"/>
+  <line x1="2" y1="12" x2="4" y2="12" stroke="#00ff88" stroke-width="1.5" filter="url(#glow)"/>
+  <line x1="20" y1="12" x2="22" y2="12" stroke="#ff00ff" stroke-width="1" opacity="0.7" filter="url(#glow)"/>
+  <!-- Diagonal rays with color shift -->
+  <line x1="4.5" y1="4.5" x2="6" y2="6" stroke="#00ffff" stroke-width="1" opacity="0.6" filter="url(#glow)"/>
+  <line x1="18" y1="18" x2="19.5" y2="19.5" stroke="#ff00ff" stroke-width="1" opacity="0.6" filter="url(#glow)"/>
+</svg>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUMMIT | Outdoor Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --text: #f8fafc;
+            --accent: #f97316;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .display-font { font-family: 'Anton', sans-serif; }
+
+        /* Tactical Borders */
+        .border-tactical {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-summit {
+            background-color: var(--accent);
+            color: white;
+            padding: 1rem 2rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            transition: all 0.2s;
+        }
+
+        .btn-summit:hover {
+            background-color: white;
+            color: var(--bg);
+            transform: scale(1.05);
+        }
+
+        /* Image Mask */
+        .img-mask {
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+        }
+
+        /* Parallax-ish Effect */
+        .bg-fixed {
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --text: #0f172a;
+            --accent: #ea580c;
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+    
+        /* Editor Overrides */
+        .apex-highlighted { outline: 3px solid #00ff00 !important; outline-offset: -3px !important; box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.4) !important; pointer-events: auto !important; }
+        body.edit-mode { cursor: none !important; }
+    </style>
+    
+</head>
+<body>
+
+    <!-- Nav -->
+    <nav class="fixed top-0 left-0 right-0 p-6 md:p-10 flex justify-between items-center z-50 pointer-events-none bg-gradient-to-b from-[var(--bg)]/90 to-transparent h-40">
+        <div class="display-font text-3xl tracking-widest uppercase italic pointer-events-auto">Summit.</div>
+        <div class="flex gap-8 text-xs font-bold uppercase tracking-widest pointer-events-auto items-center">
+            <a href="#expeditions" class="hover:text-[var(--accent)] transition">Expeditions</a>
+            <a href="#gear" class="hover:text-[var(--accent)] transition">Gear</a>
+            <a href="#contact" class="hover:text-[var(--accent)] transition">Basecamp</a>
+            <button id="edit-mode-btn" class="hover:text-[var(--accent)] transition text-xs font-bold uppercase tracking-widest">Edit</button>
+            <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="relative h-screen flex items-center justify-center overflow-hidden pt-20">
+        <div class="absolute inset-0 bg-fixed opacity-40 grayscale" style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop');"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent to-transparent"></div>
+        
+        <div class="relative z-10 text-center px-6">
+            <h1 class="display-font text-7xl md:text-[10rem] leading-[0.9] mb-8 tracking-tighter italic">
+                BEYOND<br>THE<br><span class="text-[var(--accent)]">PEAK</span>
+            </h1>
+            <p class="text-lg md:text-xl uppercase tracking-[0.4em] font-light mb-12">The climb is the goal.</p>
+            <a href="#expeditions" class="btn-summit">Join the Expedition</a>
+        </div>
+    </header>
+
+    <!-- Content Section -->
+    <section id="sec-expeditions" class="py-32 px-6 max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-20 items-center">
+            <div class="order-2 md:order-1">
+                <div class="text-[var(--accent)] font-bold mb-4 uppercase tracking-widest">// 01 // OVERLAND</div>
+                <h2 class="display-font text-5xl mb-6">Forge Your Own Path.</h2>
+                <p class="text-slate-400 leading-relaxed mb-8">
+                    Summit is a tactical digital presence built for those who operate on the edge.
+                    Clean, high-performance architecture that delivers your signal even in the harshest environments.
+                </p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="border-tactical p-4">
+                        <div class="text-2xl font-bold mb-1 display-font">4,800m</div>
+                        <div class="text-xs uppercase text-slate-500 font-bold">Max Altitude</div>
+                    </div>
+                    <div class="border-tactical p-4">
+                        <div class="text-2xl font-bold mb-1 display-font">100%</div>
+                        <div class="text-xs uppercase text-slate-500 font-bold">Resilience</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-1 md:order-2">
+                <div class="img-mask aspect-[4/3] bg-slate-800 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1527004013197-933c4bb611b3?q=80&w=1974&auto=format&fit=crop" class="w-full h-full object-cover" alt="Mountain Expedition">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="sec-contact" class="py-24 border-t border-white/10 bg-black/50">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="display-font text-5xl md:text-7xl mb-12 italic">Return to Basecamp</h2>
+            <form action="mailto:summit@axxilak.com" method="POST" enctype="text/plain" class="max-w-md mx-auto mb-8">
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Name</label>
+                    <input type="text" name="name" required class="w-full bg-white/5 border border-white/10 p-4 text-white outline-none focus:border-[var(--accent)] transition">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Email</label>
+                    <input type="email" name="email" required class="w-full bg-white/5 border border-white/10 p-4 text-white outline-none focus:border-[var(--accent)] transition">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Message (Optional)</label>
+                    <textarea name="message" rows="3" placeholder="Signal transmission..." class="w-full bg-white/5 border border-white/10 p-4 text-white outline-none focus:border-[var(--accent)] transition resize-none"></textarea>
+                </div>
+                <button type="submit" onclick="showThanks(event)" class="btn-summit">Transmit Signal</button>
+                <div id="form-success" class="hidden mt-4 text-center p-4 border border-green-500/50 text-green-400 bg-green-500/10">
+                    <p class="text-sm font-bold">Signal Received!</p>
+                    <p class="text-xs opacity-80">Transmission confirmed at basecamp.</p>
+                </div>
+            </form>
+            <div class="mt-20 text-xs font-bold uppercase tracking-[0.5em] opacity-20">
+                Summit Webling // MMXXVI // Axxilak
+            </div>
+        </div>
+    </footer>
+
+    <script src="../engines/transitions/alpine-frost.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+    </script>
+
+    
+
+    
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'summit-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('summit-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,22 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="raceGlow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Race Car Sun - Chrome, fast, sleek -->
+  <circle cx="12" cy="12" r="5" stroke="#ff1744" stroke-width="1.5" filter="url(#raceGlow)"/>
+  <!-- Speed lines instead of rays -->
+  <line x1="12" y1="1" x2="12" y2="3.5" stroke="#ff1744" stroke-width="1.5" filter="url(#raceGlow)"/>
+  <line x1="12" y1="20.5" x2="12" y2="23" stroke="#ff1744" stroke-width="1.5" filter="url(#raceGlow)"/>
+  <!-- Side streaks (speed effect) -->
+  <line x1="0.5" y1="11.5" x2="3" y2="12" stroke="#00bfff" stroke-width="1" opacity="0.8" filter="url(#raceGlow)"/>
+  <line x1="21" y1="12" x2="23.5" y2="12.5" stroke="#00bfff" stroke-width="1" opacity="0.8" filter="url(#raceGlow)"/>
+  <!-- Chrome accent rays -->
+  <line x1="4.5" y1="4.5" x2="6" y2="6" stroke="#ffff00" stroke-width="1" opacity="0.7" filter="url(#raceGlow)"/>
+  <line x1="18" y1="18" x2="19.5" y2="19.5" stroke="#ffff00" stroke-width="1" opacity="0.7" filter="url(#raceGlow)"/>
+</svg>

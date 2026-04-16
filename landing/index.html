@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak — Professional Portfolio Templates</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0033 0%, #2d0052 50%, #1a0033 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hero Section */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #d4af37 0%, #f0e68c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: #b8b8b8;
+            margin-bottom: 50px;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin-bottom: 50px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .feature h3 {
+            color: #d4af37;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            color: #c0c0c0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            background: linear-gradient(135deg, #d4af37 0%, #f0e68c 100%);
+            color: #1a0033;
+            padding: 18px 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(212, 175, 55, 0.5);
+        }
+
+        .cta-button:active {
+            transform: translateY(0px);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            color: #808080;
+        }
+
+        footer p {
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .logo {
+                width: 150px;
+                height: 150px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        /* Particles effect */
+        .particle {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: rgba(212, 175, 55, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float-particle 6s ease-in-out infinite;
+        }
+
+        @keyframes float-particle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <img src="./axxilak_logo.png" alt="Axxilak Logo" class="logo">
+
+        <h1>Axxilak</h1>
+
+        <p class="tagline">
+            Professional web templates designed to launch fast. Build your online presence without the complexity.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>⚡ Ready to Deploy</h3>
+                <p>No coding required. Customize in minutes, launch on Netlify for free.</p>
+            </div>
+            <div class="feature">
+                <h3>🎨 Professional Design</h3>
+                <p>Modern, clean, responsive. Looks great on desktop, tablet, and mobile.</p>
+            </div>
+            <div class="feature">
+                <h3>📬 Built-in Contact</h3>
+                <p>Contact form included. Wire up Formspree in 2 minutes. Start getting leads.</p>
+            </div>
+        </div>
+
+        <a href="../Axxilak Forge v4.0 (The Composer).html" class="cta-button">Get Liquid Gold Template</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Axxilak. Professional templates for builders.</p>
+        <p>Questions? Email <a href="mailto:contact@axxilak.com">contact@axxilak.com</a></p>
+    </footer>
+
+</body>
+</html>

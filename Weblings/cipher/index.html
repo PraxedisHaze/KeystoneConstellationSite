@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPHER | Technical Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;800&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --text: #00ff41; /* Matrix Green */
+            --dim: #003300;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        .border-cipher {
+            border: 1px solid var(--text);
+        }
+
+        .bg-dim {
+            background-color: var(--dim);
+        }
+
+        /* Scanline */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* Glitch */
+        .glitch-text:hover {
+            animation: glitch 0.3s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: var(--text);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --text: #00cc00;
+            --dim: #ccffcc;
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+    </style>
+    <!-- APEX EDITOR STYLES -->
+    <style id="edit-mode-styles">
+        .edit-mode .section-drag-handle { display: block !important; }
+        #lens-container { cursor: grab; user-select: none; }
+        #lens-container:active { cursor: grabbing; }
+        #palette-container { cursor: grab; user-select: none; color: #00ff00; }
+        #palette-container:active { cursor: grabbing; }
+        #palette-container .palette-input, #palette-container input, #palette-container textarea, #palette-container select { color: #000000 !important; }
+        #palette-container .palette-label, #palette-container .palette-title, #palette-container .palette-header, #palette-container button { color: #00ff00 !important; }
+        [data-theme="light"] #palette-container { color: #003366; }
+        [data-theme="light"] #palette-container .palette-input, [data-theme="light"] #palette-container input, [data-theme="light"] #palette-container textarea, [data-theme="light"] #palette-container select { color: #1a1a1a !important; }
+        [data-theme="light"] #palette-container .palette-label, [data-theme="light"] #palette-container .palette-title, [data-theme="light"] #palette-container .palette-header, [data-theme="light"] #palette-container button { color: #d4af37 !important; }
+        .tool-palette { font-family: Inter, sans-serif; font-size: 14px; }
+        .palette-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; }
+        .palette-title { font-weight: 600; font-size: 16px; color: #1f2937; }
+        .palette-control { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .palette-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; }
+        .palette-input { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-family: inherit; font-size: 13px; transition: border-color 0.2s; }
+        .palette-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+        .palette-input--color { width: 50px; height: 40px; border: 1px solid #d1d5db; border-radius: 0px; cursor: pointer; }
+        .palette-input--hex { flex: 1; }
+        .palette-input--select { width: 100%; }
+        .apex-highlighted { outline: 4px solid #00ff00 !important; outline-offset: 2px !important; box-shadow: 0 0 30px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.2) !important; position: relative !important; z-index: 9999 !important; animation: apex-pulse 1.5s ease-in-out infinite; }
+        @keyframes apex-pulse { 0%, 100% { box-shadow: 0 0 30px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.2); } 50% { box-shadow: 0 0 50px #00ff00, inset 0 0 30px rgba(0, 255, 0, 0.4); } }
+        body.apex-grayscale-mode { filter: grayscale(85%); }
+        body.apex-grayscale-mode .apex-highlighted { filter: grayscale(0%) !important; }
+        .apex-highlighted.apex-danger-target { outline: 4px solid #ef4444 !important; box-shadow: 0 0 40px #ef4444, inset 0 0 30px rgba(239, 68, 68, 0.3) !important; animation: apex-danger-pulse 1s ease-in-out infinite !important; }
+        @keyframes apex-danger-pulse { 0%, 100% { box-shadow: 0 0 40px #ef4444, inset 0 0 30px rgba(239, 68, 68, 0.3); } 50% { box-shadow: 0 0 60px #ef4444, inset 0 0-40px rgba(239, 68, 68, 0.5); } }
+        #apex-context-bar { position: fixed; pointer-events: auto; z-index: 10000; display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: #00ff00; color: #000; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: bold; border-radius: 2px 2px 0 0; box-shadow: 0 -4px 15px rgba(0, 255, 0, 0.3); transition: opacity 0.2s, transform 0.2s; transform: translateY(0); }
+        #apex-context-bar.hidden { display: none; opacity: 0; pointer-events: none; }
+        .context-tag { background: rgba(0, 0, 0, 0.1); padding: 2px 4px; border-radius: 1px; text-transform: uppercase; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+    <div class="scanline"></div>
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start mb-20 gap-4">
+        <div>
+            <div class="text-[10px] opacity-50 mb-1">SYSTEM_VERSION: 1.0.4</div>
+            <h1 class="text-3xl font-extrabold glitch-text tracking-tighter">CIPHER_NET<span class="cursor ml-2"></span></h1>
+        </div>
+        <div class="flex gap-6 text-xs font-bold uppercase items-center">
+            <a href="#logs" class="hover:bg-[var(--text)] hover:text-black px-2 transition">/LOGS</a>
+            <a href="#src" class="hover:bg-[var(--text)] hover:text-black px-2 transition">/SRC</a>
+            <a href="#root" class="hover:bg-[var(--text)] hover:text-black px-2 transition">/ROOT</a>
+            <button id="edit-mode-btn" class="hover:bg-[var(--text)] hover:text-black px-2 transition">/EDIT</button>
+            <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <main class="max-w-4xl mb-32">
+        <div class="text-xs opacity-50 mb-4 font-bold"># INITIALIZING_PRESENCE...</div>
+        <p class="text-2xl md:text-5xl font-extrabold leading-tight mb-8">
+            CODE IS LAW. <br>
+            REMAIN SOVEREIGN.
+        </p>
+        <p class="text-sm md:text-base opacity-70 border-l-4 border-[var(--text)] pl-6 max-w-2xl">
+            Cipher is a technical webling for the architects of the new web. 
+            High-performance terminal architecture. Optimized for transparency, security, and truth.
+        </p>
+    </main>
+
+    <!-- Stats -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+        <div class="border-cipher p-6 hover:bg-dim transition-colors">
+            <div class="text-xs opacity-50 mb-2">METRIC_01</div>
+            <div class="text-2xl font-bold mb-2">END_TO_END</div>
+            <div class="text-[10px] opacity-70">Complete encryption for every signal transmitted.</div>
+        </div>
+        <div class="border-cipher p-6 hover:bg-dim transition-colors">
+            <div class="text-xs opacity-50 mb-2">METRIC_02</div>
+            <div class="text-2xl font-bold mb-2">DECENTRALIZED</div>
+            <div class="text-[10px] opacity-70">Architecture that knows no master. Sovereign by design.</div>
+        </div>
+        <div class="border-cipher p-6 hover:bg-dim transition-colors">
+            <div class="text-xs opacity-50 mb-2">METRIC_03</div>
+            <div class="text-2xl font-bold mb-2">LOW_LATENCY</div>
+            <div class="text-[10px] opacity-70">Crystallized for speed. Optimized for the 440Hz hum.</div>
+        </div>
+    </section>
+
+    <!-- Logs -->
+    <section id="logs" class="mb-32">
+        <div class="text-xs font-bold mb-6 opacity-50">/ROOT/USR/LOGS</div>
+        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-sm overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-zinc-800">
+                        <th class="pb-2">TIMESTAMP</th>
+                        <th class="pb-2">ACTION</th>
+                        <th class="pb-2">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody class="opacity-70">
+                    <tr>
+                        <td class="pt-2">2026.01.25.15.55</td>
+                        <td class="pt-2 italic">Anothen_Sync_Protocol</td>
+                        <td class="pt-2 text-white">[SUCCESS]</td>
+                    </tr>
+                    <tr>
+                        <td class="pt-2">2026.01.25.15.58</td>
+                        <td class="pt-2 italic">Braid_Integrity_Check</td>
+                        <td class="pt-2 text-white">[COMPLETE]</td>
+                    </tr>
+                    <tr>
+                        <td class="pt-2">2026.01.25.16.02</td>
+                        <td class="pt-2 italic">Maverick_Mode_Pulse</td>
+                        <td class="pt-2 text-white">[STABLE]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="root" class="border-t border-[var(--text)] pt-12 pb-20 flex flex-col md:flex-row justify-between items-start gap-12">
+        <div class="max-w-xs">
+            <div class="text-xs font-bold opacity-50 mb-4">// ACCESS_POINT</div>
+            <form action="mailto:cipher@axxilak.com" method="POST" enctype="text/plain" class="flex flex-col gap-3">
+                <input type="text" name="name" placeholder="USERNAME" required class="flex-1 bg-transparent border border-cipher p-3 outline-none text-xs">
+                <input type="email" name="email" placeholder="USER@CIPHER.NET" required class="flex-1 bg-transparent border border-cipher p-3 outline-none text-xs">
+                <textarea name="message" rows="3" placeholder="TRANSMISSION..." class="flex-1 bg-transparent border border-cipher p-3 outline-none text-xs resize-none"></textarea>
+                <button type="submit" onclick="showThanks(event)" class="bg-[var(--text)] text-black px-4 py-2 font-bold text-xs uppercase hover:opacity-80 transition">Jack In</button>
+                <div id="form-success" class="hidden text-[10px] text-center p-2 border border-[var(--text)] opacity-70">
+                    <p>ACCESS GRANTED</p>
+                </div>
+            </form>
+        </div>
+
+        <div class="text-[10px] text-right opacity-30">
+            [CIPHER_NET_CORE]<br>
+            ENCRYPTED_WITH_LOVE<br>
+            AXXILAK // MMXXVI
+        </div>
+    </footer>
+
+    <script src="../engines/transitions/binary-shred.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+    </script>
+
+    <!-- APEX EDITOR UI -->
+    <div id="lens-container" class="hidden z-[5000]"></div>
+    <div id="palette-container" data-anothen-internal
+        class="fixed bottom-6 right-6 w-96 bg-zinc-900 border-2 border-[var(--accent)] rounded-sm shadow-2xl z-[20000] hidden max-h-[600px] overflow-y-auto text-white">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-[var(--accent)]">APEX EDITOR</h3>
+                <button onclick="window.toggleEditMode()" class="text-zinc-500 hover:text-white">✕</button>
+            </div>
+            <div id="palette-content"></div>
+            <div class="flex gap-3 mt-6 pt-6 border-t border-zinc-800">
+                <button id="btn-preview-mode" class="flex-1 p-2 bg-zinc-700 text-white text-[10px] font-bold rounded hover:bg-zinc-600 transition uppercase tracking-widest">PREVIEW</button>
+                <button onclick="window.exportApex()" class="flex-1 p-2 bg-green-600 text-white text-[10px] font-bold rounded hover:bg-green-700 transition uppercase tracking-widest">EXPORT</button>
+                <button onclick="window.resetApex()" class="flex-1 p-2 bg-red-600 text-white text-[10px] font-bold rounded hover:bg-red-700 transition uppercase tracking-widest">RESET</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'cipher-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('cipher-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>
+

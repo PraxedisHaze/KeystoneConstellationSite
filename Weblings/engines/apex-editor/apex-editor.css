@@ -1,0 +1,92 @@
+/**
+ * APEX EDITOR - UNIVERSAL AESTHETIC STANDARD
+ * Description: The shared visual language of the Apex Editor "Skill".
+ * 
+ * Colors: 
+ * - Accent: #2563eb (Electric Blue) or var(--gold)
+ * - Highlight: #00ff00 (Neon Green)
+ */
+
+:root {
+    --apex-accent: #2563eb;
+    --apex-highlight: #00ff00;
+}
+
+/* 1. THE LENS */
+.lens-container {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    border: 2px solid var(--apex-highlight);
+    border-radius: 50%;
+    z-index: 19999;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1);
+    background: transparent;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+}
+
+.lens-hint {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    font-weight: bold;
+    color: var(--apex-highlight);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    text-shadow: 0 0 10px rgba(0,255,0,0.5);
+}
+
+/* 2. THE HIGHLIGHT */
+.apex-highlighted { 
+    outline: 3px solid var(--apex-highlight) !important; 
+    outline-offset: -3px !important; 
+    box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.4) !important;
+    pointer-events: auto !important;
+}
+
+/* 3. THE PALETTE */
+#palette-container {
+    font-family: 'Inter', sans-serif;
+    background: #080808;
+    color: #ffffff;
+    border: 1px solid #1a1a1a;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+#palette-container .palette-title {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--apex-accent);
+}
+
+#palette-container .palette-label {
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 4. UNIVERSAL LIGHT MODE (PARCHMENT) */
+[data-theme="light"] {
+    --bg: #f2f2f2;
+    --text: #1a1a1a;
+}
+
+[data-theme="light"] .text-zinc-400,
+[data-theme="light"] .text-gray-400 {
+    color: #555555 !important;
+}
+
+[data-theme="light"] .border-zinc-800 {
+    border-color: #cccccc !important;
+}
+
+[data-theme="light"] nav a, 
+[data-theme="light"] #edit-mode-btn,
+[data-theme="light"] footer a {
+    color: #1a1a1a !important;
+}

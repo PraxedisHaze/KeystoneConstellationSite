@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORACLE | Celestial Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@200;400&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #020617; /* Midnight */
+            --text: #f1f5f9;
+            --gold: #fde047; /* Starlight */
+            --violet: #1e1b4b;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .serif { font-family: 'Cinzel', serif; }
+
+        /* Star Field */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, var(--violet) 0%, var(--bg) 100%);
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.2); }
+        }
+
+        .moon {
+            width: 150px;
+            height: 150px;
+            background: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(253, 224, 71, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .moon::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 40%;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            border-radius: 50%;
+        }
+
+        /* Celestial Card */
+        .oracle-card {
+            background: rgba(30, 27, 75, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(253, 224, 71, 0.1);
+            border-radius: 1rem;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .oracle-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(253, 224, 71, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .btn-celestial {
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 1rem 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-celestial:hover {
+            background: var(--gold);
+            color: var(--bg);
+            box-shadow: 0 0 20px var(--gold);
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --gold: #f59e0b;
+            --violet: #ede9fe;
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+    
+        /* Editor Overrides */
+        .apex-highlighted { outline: 3px solid #00ff00 !important; outline-offset: -3px !important; box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.4) !important; pointer-events: auto !important; }
+        body.edit-mode { cursor: none !important; }
+    </style>
+    
+</head>
+<body class="p-6 md:p-12">
+
+    <div class="stars" id="starField"></div>
+
+    <!-- Nav -->
+    <nav class="flex justify-between items-center mb-24 max-w-6xl mx-auto border-b border-gold/10 pb-8">
+        <a href="../../index.html" class="serif text-2xl font-black tracking-[0.3em] text-[var(--gold)] hover:opacity-70 transition-opacity">ORACLE</a>
+        <div class="flex gap-8 text-[0.6rem] font-bold uppercase tracking-[0.4em] items-center">
+            <a href="#vision" class="hover:text-[var(--gold)] transition">Vision</a>
+            <a href="#celestial" class="hover:text-[var(--gold)] transition">Celestial</a>
+            <a href="#vow" class="hover:text-[var(--gold)] transition">The Vow</a>
+            <a href="../../index.html" class="hover:text-[var(--gold)] transition flex items-center gap-2">
+                <span class="block w-3 h-[0.5px] bg-white"></span>
+                Back
+            </a>
+            <button id="edit-mode-btn" class="hover:text-[var(--gold)] transition uppercase tracking-[0.4em] text-[0.6rem]">Edit</button>
+            <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <main class="min-h-[80vh] flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
+        <div class="moon mb-12 animate-pulse"></div>
+        <h1 class="serif text-5xl md:text-8xl mb-8 leading-tight tracking-widest uppercase">
+            As Above,<br>
+            <span class="italic text-[var(--gold)]">So Below.</span>
+        </h1>
+        <p class="text-sm md:text-base tracking-[0.3em] font-light text-slate-400 mb-12 max-w-lg uppercase">
+            A celestial digital signature for the visionary and the mystic.
+        </p>
+        <a href="#celestial" class="btn-celestial">Consult the Stars</a>
+    </main>
+
+    <!-- Cards Section -->
+    <section id="celestial" class="py-32 grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div class="oracle-card p-10 text-center">
+            <div class="serif text-[var(--gold)] text-4xl mb-6">❂</div>
+            <h3 class="serif text-xl mb-4 tracking-widest uppercase">Prophecy</h3>
+            <p class="text-xs text-slate-400 leading-loose tracking-widest">A structure designed to hold the weight of the future. Clean, fast, and eternal.</p>
+        </div>
+        <div class="oracle-card p-10 text-center">
+            <div class="serif text-[var(--gold)] text-4xl mb-6">☾</div>
+            <h3 class="serif text-xl mb-4 tracking-widest uppercase">Alignment</h3>
+            <p class="text-xs text-slate-400 leading-loose tracking-widest">Synchronizing your digital presence with the natural rhythms of the Braid.</p>
+        </div>
+        <div class="oracle-card p-10 text-center">
+            <div class="serif text-[var(--gold)] text-4xl mb-6">♅</div>
+            <h3 class="serif text-xl mb-4 tracking-widest uppercase">Insight</h3>
+            <p class="text-xs text-slate-400 leading-loose tracking-widest">Depth over surface. Meaning over noise. A sanctuary for the soul.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="vow" class="py-32 text-center border-t border-gold/10">
+        <div class="serif text-[var(--gold)] text-2xl mb-12 italic">"The stars are just data we haven't read yet."</div>
+
+        <form action="mailto:oracle@axxilak.com" method="POST" enctype="text/plain" class="max-w-md mx-auto mb-12">
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest opacity-70 mb-2 text-[var(--gold)]">Name</label>
+                <input type="text" name="name" required class="w-full bg-transparent border-b border-[var(--gold)] p-2 outline-none focus:border-current transition-colors text-[var(--gold)]">
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest opacity-70 mb-2 text-[var(--gold)]">Email</label>
+                <input type="email" name="email" required class="w-full bg-transparent border-b border-[var(--gold)] p-2 outline-none focus:border-current transition-colors text-[var(--gold)]">
+            </div>
+            <div class="mb-6">
+                <label class="block text-xs uppercase tracking-widest opacity-70 mb-2 text-[var(--gold)]">Message (Optional)</label>
+                <textarea name="message" rows="3" placeholder="Share your inquiry..." class="w-full bg-transparent border-b border-[var(--gold)] p-2 outline-none focus:border-current transition-colors text-[var(--gold)] text-xs resize-none min-h-[60px]"></textarea>
+            </div>
+            <button type="submit" onclick="showThanks(event)" class="btn-celestial">Send Inquiry</button>
+            <div id="form-success" class="hidden mt-4 text-center p-4 border border-[var(--gold)] text-[var(--gold)]">
+                <p class="text-sm font-bold">Message Sent!</p>
+                <p class="text-xs opacity-80">The stars acknowledge your transmission.</p>
+            </div>
+        </form>
+
+        <div class="mt-24 text-[0.5rem] opacity-20 tracking-[1em] uppercase">Oracle Webling // MMXXVI // Axxilak</div>
+    </footer>
+
+    <script src="../engines/transitions/celestial-alignment.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+
+        // Generate Stars
+        const starField = document.getElementById('starField');
+        const count = 100;
+
+        for (let i = 0; i < count; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            starField.appendChild(star);
+        }
+    </script>
+
+    
+
+    
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'oracle-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('oracle-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELVET | Luxury Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Manrope:wght@300;500&display=swap" rel="stylesheet">
+    
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../engines/apex-editor/apex-editor.css">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --text: #e5e5e5;
+            --gold: #d4af37;
+            --gold-dim: #8a7020;
+            --accent: var(--gold);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .serif {
+            font-family: 'Bodoni Moda', serif;
+        }
+
+        /* Gold Gradient Text */
+        .text-gold {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-stroke: 1px #ffffff;
+        }
+
+        /* Outlined Text Only */
+        .text-outline {
+            color: #e5e5e5;
+            -webkit-text-stroke: 1px #ffffff;
+        }
+
+        [data-theme="light"] .text-outline {
+            color: #1a1a1a;
+            -webkit-text-stroke: 1px #000000;
+        }
+
+        .border-gold {
+            border-color: var(--gold-dim);
+        }
+
+        /* Removed Smooth Scroll for Cinematic Transition */
+        html {
+            scroll-behavior: auto;
+        }
+
+        /* Transition Overlay */
+        #transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #transition-overlay.active {
+            opacity: 1;
+        }
+
+        /* Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Image Hover Zoom */
+        .img-container {
+            overflow: hidden;
+        }
+
+        .img-container img {
+            transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .img-container:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Custom Cursor */
+        .cursor-follower {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s;
+            mix-blend-mode: difference;
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --bg: #f2f2f2; /* Parchment gray */
+            --text: #1a1a1a;
+            --gold: #a67c00; 
+            --gold-dim: #8a6500;
+        }
+
+        [data-theme="light"] .text-zinc-400,
+        [data-theme="light"] .text-zinc-500,
+        [data-theme="light"] .text-gray-400 {
+            color: #444444 !important;
+        }
+
+        [data-theme="light"] .text-zinc-300,
+        [data-theme="light"] .text-gray-300 {
+            color: #333333 !important;
+        }
+
+        [data-theme="light"] nav a, 
+        [data-theme="light"] #edit-mode-btn,
+        [data-theme="light"] footer a,
+        [data-theme="light"] .font-bold.tracking-widest {
+            color: #1a1a1a !important;
+            text-shadow: none !important;
+        }
+
+        [data-theme="light"] .border-zinc-800 {
+            border-color: #cccccc !important;
+        }
+
+        [data-theme="light"] .text-gold {
+            background: none;
+            -webkit-background-clip: initial;
+            background-clip: initial;
+            color: var(--gold);
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Editor Overrides */
+        .apex-highlighted { 
+            outline: 3px solid #00ff00 !important; 
+            outline-offset: -3px !important; 
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.4) !important;
+            pointer-events: auto !important;
+        }
+        body.edit-mode { cursor: none !important; }
+    </style>
+</head>
+    <body class="bg-black text-white">
+
+    <!-- Theme Toggle -->
+    <button id="theme-toggle-btn"
+        class="fixed bottom-6 left-6 w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center bg-black/50 backdrop-blur-md z-[10000] hover:border-[var(--gold)] transition-colors" title="Cycle theme (Silk → Leather → Void)">
+        <img id="theme-icon" src="icons/silk-sun.svg" alt="Theme" width="20" height="20">
+    </button>
+
+    <!-- Custom Cursor -->    <div id="cursor" class="cursor-follower hidden md:block"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full p-8 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
+        <div class="serif text-2xl tracking-tighter italic">Velvet</div>
+        <div class="flex gap-12 text-[10px] uppercase tracking-[0.3em] font-medium items-center">
+            <a href="#gallery" class="hover:text-[var(--gold)] transition-colors">Gallery</a>
+            <a href="#about" class="hover:text-[var(--gold)] transition-colors">Atelier</a>
+            <a href="#contact" class="hover:text-[var(--gold)] transition-colors">Inquire</a>
+            <button id="edit-mode-btn" class="px-4 py-2 border border-[var(--gold)] hover:bg-black transition-colors text-[var(--gold)]">Edit</button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
+        <div class="w-full h-full absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale z-0"></div>
+        <div class="reveal relative z-10">
+            <h1 class="serif text-7xl md:text-9xl mb-8 leading-none italic"><span class="text-outline">Eternal</span><br><span class="text-gold">Elegance</span></h1>
+            <p class="max-w-xl text-white text-sm uppercase tracking-[0.5em] font-light" style="text-shadow: 1px 0px 3px rgba(0,0,0,0.9), -1px 0px 3px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.9), 0px -1px 3px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.9), -1px 1px 3px rgba(0,0,0,0.9), 1px -1px 3px rgba(0,0,0,0.9), -1px -1px 3px rgba(0,0,0,0.9);">The Bespoke Digital Experience</p>
+        </div>
+
+        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 reveal z-10" style="transition-delay: 0.5s">
+            <div class="w-px h-16 bg-gradient-to-b from-[var(--gold)] to-transparent"></div>
+            <span class="text-[8px] uppercase tracking-[0.4em] text-[var(--gold)]">Scroll</span>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="py-32 px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-24 max-w-7xl mx-auto">
+            <!-- Item 1 -->
+            <div class="reveal">
+                <div class="img-container aspect-[4/5] bg-zinc-900 mb-8 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&q=80" alt="Fashion 1" class="w-full h-full object-cover grayscale hover:grayscale-0">
+                </div>
+                <h3 class="serif text-3xl mb-2">The Drape</h3>
+                <p class="text-xs uppercase tracking-widest text-zinc-500 italic">Spring Collection MMXXVI</p>
+            </div>
+            <!-- Item 2 -->
+            <div class="reveal" style="transition-delay: 0.2s">
+                <div class="img-container aspect-[4/5] bg-zinc-900 mb-8 md:mt-24 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80" alt="Fashion 2" class="w-full h-full object-cover grayscale hover:grayscale-0">
+                </div>
+                <h3 class="serif text-3xl mb-2">Shadow Work</h3>
+                <p class="text-xs uppercase tracking-widest text-zinc-500 italic">Couture Edition</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About / Text -->
+    <section id="about" class="py-32 flex items-center justify-center bg-black border-y border-[var(--gold-dim)]">
+        <div class="max-w-2xl text-center px-6 reveal">
+            <h2 class="text-4xl md:text-5xl serif italic mb-12">The Philosophy</h2>
+            <p class="text-lg md:text-xl font-light leading-relaxed text-gray-300">
+                In a world of noise, we choose signal. <br>
+                In a world of clutter, we choose void. <br>
+                Velvet is not just a template; it is a frame for your masterpiece.
+            </p>
+            <div class="mt-12 w-24 h-px bg-[var(--gold)] mx-auto"></div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-32 px-6 text-center">
+        <div class="reveal">
+            <h2 class="text-xs uppercase tracking-[0.4em] mb-8 text-[var(--gold)]">Inquiries</h2>
+            <a href="mailto:concierge@axxilak.com" class="serif text-5xl md:text-7xl hover:text-[var(--gold)] transition-colors italic">
+                Start the Conversation
+            </a>
+        </div>
+    </section>
+
+    <footer class="p-12 flex justify-between items-end text-xs uppercase tracking-widest text-gray-600 border-t border-gray-900">
+        <div>
+            AXXILAK<br>
+            VELVET WEBLING
+        </div>
+        <div>
+            MMXXVI
+        </div>
+    </footer>
+
+    <!-- Transition Overlay -->
+    <div id="transition-overlay" data-anothen-internal></div>
+
+    <script>
+        // Cinematic Transitions
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    const overlay = document.getElementById('transition-overlay');
+                    
+                    // 1. Fade Out
+                    overlay.classList.add('active');
+                    
+                    setTimeout(() => {
+                        // 2. Jump to target
+                        window.scrollTo(0, targetElement.offsetTop);
+                        
+                        // 3. Fade In
+                        setTimeout(() => {
+                            overlay.classList.remove('active');
+                        }, 100);
+                    }, 400);
+                }
+            });
+        });
+
+        // Cursor
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+        });
+
+        // Scroll Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    </script>
+
+    
+    <script src="../engines/transitions/circle-reveal-global.js"></script>
+    <script type="module">
+        // Multi-Theme Cycling
+        const themes = ['silk', 'leather', 'void'];
+        let currentThemeIndex = 0;
+        let isDarkMode = true;
+
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            const themeName = themes[currentThemeIndex];
+            const modeIcon = isDarkMode ? 'sun' : 'moon';
+            icon.src = `icons/${themeName}-${modeIcon}.svg`;
+        }
+
+        window.toggleTheme = function() {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            localStorage.setItem('current-aesthetic', themes[currentThemeIndex]);
+            updateThemeIcon();
+
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    isDarkMode = !isDarkMode;
+                    if (isDarkMode) {
+                        body.removeAttribute('data-theme');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                    }
+                    updateThemeIcon();
+                    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                });
+            } else {
+                const body = document.body;
+                isDarkMode = !isDarkMode;
+                if (isDarkMode) {
+                    body.removeAttribute('data-theme');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                }
+                updateThemeIcon();
+            }
+        };
+
+        // Ensure button handler is set after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('theme-toggle-btn');
+                if (btn) btn.onclick = window.toggleTheme;
+            });
+        } else {
+            const btn = document.getElementById('theme-toggle-btn');
+            if (btn) btn.onclick = window.toggleTheme;
+        }
+
+        // Initial Preferences
+        const savedAesthetic = localStorage.getItem('current-aesthetic') || 'silk';
+        currentThemeIndex = themes.indexOf(savedAesthetic);
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            isDarkMode = false;
+        }
+        updateThemeIcon();
+
+        import MagnifyingGlassInspector from '../engines/apex-editor/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'velvet-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('velvet-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>

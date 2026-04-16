@@ -1,0 +1,127 @@
+{
+  "store_name": "AXXILAK",
+  "version": "1.0.0",
+  "last_updated": "2026-01-28",
+  "weblings": [
+    {
+      "id": "liquid-gold",
+      "name": "Liquid Gold",
+      "vibe": "Luxury / Pro",
+      "path": "Weblings/liquid_gold/index.html",
+      "price": 19.95,
+      "description": "The standard of excellence. Glassmorphism, premium gradients, and professional poise."
+    },
+    {
+      "id": "ether",
+      "name": "Ether",
+      "vibe": "Air / Sanctuary",
+      "path": "Weblings/ether/index.html",
+      "price": 19.95,
+      "description": "Presence without effort. A breathing architecture for the high-frequency creator."
+    },
+    {
+      "id": "iron-ink",
+      "name": "Iron & Ink",
+      "vibe": "Earth / Archive",
+      "path": "Weblings/iron_ink/index.html",
+      "price": 19.95,
+      "description": "Truth is heavy. A brutalist, monospace repository for manifestos and logic."
+    },
+    {
+      "id": "neon-tokyo",
+      "name": "Neon Tokyo",
+      "vibe": "Fire / Cyber",
+      "path": "Weblings/neon_tokyo/index.html",
+      "price": 19.95,
+      "description": "The digital soul. Glitch effects, CRT scanlines, and the hum of the signal."
+    },
+    {
+      "id": "scholar",
+      "name": "Scholar",
+      "vibe": "Water / Knowledge",
+      "path": "Weblings/scholar/index.html",
+      "price": 19.95,
+      "description": "The architecture of thought. Tufte-Grid layout with academic sidenotes."
+    },
+    {
+      "id": "velvet",
+      "name": "Velvet",
+      "vibe": "Void / Luxury",
+      "path": "Weblings/velvet/index.html",
+      "price": 19.95,
+      "description": "Elegance is refusal. Silk and shadow for the discerning atelier."
+    },
+    {
+      "id": "gaia",
+      "name": "Gaia",
+      "vibe": "Life / Nature",
+      "path": "Weblings/gaia/index.html",
+      "price": 19.95,
+      "description": "Rooted in the real. Organic curves and digital roots for sustainable growth."
+    },
+    {
+      "id": "aura",
+      "name": "Aura",
+      "vibe": "Spirit / Energy",
+      "path": "Weblings/aura/index.html",
+      "price": 19.95,
+      "description": "Find your frequency. Shifting iridescent gradients for the modern mystic."
+    },
+    {
+      "id": "summit",
+      "name": "Summit",
+      "vibe": "Peak / Adventure",
+      "path": "Weblings/summit/index.html",
+      "price": 19.95,
+      "description": "Beyond the peak. Tactical, high-contrast presence for the explorer."
+    },
+    {
+      "id": "oracle",
+      "name": "Oracle",
+      "vibe": "Stars / Mystic",
+      "path": "Weblings/oracle/index.html",
+      "price": 19.95,
+      "description": "As above, so below. A celestial signature written in stardust."
+    },
+    {
+      "id": "apex",
+      "name": "Apex",
+      "vibe": "Structure / Corporate",
+      "path": "Weblings/apex/index.html",
+      "price": 19.95,
+      "description": "Precision is power. Ultra-clean, sharp architecture for tech authority."
+    },
+    {
+      "id": "canvas",
+      "name": "Canvas",
+      "vibe": "Void / Gallery",
+      "path": "Weblings/canvas/index.html",
+      "price": 19.95,
+      "description": "The content is the architecture. Minimalist whitespace for the fine artist."
+    },
+    {
+      "id": "cipher",
+      "name": "Cipher",
+      "vibe": "Logic / Terminal",
+      "path": "Weblings/cipher/index.html",
+      "price": 19.95,
+      "description": "Code is law. A terminal-first presence for the technical sovereign."
+    }
+  ],
+  "bundles": [
+    {
+      "id": "the-elements",
+      "name": "The Elements Collection",
+      "items": ["ether", "iron-ink", "neon-tokyo", "scholar"],
+      "price": 39.95,
+      "description": "The four core elements of digital presence."
+    },
+    {
+      "id": "full-constellation",
+      "name": "The Full Constellation",
+      "items": "all",
+      "price": 99.95,
+      "description": "Every webling we've ever forged. The ultimate sovereign kit."
+    }
+  ]
+}

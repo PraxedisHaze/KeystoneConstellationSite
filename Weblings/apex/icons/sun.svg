@@ -1,0 +1,14 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+  <!-- Apex sun - clean, geometric, corporate precision -->
+  <circle cx="12" cy="12" r="5" stroke="#1e90ff"/>
+  <!-- Perfect geometric rays -->
+  <line x1="12" y1="1" x2="12" y2="3" stroke="#1e90ff"/>
+  <line x1="12" y1="21" x2="12" y2="23" stroke="#1e90ff"/>
+  <line x1="1" y1="12" x2="3" y2="12" stroke="#1e90ff"/>
+  <line x1="21" y1="12" x2="23" y2="12" stroke="#1e90ff"/>
+  <!-- Diagonal rays with precision -->
+  <line x1="3.5" y1="3.5" x2="5.4" y2="5.4" stroke="#1e90ff" stroke-width="1.5"/>
+  <line x1="18.6" y1="18.6" x2="20.5" y2="20.5" stroke="#1e90ff" stroke-width="1.5"/>
+  <line x1="3.5" y1="20.5" x2="5.4" y2="18.6" stroke="#1e90ff" stroke-width="1.5"/>
+  <line x1="18.6" y1="5.4" x2="20.5" y2="3.5" stroke="#1e90ff" stroke-width="1.5"/>
+</svg>

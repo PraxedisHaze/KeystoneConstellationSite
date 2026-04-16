@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak Webling Editor System | Architectural Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Chosen Palette: Cyber Vibrant (Deep Navy #0F172A, Electric Blue #3B82F6, Neon Purple #8B5CF6, Hot Pink #EC4899, Teal #14B8A6) */
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+        }
+
+        /* Chart Container Styles - Strictly Enforced */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            /* Max width constraint */
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            /* Base height */
+            max-height: 400px;
+        }
+
+        /* Responsive height adjustments */
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        /* Utility for Flow Diagrams (No SVG) */
+        .flow-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .flow-card:hover {
+            transform: translateY(-5px);
+            border-color: #8B5CF6;
+        }
+
+        /* CSS Arrow for Flowcharts */
+        .arrow-right::after {
+            content: '→';
+            font-size: 2rem;
+            color: #3B82F6;
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .arrow-down::after {
+            content: '↓';
+            font-size: 2rem;
+            color: #3B82F6;
+            display: block;
+            text-align: center;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(to right, #3B82F6, #EC4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <!-- Application Structure Plan:
+        1. Hero Section: High-level Vision ("Zero Code. Pure Creation.").
+        2. The User Journey: A linear flow diagram showing the user's path from visitor to owner.
+        3. Technical Architecture: Breakdown of the Client-Side/Offline/Gumroad logic using charts and cards.
+        4. Data & State: Explaining the JSON serialization via diagrams.
+        5. Comparative Analysis: Radar chart showing why this system beats traditional methods.
+        6. Roadmap & Constraints: Timeline of phases and technical rules.
+    -->
+    <!-- Visualization & Content Choices:
+        1. User Flow: HTML Flexbox Layout. Goal: Organize. Logic: Step-by-step visual.
+        2. Comparison Radar: Chart.js Radar. Goal: Compare. Logic: Axxilak vs Traditional.
+        3. File Size Donut: Chart.js Doughnut. Goal: Inform/Constraint. Logic: 2MB limit breakdown.
+        4. Architecture Diagram: HTML Grid. Goal: Organize. Logic: Showing system components.
+        5. Phased Roadmap: Chart.js Horizontal Bar. Goal: Change/Timeline. Logic: Development effort estimate.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- HERO SECTION -->
+    <header class="w-full py-16 px-6 md:px-12 text-center bg-gradient-to-b from-[#1e293b] to-[#0F172A]">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 tracking-tight">The <span
+                    class="text-gradient">Axxilak</span> Webling System</h1>
+            <p class="text-xl md:text-2xl text-gray-400 mb-8">Architecting a frictionless, client-side portfolio editor.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-mono">
+                <div class="p-3 border border-blue-500/30 rounded-lg bg-blue-500/10 text-blue-300">
+                    NO BUILD TOOLS
+                </div>
+                <div class="p-3 border border-purple-500/30 rounded-lg bg-purple-500/10 text-purple-300">
+                    CLIENT-SIDE ONLY
+                </div>
+                <div class="p-3 border border-pink-500/30 rounded-lg bg-pink-500/10 text-pink-300">
+                    OFFLINE CAPABLE
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-6 py-12 space-y-20">
+
+        <!-- SECTION 1: THE USER JOURNEY -->
+        <section>
+            <div class="mb-8 border-l-4 border-blue-500 pl-4">
+                <h2 class="text-3xl font-bold text-white mb-2">The Creator's Journey</h2>
+                <p class="text-gray-400 max-w-2xl">
+                    The system is designed for instant gratification. The user customizes first, falls in love with
+                    their creation, and then purchases the exact state they built.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center text-center">
+                <!-- Step 1 -->
+                <div class="flow-card p-6 rounded-xl relative group">
+                    <div class="text-4xl mb-3">🎨</div>
+                    <h3 class="font-bold text-blue-400">1. Customize</h3>
+                    <p class="text-xs text-gray-400 mt-2">Live Studio</p>
+                </div>
+
+                <!-- Arrow (Hidden on mobile, block on desktop) -->
+                <div class="hidden md:block text-2xl text-blue-500">→</div>
+                <div class="block md:hidden text-2xl text-blue-500 my-2">↓</div>
+
+                <!-- Step 2 -->
+                <div class="flow-card p-6 rounded-xl relative">
+                    <div class="text-4xl mb-3">💳</div>
+                    <h3 class="font-bold text-purple-400">2. Purchase</h3>
+                    <p class="text-xs text-gray-400 mt-2">Gumroad Param</p>
+                </div>
+
+                <!-- Arrow -->
+                <div class="hidden md:block text-2xl text-blue-500">→</div>
+                <div class="block md:hidden text-2xl text-blue-500 my-2">↓</div>
+
+                <!-- Step 3 -->
+                <div class="flow-card p-6 rounded-xl relative">
+                    <div class="text-4xl mb-3">🚀</div>
+                    <h3 class="font-bold text-pink-400">3. Own</h3>
+                    <p class="text-xs text-gray-400 mt-2">Download & Deploy</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: COMPARATIVE ADVANTAGE -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="mb-6 border-l-4 border-pink-500 pl-4">
+                    <h2 class="text-3xl font-bold text-white mb-2">Why This Architecture?</h2>
+                    <p class="text-gray-400">
+                        Traditional site builders trap users in subscriptions. The Axxilak model prioritizes <span
+                            class="text-pink-400">ownership</span> and <span class="text-pink-400">speed</span>. By
+                        eliminating server-side dependencies for the editor, we reduce friction and cost.
+                    </p>
+                </div>
+                <ul class="space-y-4 text-sm text-gray-300">
+                    <li class="flex items-center">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                        <strong>Zero Friction:</strong> No login required to start editing.
+                    </li>
+                    <li class="flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
+                        <strong>Persistence:</strong> `localStorage` saves progress automatically.
+                    </li>
+                    <li class="flex items-center">
+                        <span class="w-2 h-2 bg-pink-500 rounded-full mr-3"></span>
+                        <strong>Portability:</strong> The output is a simple HTML file.
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                <h3 class="text-center text-sm font-bold text-gray-400 uppercase mb-4 tracking-widest">Axxilak vs.
+                    Traditional Builders</h3>
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: DATA ARCHITECTURE & STATE -->
+        <section>
+            <div class="mb-8 border-l-4 border-teal-500 pl-4">
+                <h2 class="text-3xl font-bold text-white mb-2">The Logic Core: State Serialization</h2>
+                <p class="text-gray-400 max-w-2xl">
+                    How do we pass the user's design from the live site to the download? We serialize the state object
+                    into a Base64 string and pass it through the payment gateway.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Visualizing the JSON Structure -->
+                <div
+                    class="col-span-1 bg-slate-900 rounded-xl p-6 border border-slate-700 font-mono text-xs overflow-hidden">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                        <span class="text-teal-400 font-bold">weblingState.json</span>
+                        <span class="text-gray-500">Structure</span>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-purple-400">{</p>
+                        <p class="pl-4 text-blue-300">"colors": <span class="text-gray-400">{ "primary": "#d4af37", ...
+                                }</span>,</p>
+                        <p class="pl-4 text-blue-300">"text": <span class="text-gray-400">{ "name": "Jane Doe", ...
+                                }</span>,</p>
+                        <p class="pl-4 text-blue-300">"images": <span class="text-gray-400">{ "hero": "data:image...",
+                                ... }</span>,</p>
+                        <p class="pl-4 text-blue-300">"font": <span class="text-orange-300">"Inter"</span></p>
+                        <p class="text-purple-400">}</p>
+                    </div>
+                </div>
+
+                <!-- Process Diagram -->
+                <div class="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flow-card p-4 rounded-lg flex flex-col justify-center items-center text-center">
+                        <div class="font-bold text-teal-400 mb-1">1. Serialize</div>
+                        <p class="text-[10px] text-gray-400">JSON.stringify(state)</p>
+                    </div>
+                    <div class="flow-card p-4 rounded-lg flex flex-col justify-center items-center text-center">
+                        <div class="font-bold text-teal-400 mb-1">2. Encode</div>
+                        <p class="text-[10px] text-gray-400">btoa(jsonString)</p>
+                    </div>
+                    <div class="flow-card p-4 rounded-lg flex flex-col justify-center items-center text-center">
+                        <div class="font-bold text-teal-400 mb-1">3. Transport</div>
+                        <p class="text-[10px] text-gray-400">?custom=eyJjb2xv...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: RESOURCE CONSTRAINTS -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="order-2 md:order-1 bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                <h3 class="text-center text-sm font-bold text-gray-400 uppercase mb-4 tracking-widest">Download Package
+                    Size (Max 2MB)</h3>
+                <div class="chart-container">
+                    <canvas id="fileSizeChart"></canvas>
+                </div>
+                <p class="text-center text-xs text-gray-500 mt-4">User images are the primary variable affecting bundle
+                    size.</p>
+            </div>
+
+            <div class="order-1 md:order-2">
+                <div class="mb-6 border-l-4 border-purple-500 pl-4">
+                    <h2 class="text-3xl font-bold text-white mb-2">Technical Constraints</h2>
+                    <p class="text-gray-400">
+                        To maintain speed and portability, we operate under strict limits. The entire standalone editor
+                        bundle must remain lightweight.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="p-4 bg-slate-800 border-l-4 border-red-500 rounded-r-lg">
+                        <h4 class="font-bold text-white">No Server-Side Code</h4>
+                        <p class="text-sm text-gray-400">Logic must rely on `FileReader` API and `Blob` generation. No
+                            databases.</p>
+                    </div>
+                    <div class="p-4 bg-slate-800 border-l-4 border-orange-500 rounded-r-lg">
+                        <h4 class="font-bold text-white">Security Sanitization</h4>
+                        <p class="text-sm text-gray-400">Must use `DOMPurify` to clean user input before injecting into
+                            the DOM to prevent XSS.</p>
+                    </div>
+                    <div class="p-4 bg-slate-800 border-l-4 border-yellow-500 rounded-r-lg">
+                        <h4 class="font-bold text-white">Image Optimization</h4>
+                        <p class="text-sm text-gray-400">Images > 500KB trigger a warning to prevent bloated Base64
+                            strings.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: IMPLEMENTATION ROADMAP -->
+        <section>
+            <div class="mb-8 border-l-4 border-blue-500 pl-4">
+                <h2 class="text-3xl font-bold text-white mb-2">Development Roadmap</h2>
+                <p class="text-gray-400 max-w-2xl">
+                    The rollout is structured in three distinct phases to ensure core functionality before advanced
+                    integration.
+                </p>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                <h3 class="text-center text-sm font-bold text-gray-400 uppercase mb-4 tracking-widest">Estimated
+                    Development Effort</h3>
+                <div class="chart-container">
+                    <canvas id="roadmapChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-12 text-gray-600 text-sm border-t border-gray-800 mt-12">
+        <p>Axxilak System Architecture Reference</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- HELPER FUNCTIONS ---
+
+        // 1. Label Wrapping Helper (Mandatory)
+        // Splits long strings into arrays of strings for Chart.js
+        function wrapLabel(str, maxLen = 16) {
+            if (str.length <= maxLen) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if ((currentLine + " " + words[i]).length <= maxLen) {
+                    currentLine += " " + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // 2. Tooltip Configuration Helper (Mandatory)
+        // Returns the plugins object with the specific tooltip title callback
+        function getCommonPlugins() {
+            return {
+                legend: {
+                    labels: {
+                        color: '#cbd5e1', // Slate-300
+                        font: { family: 'Space Grotesk', size: 12 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)', // Dark background
+                    titleColor: '#3B82F6', // Blue title
+                    bodyColor: '#F8FAFC', // White body
+                    borderColor: '#334155', // Slate-700 border
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        title: function (tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            } else {
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        // --- CHART 1: COMPARATIVE ADVANTAGE (RADAR) ---
+        const ctxComparison = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(ctxComparison, {
+            type: 'radar',
+            data: {
+                labels: ['Setup Speed', 'Ease of Use', 'Ownership Control', 'Cost Efficiency', 'Customization Depth'].map(l => wrapLabel(l)),
+                datasets: [{
+                    label: 'Axxilak Webling',
+                    data: [95, 90, 100, 95, 75], // High ownership, speed, low cost
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)', // Electric Blue
+                    borderColor: '#3B82F6',
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#3B82F6'
+                }, {
+                    label: 'Traditional Site Builders',
+                    data: [70, 85, 40, 50, 60], // Lower ownership, higher cost
+                    backgroundColor: 'rgba(236, 72, 153, 0.2)', // Hot Pink
+                    borderColor: '#EC4899',
+                    pointBackgroundColor: '#EC4899',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#EC4899'
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: {
+                            color: '#94a3b8', // Slate-400
+                            font: { family: 'Space Grotesk', size: 11 }
+                        },
+                        ticks: { display: false }
+                    }
+                },
+                plugins: getCommonPlugins()
+            }
+        });
+
+        // --- CHART 2: DOWNLOAD FILE SIZE (DOUGHNUT) ---
+        const ctxFileSize = document.getElementById('fileSizeChart').getContext('2d');
+        new Chart(ctxFileSize, {
+            type: 'doughnut',
+            data: {
+                labels: ['Core Editor (JS/Logic)', 'Template HTML', 'CSS Styles', 'User Images (Base64)'].map(l => wrapLabel(l)),
+                datasets: [{
+                    data: [15, 10, 5, 70], // Images take up bulk
+                    backgroundColor: [
+                        '#8B5CF6', // Neon Purple
+                        '#3B82F6', // Electric Blue
+                        '#14B8A6', // Teal
+                        '#EC4899'  // Hot Pink (Images)
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                cutout: '70%',
+                plugins: getCommonPlugins()
+            }
+        });
+
+        // --- CHART 3: ROADMAP (HORIZONTAL BAR) ---
+        const ctxRoadmap = document.getElementById('roadmapChart').getContext('2d');
+        new Chart(ctxRoadmap, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Phase 1: Standalone Editor (MVP)',
+                    'Phase 2: Live Preview & Gumroad Sync',
+                    'Phase 3: Download & Zip Logic'
+                ].map(l => wrapLabel(l, 25)),
+                datasets: [{
+                    label: 'Complexity / Effort Points',
+                    data: [40, 35, 25],
+                    backgroundColor: [
+                        '#14B8A6', // Teal
+                        '#8B5CF6', // Purple
+                        '#3B82F6'  // Blue
+                    ],
+                    borderRadius: 4,
+                    barThickness: 30
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Horizontal Bar
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#e2e8f0' }
+                    }
+                },
+                plugins: getCommonPlugins()
+            }
+        });
+
+    </script>
+</body>
+
+</html>

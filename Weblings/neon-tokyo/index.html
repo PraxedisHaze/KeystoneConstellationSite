@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON TOKYO | Cyber-Gothic Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=JetBrains+Mono:wght@200;400&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --bg: #050505;
+            --text: #e0e0e0;
+            --neon-pink: #ff00ff;
+            --neon-blue: #00ffff;
+            --glow: rgba(0, 255, 255, 0.4);
+            --grid: rgba(0, 255, 255, 0.05);
+            --accent: var(--neon-blue);
+        }
+
+        [data-theme="light"] {
+            --bg: #0a0a0c; /* Still very dark, industrial */
+            --text: #a0a0a0;
+            --neon-pink: #660066; /* Muted purple/red */
+            --neon-blue: #d4af37; /* Gold/Amber for industrial feel */
+            --glow: rgba(212, 175, 55, 0.1);
+            --grid: rgba(255, 255, 255, 0.02);
+            --accent: var(--neon-blue);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        h1, h2, h3, .cyber-font {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        /* Background Layers */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            width: 200vw;
+            height: 200vh;
+            left: -50%;
+            top: -50%;
+            background-image: 
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(1000px) rotateX(60deg);
+            animation: grid-move 30s linear infinite;
+            z-index: -2;
+        }
+
+        @keyframes grid-move {
+            0% { transform: perspective(1000px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(1000px) rotateX(60deg) translateY(60px); }
+        }
+
+        /* CRT Filter */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 100;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* Glitch Styles */
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.8;
+        }
+        .glitch:hover::before {
+            animation: glitch-anim 0.3s infinite;
+            text-shadow: 2px 0 var(--neon-pink);
+            clip: rect(44px, 450px, 56px, 0);
+        }
+        .glitch:hover::after {
+            animation: glitch-anim-2 0.3s infinite;
+            text-shadow: -2px 0 var(--neon-blue);
+            clip: rect(12px, 450px, 28px, 0);
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 31px, 0); }
+            20% { clip: rect(65px, 9999px, 80px, 0); }
+            40% { clip: rect(25px, 9999px, 5px, 0); }
+            60% { clip: rect(95px, 9999px, 105px, 0); }
+            80% { clip: rect(5px, 9999px, 35px, 0); }
+            100% { clip: rect(45px, 9999px, 60px, 0); }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            20% { clip: rect(15px, 9999px, 45px, 0); }
+            40% { clip: rect(5px, 9999px, 35px, 0); }
+            60% { clip: rect(85px, 9999px, 95px, 0); }
+            80% { clip: rect(45px, 9999px, 60px, 0); }
+            100% { clip: rect(15px, 9999px, 25px, 0); }
+        }
+
+        /* Component: Gothic Card */
+        .gothic-card {
+            background: rgba(10, 10, 12, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            transition: all 0.4s;
+        }
+        .gothic-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--glow);
+            transform: translateY(-5px);
+        }
+        
+        .accent-corner {
+            position: absolute;
+            width: 10px; height: 10px;
+            border: 2px solid var(--accent);
+            opacity: 0.5;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); }
+
+        /* === APEX EDITOR STYLES === */
+        .edit-mode .section-drag-handle { display: block !important; }
+        #lens-container { cursor: grab; user-select: none; }
+        #lens-container:active { cursor: grabbing; }
+        #palette-container { 
+            background: #0a0a0c !important; 
+            border: 2px solid var(--accent) !important;
+            color: var(--text) !important;
+        }
+        .apex-highlighted { 
+            outline: 3px solid var(--accent) !important; 
+            box-shadow: 0 0 20px var(--glow) !important;
+        }
+    </style>
+</head>
+<body class="crt overflow-x-hidden">
+    <canvas id="matrix-canvas"></canvas>
+    <div class="cyber-grid"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full p-8 flex justify-between items-center z-[1000] mix-blend-difference">
+        <div class="cyber-font text-2xl font-black italic tracking-tighter glitch" data-text="AXXILAK_REEL">AXXILAK_REEL</div>
+        <div class="flex gap-12 text-[10px] uppercase tracking-[0.4em] font-light items-center">
+            <button id="showcase-autopilot-btn" class="text-amber-400 hover:text-white transition-colors border border-amber-400/20 px-4 py-2 hover:bg-amber-400/10">[AUTOPILOT_OFF]</button>
+            <button id="edit-mode-btn" class="hover:text-[var(--neon-blue)] transition-colors border border-white/10 px-4 py-2 hover:border-[var(--neon-blue)]">[RECODE]</button>
+            <button id="theme-toggle-btn" class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:border-[var(--accent)] transition-all" title="Cycle theme (Race Car → Motorcycle → Jet)">
+                <img id="theme-icon" src="icons/race-car-sun.svg" alt="Theme" width="20" height="20">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <main class="min-h-screen flex items-center justify-center p-6 pt-32">
+        <div class="max-w-6xl w-full">
+            <div class="grid md:grid-cols-2 gap-20 items-center">
+                <div class="reveal">
+                    <div class="text-[var(--neon-blue)] text-[10px] mb-4 tracking-[0.8em] animate-pulse">SHOWCASE_STREAMS_ACTIVE...</div>
+                    <h1 class="text-6xl md:text-8xl font-black mb-8 leading-none glitch" data-text="THE_COLLECTION">
+                        THE<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--neon-pink)] to-[var(--neon-blue)]">COLLECTION</span>
+                    </h1>
+                    <p class="text-lg font-light text-slate-500 leading-relaxed mb-12 max-w-md">
+                        Digital architecture for the next era. Thirteen weblings. Zero templates. Absolute sovereign presence.
+                    </p>
+                    <div class="flex gap-6">
+                        <a href="../../index.html" class="px-10 py-4 bg-[var(--neon-blue)] text-black font-bold uppercase text-xs tracking-widest hover:bg-white transition-all shadow-[0_0_20px_var(--glow)]">Gallery</a>
+                        <button id="audio-toggle-btn" class="px-10 py-4 border border-white/10 hover:bg-white/5 text-white uppercase text-xs tracking-widest transition-all">Audio: OFF</button>
+                    </div>
+                </div>
+
+                <div class="relative reveal" style="transition-delay: 0.3s">
+                    <div class="gothic-card aspect-square p-1 relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1515462277126-2dd0c162007a?auto=format&fit=crop&q=80')] bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-[2000ms] opacity-40 group-hover:opacity-80"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                        
+                        <!-- Accents -->
+                        <div class="accent-corner top-0 left-0 border-r-0 border-b-0"></div>
+                        <div class="accent-corner top-0 right-0 border-l-0 border-b-0"></div>
+                        <div class="accent-corner bottom-0 left-0 border-r-0 border-t-0"></div>
+                        <div class="accent-corner bottom-0 right-0 border-l-0 border-t-0"></div>
+
+                        <div class="absolute bottom-8 left-8 right-8">
+                            <div class="text-[8px] uppercase tracking-widest mb-2 opacity-50">Subject: 001</div>
+                            <div class="cyber-font text-2xl font-bold">NEURAL_DENSITY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Content Sections -->
+    <section id="sector-01" class="py-32 px-6">
+        <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+            <div class="gothic-card p-10 reveal">
+                <i data-lucide="cpu" class="w-8 h-8 text-[var(--neon-blue)] mb-6"></i>
+                <h3 class="cyber-font text-xl mb-4">Core</h3>
+                <p class="text-sm text-slate-500 font-light">Optimized neural rendering for high-latency environments.</p>
+            </div>
+            <div class="gothic-card p-10 reveal" style="transition-delay: 0.1s">
+                <i data-lucide="shield" class="w-8 h-8 text-[var(--neon-blue)] mb-6"></i>
+                <h3 class="cyber-font text-xl mb-4">Vault</h3>
+                <p class="text-sm text-slate-500 font-light">Encrypted presence. Your data belongs to the void, and only you.</p>
+            </div>
+            <div class="gothic-card p-10 reveal" style="transition-delay: 0.2s">
+                <i data-lucide="terminal" class="w-8 h-8 text-[var(--neon-blue)] mb-6"></i>
+                <h3 class="cyber-font text-xl mb-4">Command</h3>
+                <p class="text-sm text-slate-500 font-light">Direct CLI integration for real-time architecture adjustment.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Status Bar -->
+    <div class="fixed bottom-0 w-full bg-black/80 border-t border-white/5 p-4 flex justify-between items-center z-[1000] text-[8px] uppercase tracking-[0.5em] text-[var(--accent)] font-bold backdrop-blur-md">
+        <div class="flex gap-8">
+            <div>STATUS: <span class="animate-pulse">ONLINE</span></div>
+            <div class="hidden md:block">LOC: TOKYO_NORTH_SECTOR</div>
+        </div>
+        <div class="flex gap-8">
+            <div>MEM: 99%</div>
+            <div class="hidden md:block">USER: ADMIN_ANOTHEN</div>
+        </div>
+    </div>
+
+    <script>
+        // Matrix Code Rain
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(5, 5, 5, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--accent');
+            ctx.font = fontSize + "px 'JetBrains Mono'";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Lucide Icons
+        lucide.createIcons();
+
+        // Reveal Animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    </script>
+
+    <script src="../engines/transitions/signal-glitch.js"></script>
+    <script type="module">
+        // Showcase Auto-Pilot
+        let autoPilotActive = false;
+        let autoPilotVelocity = 0;
+        const maxV = 1.2;
+        const accel = 0.005;
+
+        function autoPilotStep() {
+            if (!autoPilotActive) return;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPos = window.pageYOffset;
+
+            if (scrollPos >= maxScroll - 5) {
+                autoPilotActive = false;
+                document.getElementById('showcase-autopilot-btn').innerText = '[AUTOPILOT_DONE]';
+                return;
+            }
+
+            if (autoPilotVelocity < maxV) autoPilotVelocity += accel;
+            window.scrollBy(0, autoPilotVelocity);
+            requestAnimationFrame(autoPilotStep);
+        }
+
+        document.getElementById('showcase-autopilot-btn').onclick = function() {
+            autoPilotActive = !autoPilotActive;
+            this.innerText = autoPilotActive ? '[AUTOPILOT_ON]' : '[AUTOPILOT_OFF]';
+            if (autoPilotActive) {
+                autoPilotVelocity = 0;
+                autoPilotStep();
+            }
+        };
+
+        // Multi-Theme Cycling
+        const themes = ['race-car', 'motorcycle', 'jet'];
+        let currentThemeIndex = 0;
+        let isDarkMode = true;
+
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            const themeName = themes[currentThemeIndex];
+            const modeIcon = isDarkMode ? 'sun' : 'moon';
+            icon.src = `icons/${themeName}-${modeIcon}.svg`;
+        }
+
+        window.toggleTheme = function() {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            localStorage.setItem('current-showroom', themes[currentThemeIndex]);
+            updateThemeIcon();
+
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    isDarkMode = !isDarkMode;
+                    if (isDarkMode) {
+                        body.removeAttribute('data-theme');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                    }
+                    updateThemeIcon();
+                    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                });
+            } else {
+                const body = document.body;
+                isDarkMode = !isDarkMode;
+                if (isDarkMode) {
+                    body.removeAttribute('data-theme');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                }
+                updateThemeIcon();
+            }
+        };
+        document.getElementById('theme-toggle-btn').onclick = window.toggleTheme;
+
+        // Initial Preferences
+        const savedTheme = localStorage.getItem('current-showroom') || 'race-car';
+        currentThemeIndex = themes.indexOf(savedTheme);
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            isDarkMode = false;
+        }
+        updateThemeIcon();
+
+        import MagnifyingGlassInspector from '../engines/apex-editor/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'neon-tokyo-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('neon-tokyo-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+
+    <style>
+        .reveal { opacity: 0; transform: translateY(20px); transition: all 1s; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+    </style>
+</body>
+</html>

@@ -1,0 +1,68 @@
+archives/Project Analyzer/
+archives/reviewToSeeIfPirated.txt
+_Z_Rescue/
+Arcana-Mirror-2.1/dist/
+Arcana-Mirror-2.1/node_modules/
+
+# Stable Diffusion and Image Generation Exclusions
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+*.bin
+models/
+configs/
+data/
+outputs/
+logs/
+webui/
+stable-diffusion-webui/
+ldm/
+repositories/
+venv/
+__pycache__/
+*.zip
+*.tar.gz
+*.rar
+messenger/
+frameworks/Shared/The 8
+
+# Client Data Protection
+**/RustyParrot*/
+**/*LaRovere*/
+**/LegalClientData/
+RUSTY_PARROT_*.md
+# Large generated/bundled assets
+assets/content/Elementals of Cooking/pubic/cards/floor/Fooocus_win64_2-5-0/
+assets/content/Elementals of Cooking/pubic/cards/floor/defooocus_portable/
+assets/content/Elementals of Cooking/pubic/cards/floor/**/python_embeded/
+projects/active-development/Arcana-Mirror-2.1/node_modules/
+
+# Penni build artifacts
+penni/src-tauri/target/
+penni/node_modules/
+
+# Seriatim Codex client archives (moved to fortress)
+Seriatim Codex/archive_original_pdfs/
+Seriatim Codex/_OLD_DATA_BACKUP_1127_2032/
+
+# Applings build artifacts (to keep snapshots small)
+applings/Secretary_v1/ui/src-tauri/target/
+applings/Secretary_v1/ui/node_modules/
+applings/Secretary_v1/node_modules/
+
+# Global Ignores
+node_modules/
+
+# More Global Ignores
+**/node_modules/
+
+# Large build artifacts - GitHub limit
+**/target/
+**/node_modules/
+**/dist/
+**/*.rlib
+**/*.rmeta
+**/*.pdb
+**/electron.exe
+archives-organized/

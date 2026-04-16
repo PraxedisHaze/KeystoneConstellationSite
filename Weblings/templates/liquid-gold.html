@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Gold</title>
+    <style>
+        :root { --primary: {{colors.primary}}; --bg: #030303; --text: #f0f0f0; }
+        body { background: var(--bg); color: var(--text); font-family: Georgia, serif; padding: 40px; margin: 0; text-align: center; }
+        h1 { font-size: 2.5rem; color: var(--primary); margin: 0.5em 0; }
+        p { max-width: 600px; margin: 0 auto; line-height: 1.8; }
+        .accent { color: var(--primary); }
+        .section { margin: 3rem 0; max-width: 500px; margin-left: auto; margin-right: auto; border-top: 1px solid var(--primary); padding-top: 1rem; }
+        input, textarea { width: 100%; padding: 10px; background: #1a1a1a; border-bottom: 1px solid var(--primary); color: var(--text); margin: 5px 0; }
+        button { background: var(--primary); color: var(--bg); padding: 10px 20px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>{{text.name}}</h1>
+    <p class="accent">{{text.tagline}}</p>
+    <p>{{text.bio}}</p>
+
+    <div class="section">
+        <h3>Inquiry</h3>
+        <input type="text" placeholder="Name">
+        <input type="email" placeholder="Email">
+        <textarea placeholder="Message (Optional)" rows="3"></textarea>
+        <button>Submit</button>
+    </div>
+</body>
+</html>

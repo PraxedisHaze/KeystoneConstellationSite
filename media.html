@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media - Axxilak | Creator Content</title>
+    <meta name="description"
+        content="Follow Timothy Drake's creative journey. TikTok videos, Facebook posts, and behind-the-scenes content from the creator behind Axxilak.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=2026020101">
+    <link rel="icon" type="image/png" href="favicon.png?v=2026020101">
+    <link rel="apple-touch-icon" href="favicon.png?v=2026020101">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Cinzel + Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@200;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #d4af37;
+            --bg: #030303;
+            --glass: rgba(20, 20, 20, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        @keyframes blub-in {
+            0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+            70% { opacity: 1; transform: translateY(-2px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1.0); }
+        }
+
+        .animate-blub {
+            animation: blub-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #f0f0f0;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Particle Canvas (Same as landing page) */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Gold Gradient Text */
+        .gold-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shine 5s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: -1000px; }
+            100% { background-position: 1000px; }
+        }
+
+        /* Section Spacing */
+        section {
+            padding: 6rem 5%;
+        }
+
+        @media (max-width: 768px) {
+            section {
+                padding: 3rem 5%;
+            }
+        }
+
+        /* Media Grid */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .media-item {
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .media-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Embedded content styling */
+        .tiktok-embed,
+        .facebook-embed {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: black;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .social-link:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .creator-bio {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .creator-bio h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .creator-bio p {
+            color: #d0d0d0;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Hover Effects */
+        .hover-trigger {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hover-trigger:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Particle Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
+        <nav class="flex items-center justify-between px-6 md:px-12 py-6">
+            <a href="index.html" class="flex items-center gap-4 hover:opacity-80 transition group">
+                <img src="favicon.png" alt="Axxilak Logo" class="h-[50px] w-auto drop-shadow-[0_0_15px_rgba(212,175,55,0.6)] group-hover:scale-105 transition duration-500">
+                <div class="flex flex-col justify-center items-start animate-blub text-left">
+                    <div class="serif font-bold text-2xl tracking-[0.05em] text-white leading-none">
+                        AXXILAK <span class="font-light opacity-80">Studios</span>
+                    </div>
+                    <div class="text-[10px] tracking-[0.3em] text-amber-400/60 font-light mt-1" style="font-family: 'Outfit', sans-serif;">
+                        We make beautiful apps.
+                    </div>
+                </div>
+            </a>
+            <div class="flex gap-8 items-center">
+                <a href="#contact" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">Contact</a>
+                <a href="axxilak_portfolio/index.html"
+                    class="px-4 py-2 border border-white/20 hover:border-amber-400 rounded-sm text-sm transition">About
+                    Me</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col items-center justify-center gap-8 text-center">
+        <div class="max-w-3xl">
+            <h1 class="text-6xl md:text-8xl font-light serif italic leading-tight mb-8">
+                <span class="gold-text">CREATOR</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-300 mb-6 font-light max-w-3xl mx-auto">
+                Fun. Interesting. Funny.<br>
+                <span class="text-amber-400 font-semibold">Follow along on TikTok and Facebook for the latest.</span>
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+                <a href="https://www.tiktok.com/@timdrake" target="_blank" rel="noopener noreferrer"
+                    class="social-link">
+                    TikTok @timdrake
+                </a>
+                <a href="https://www.facebook.com/TimothyDrake" target="_blank" rel="noopener noreferrer"
+                    class="social-link">
+                    Facebook Timothy Drake
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Creator Bio -->
+    <section class="py-20">
+        <div class="creator-bio">
+            <h2>Who's Behind Axxilak?</h2>
+            <p>
+                I'm a creator who builds beautiful things. From weblings to videos to ideas that challenge how we think
+                about digital ownership.
+                I make content that's worth your time—genuinely fun, interesting, and occasionally hilarious.
+            </p>
+            <p style="margin-bottom: 0;">
+                <span class="text-amber-400 font-semibold">Every project starts with love. Every video starts with joy.</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- TikTok Section -->
+    <section id="tiktok" class="py-20">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">TikTok Creations</h2>
+            <p class="text-center text-slate-400 mb-16 font-light italic">
+                Short-form videos. Big ideas. Entertaining moments.
+            </p>
+
+            <div class="media-grid">
+                <!-- TikTok Embed Instructions -->
+                <div class="glass-panel p-8 rounded-sm text-center hover-trigger">
+                    <p class="text-slate-300 mb-4">
+                        <span class="text-amber-400 font-semibold">@timdrake</span> on TikTok
+                    </p>
+                    <a href="https://www.tiktok.com/@timdrake" target="_blank" rel="noopener noreferrer"
+                        class="inline-block px-6 py-3 bg-white text-black font-semibold hover:bg-amber-400 transition">
+                        Watch on TikTok
+                    </a>
+                    <p class="text-slate-500 text-sm mt-4 italic">
+                        Embedded TikTok videos load dynamically. Visit TikTok directly for the latest content.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facebook Section -->
+    <section id="facebook" class="py-20">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">Facebook Updates</h2>
+            <p class="text-center text-slate-400 mb-16 font-light italic">
+                Longer thoughts. Project updates. Community conversations.
+            </p>
+
+            <div class="media-grid">
+                <!-- Facebook Embed Instructions -->
+                <div class="glass-panel p-8 rounded-sm text-center hover-trigger">
+                    <p class="text-slate-300 mb-4">
+                        <span class="text-amber-400 font-semibold">Timothy Drake</span> on Facebook
+                    </p>
+                    <a href="https://www.facebook.com/TimothyDrake" target="_blank" rel="noopener noreferrer"
+                        class="inline-block px-6 py-3 bg-white text-black font-semibold hover:bg-amber-400 transition">
+                        Visit Facebook
+                    </a>
+                    <p class="text-slate-500 text-sm mt-4 italic">
+                        Embedded Facebook posts load dynamically. Visit Facebook directly for the latest updates.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-20">
+        <div class="max-w-3xl mx-auto text-center glass-panel p-12 rounded-sm">
+            <h2 class="text-3xl md:text-4xl serif font-light mb-6">Follow Along</h2>
+            <p class="text-slate-300 mb-8 font-light">
+                New content every week. Videos, updates, behind-the-scenes looks at how I build Axxilak and everything else.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://www.tiktok.com/@timdrake" target="_blank" rel="noopener noreferrer"
+                    class="social-link">
+                    Follow on TikTok
+                </a>
+                <a href="https://www.facebook.com/TimothyDrake" target="_blank" rel="noopener noreferrer"
+                    class="social-link">
+                    Follow on Facebook
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-12">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <h4 class="serif text-xl mb-4">AXXILAK <span class="font-light opacity-60">Studios</span></h4>
+                    <p class="text-slate-400 text-sm font-light">
+                        Weblings by a creator. Everything I make comes from a place of genuine care.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-sm uppercase tracking-widest mb-4">Explore</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="index.html" class="hover:text-amber-400 transition">Home</a></li>
+                        <li><a href="free-stuff.html" class="hover:text-amber-400 transition">Free Stuff</a></li>
+                        <li><a href="media.html" class="hover:text-amber-400 transition">Media</a></li>
+                        <li><a href="axxilak_portfolio/index.html" class="hover:text-amber-400 transition">About Me</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-sm uppercase tracking-widest mb-4">Follow</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="https://www.tiktok.com/@timdrake" target="_blank" class="hover:text-amber-400 transition">TikTok</a></li>
+                        <li><a href="https://www.facebook.com/TimothyDrake" target="_blank" class="hover:text-amber-400 transition">Facebook</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
+                <p class="mb-4">&copy; 2026 AXXILAK. All rights reserved.</p>
+                <p class="text-xs text-slate-600 italic">
+                    Created with intention. Made with love.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Particle Network (same as landing page)
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = Math.max(20, Math.floor((canvas.width * canvas.height) / 15000));
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 1.5;
+                this.isGold = Math.random() < 0.05;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = this.isGold ? '#d4af37' : '#ffffff';
+                ctx.globalAlpha = this.isGold ? 0.5 : 0.3;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function drawLines() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.1 * (1 - distance / 150)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(3, 3, 3, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((p) => {
+                p.update();
+                p.draw();
+            });
+
+            drawLines();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+
+</html>

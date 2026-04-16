@@ -1,0 +1,19 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <linearGradient id="auraGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff00ff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#00ffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffff00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Aura sun - iridescent, flowing, spiritual -->
+  <circle cx="12" cy="12" r="5" stroke="url(#auraGradient)" stroke-width="1.2" opacity="0.9"/>
+  <!-- Flowing rays with iridescent colors -->
+  <line x1="12" y1="2" x2="12" y2="4" stroke="#ff00ff" stroke-width="1"/>
+  <line x1="12" y1="20" x2="12" y2="22" stroke="#00ffff" stroke-width="1"/>
+  <line x1="2" y1="12" x2="4" y2="12" stroke="#ffff00" stroke-width="1"/>
+  <line x1="20" y1="12" x2="22" y2="12" stroke="#ff00ff" stroke-width="1"/>
+  <!-- Soft diagonal rays -->
+  <line x1="4.5" y1="4.5" x2="6" y2="6" stroke="#00ffff" opacity="0.7" stroke-width="0.8"/>
+  <line x1="18" y1="18" x2="19.5" y2="19.5" stroke="#ffff00" opacity="0.7" stroke-width="0.8"/>
+</svg>

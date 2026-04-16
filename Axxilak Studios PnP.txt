@@ -1,0 +1,48 @@
+﻿Axxilak Studios: Policies & Procedures (P&P)
+Version: 1.0
+Effective Date: January 22, 2026
+Mission: "Trying to make the world a better place."
+I. Core Philosophy: The Economy of Love
+We operate on the belief that code is not merely functional; it is an act of service. The more we give (in performance, accessibility, and stability), the more value we create.
+Our "Weblings"—the digital entities we birth into the internet—must be resilient, polite, and helpful. They are designed to serve the user, not the ego of the developer.
+II. The Webling Protocol (Technical Standards)
+The mandatory standard for all Axxilak Studios web products. A product cannot be released until it passes this protocol.
+1. The Principle of Semantic Sanctity
+"Speak clearly to the machine so it can speak clearly to the human."
+* Requirement: We never use a <div> when a semantic tag (<main>, <article>, <nav>, <button>) will do.
+* Reasoning: Semantic HTML is the bedrock of accessibility and SEO. It allows screen readers to navigate and search engines to understand the hierarchy of importance.
+2. The Social Handshake (Open Graph)
+"Introduce yourself properly when you enter a room."
+* Requirement: Every page must include complete Open Graph (og:) and Twitter Card metadata (Title, Description, Image, URL).
+* Reasoning: When a user shares our work, it is a referral. The link must unfurl into a professional "card" that respects the platform it is shared on. A bare URL is a weak handshake.
+3. The Robustness Rule (No-JS Fallback)
+"Stand strong, even when the magic fails."
+* Requirement: Core navigation and content consumption must function without JavaScript.
+* Specifics: Buttons that navigate must be <a> tags, not <div onclick="...">.
+* Reasoning: Scripts break. CDNs fail. Privacy plugins block code. Our users must never be stranded because a script didn't load. The site works first; the magic (particles/animation) is a reward, not a requirement.
+4. The Invisible Polish
+"Dress for the occasion."
+* Requirement:
+   * Favicon: No generic browser globe.
+   * Theme Color: The browser address bar (mobile) must match the site's background color (<meta name="theme-color">).
+* Reasoning: These invisible touches signal "Native App" quality. They immerse the user completely in the environment we have created.
+5. Accessibility Guardrails
+"Leave no one behind."
+* Requirement:
+   * Purely decorative elements (like particle canvases) must be hidden from screen readers (aria-hidden="true").
+   * Interactive elements must have aria-labels if their text is ambiguous.
+   * Focus states must remain visible for keyboard navigation.
+* Reasoning: A screen reader announcing "Canvas... graphic... clickable" creates noise. We silence the noise so the content can sing.
+6. Respect for Resources (The "Liquid" Standard)
+"Do not waste what is not yours."
+* Requirement: Zero-dependency architecture whenever possible. No heavy frameworks for simple sites.
+* Reasoning: We respect the user's data plan and battery life. Bloated code steals time and energy from the visitor. We ship only what is necessary.
+III. Product Release Checklist
+Before any product (like "Liquid Gold") is shipped, it must answer "Yes" to the following:
+1. [ ] Does it work if I turn off JavaScript?
+2. [ ] Does it look like a native app on mobile (black address bar)?
+3. [ ] Does it share beautifully on Slack/LinkedIn?
+4. [ ] Is the decorative noise silenced for screen readers?
+5. [ ] Does it honor the user's time (load speed)?
+Approved by T. Drake
+Axxilak Studios

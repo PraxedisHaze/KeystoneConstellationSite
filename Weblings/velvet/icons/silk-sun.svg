@@ -1,0 +1,12 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Silk Sun - Soft, flowing, rose gold -->
+  <circle cx="12" cy="12" r="5" stroke="#d4a5a5"/>
+  <!-- Soft, flowing rays -->
+  <path d="M 12 2 Q 11.5 3.5 12 5" stroke="#d4a5a5" fill="none"/>
+  <path d="M 12 19 Q 11.5 20.5 12 22" stroke="#d4a5a5" fill="none"/>
+  <path d="M 2 12 Q 3.5 11.5 5 12" stroke="#d4a5a5" fill="none"/>
+  <path d="M 19 12 Q 20.5 11.5 22 12" stroke="#d4a5a5" fill="none"/>
+  <!-- Delicate diagonal curves -->
+  <path d="M 4.5 4.5 Q 5.5 5 6.5 6" stroke="#d4a5a5" opacity="0.6" fill="none"/>
+  <path d="M 17.5 17.5 Q 18.5 18 19.5 19" stroke="#d4a5a5" opacity="0.6" fill="none"/>
+</svg>

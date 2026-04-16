@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak Forge - Webling Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { overflow: hidden; }
+        #preview { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white h-screen flex overflow-hidden">
+
+    <!-- Sidebar Controls -->
+    <div class="w-80 bg-slate-800 border-r border-slate-700 p-6 overflow-y-auto">
+        <h1 class="text-xl font-bold mb-6">Axxilak <span class="text-[#d4af37]">Forge</span></h1>
+
+        <div class="space-y-6">
+            <!-- Template Selector -->
+            <div>
+                <label class="text-xs uppercase text-slate-400 block mb-2">Template</label>
+                <select id="template" onchange="changeTemplate()" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-[#d4af37]">
+                    <option value="velvet">Velvet (Minimalist)</option>
+                    <option value="gaia">Gaia (Organic)</option>
+                    <option value="summit">Summit (Tactical)</option>
+                </select>
+            </div>
+
+            <!-- Text Controls -->
+            <div>
+                <label class="text-xs uppercase text-slate-400 block mb-2">Name</label>
+                <input type="text" id="text-name" placeholder="Your Name" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-[#d4af37]" oninput="updatePreview()">
+            </div>
+
+            <div>
+                <label class="text-xs uppercase text-slate-400 block mb-2">Tagline</label>
+                <input type="text" id="text-tagline" placeholder="Your Tagline" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-[#d4af37]" oninput="updatePreview()">
+            </div>
+
+            <div>
+                <label class="text-xs uppercase text-slate-400 block mb-2">Bio</label>
+                <textarea id="text-bio" placeholder="Your Bio" rows="3" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-[#d4af37]" oninput="updatePreview()"></textarea>
+            </div>
+
+            <!-- Color Controls -->
+            <div>
+                <label class="text-xs uppercase text-slate-400 block mb-2">Primary Color</label>
+                <input type="color" id="color-primary" value="#d4af37" class="w-full h-10 rounded cursor-pointer" oninput="updatePreview()">
+            </div>
+
+            <div>
+                <label class="text-xs uppercase text-slate-400 block mb-2">Background Color</label>
+                <input type="color" id="color-background" value="#0a0a0a" class="w-full h-10 rounded cursor-pointer" oninput="updatePreview()">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-4 border-t border-slate-600">
+                <button onclick="downloadHTML()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded mb-2 text-sm font-medium">Download HTML</button>
+                <button onclick="purchaseLicense()" class="w-full bg-[#d4af37] hover:bg-[#b5952f] text-slate-900 py-2 rounded font-bold text-sm">Purchase License ($50)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="flex-1 bg-slate-700 flex items-center justify-center overflow-hidden">
+        <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+
+    <script>
+        let currentTemplate = 'velvet';
+        let templateHTML = '';
+
+        // Load template on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTemplate('velvet');
+        });
+
+        async function loadTemplate(name) {
+            currentTemplate = name;
+            try {
+                const response = await fetch(`../Weblings/${name}/index.html`);
+                templateHTML = await response.text();
+                updatePreview();
+            } catch (e) {
+                console.error('Failed to load template:', e);
+            }
+        }
+
+        function changeTemplate() {
+            const name = document.getElementById('template').value;
+            loadTemplate(name);
+        }
+
+        function updatePreview() {
+            let html = templateHTML;
+
+            // Get values from controls
+            const name = document.getElementById('text-name').value || 'Your Name';
+            const tagline = document.getElementById('text-tagline').value || 'Your Tagline';
+            const bio = document.getElementById('text-bio').value || 'Your professional bio';
+            const primaryColor = document.getElementById('color-primary').value;
+            const bgColor = document.getElementById('color-background').value;
+
+            // Replace text variables
+            html = html.replace(/{{text.name}}/g, name);
+            html = html.replace(/{{text.tagline}}/g, tagline);
+            html = html.replace(/{{text.bio}}/g, bio);
+
+            // Replace color variables in CSS
+            html = html.replace(/{{colors.primary}}/g, primaryColor);
+            html = html.replace(/{{colors.background}}/g, bgColor);
+            html = html.replace(/{{colors.text}}/g, '#f5f5f5');
+            html = html.replace(/{{colors.background_light}}/g, '#ffffff');
+            html = html.replace(/{{colors.text_light}}/g, '#1a1a1a');
+            html = html.replace(/{{colors.primary_light}}/g, primaryColor);
+
+            // Inject CSS to override colors
+            const colorOverride = `
+                <style>
+                    :root {
+                        --bg: ${bgColor} !important;
+                        --text: #f5f5f5 !important;
+                        --gold: ${primaryColor} !important;
+                        --primary: ${primaryColor} !important;
+                        --accent: ${primaryColor} !important;
+                        --background: ${bgColor} !important;
+                    }
+                </style>
+            `;
+            html = html.replace('</head>', colorOverride + '</head>');
+
+            // Render in iframe
+            const frame = document.getElementById('preview');
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            doc.open();
+            doc.write(html);
+            doc.close();
+        }
+
+        function downloadHTML() {
+            const preview = document.getElementById('preview');
+            const html = preview.contentDocument.documentElement.outerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${document.getElementById('text-name').value.replace(/\s+/g, '_')}_webling.html`;
+            a.click();
+        }
+
+        function purchaseLicense() {
+            const name = document.getElementById('text-name').value || 'Webling';
+            const state = {
+                template: currentTemplate,
+                text: {
+                    name: document.getElementById('text-name').value,
+                    tagline: document.getElementById('text-tagline').value,
+                    bio: document.getElementById('text-bio').value
+                },
+                colors: {
+                    primary: document.getElementById('color-primary').value,
+                    background: document.getElementById('color-background').value
+                }
+            };
+            const encoded = btoa(JSON.stringify(state));
+            window.location.href = `../download.html?custom=${encoded}`;
+        }
+    </script>
+</body>
+</html>

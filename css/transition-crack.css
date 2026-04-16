@@ -1,0 +1,80 @@
+/**
+ * Axxilak Cracking Transition Styles
+ * GPU acceleration, z-index layering, accessibility
+ */
+
+/* Prevent layout shift during transition */
+body.transition-active {
+    overflow: hidden;
+}
+
+/* Canvas overlay for shard rendering */
+#transition-crack-canvas {
+    will-change: opacity;
+    transform: translateZ(0); /* GPU acceleration */
+}
+
+/* Backdrop layer */
+#transition-backdrop {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    will-change: opacity;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Expanding card during transition */
+.transition-card {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    border-radius: 0;
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    #transition-crack-canvas,
+    #transition-backdrop,
+    .transition-card {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    /* Instant crossfade fallback */
+    #transition-backdrop {
+        opacity: 0;
+    }
+
+    .transition-card {
+        opacity: 0;
+    }
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+    #transition-crack-canvas {
+        /* Reduce shard count on mobile for performance */
+        /* (Handled via JavaScript) */
+    }
+}
+
+/* Z-index hierarchy (clear layering) */
+:root {
+    --z-backdrop: 9997;
+    --z-shards: 9998;
+    --z-card: 9999;
+}
+
+/* Ensure other fixed elements don't interfere */
+header,
+nav {
+    z-index: 50; /* Below transition layers */
+}

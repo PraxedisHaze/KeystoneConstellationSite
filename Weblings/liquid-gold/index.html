@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXXILAK STUDIOS | Bespoke Web Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Outfit:wght@200;400;600&display=swap"
+        rel="stylesheet">
+
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #d4af37;
+            /* Gold */
+            --bg: #030303;
+            --glass: rgba(20, 20, 20, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #f0f0f0;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            cursor: auto;
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --primary: #d4af37;
+            --bg: #ffffff;
+            --glass: rgba(200, 200, 200, 0.4);
+            --border: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Custom Cursor */
+        #cursor-dot,
+        #cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+        }
+
+        #cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        body:hover #cursor-outline {
+            opacity: 1;
+        }
+
+        /* Interactive Canvas Background */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Glass Cards */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Text Gradient */
+        .gold-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 5s linear infinite;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Smooth marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+
+        /* FOOTER STYLING */
+        footer {
+            background-color: #000000;
+            opacity: 1 !important;
+            position: relative;
+            z-index: 100;
+        }
+
+    
+        /* Editor Overrides */
+        .apex-highlighted { outline: 3px solid #00ff00 !important; outline-offset: -3px !important; box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.4) !important; pointer-events: auto !important; }
+        body.edit-mode { cursor: none !important; }
+    </style>
+    
+</head>
+
+<body class="selection:bg-amber-900 selection:text-white">
+
+    <!-- Hidden State Data Placeholders (for Forge state injection) -->
+    <div style="display:none; color:#000; background:#000; z-index:-9999;">
+        <span id="state-name">{{text.name}}</span>
+        <span id="state-tagline">{{text.tagline}}</span>
+        <span id="state-bio">{{text.bio}}</span>
+        <span id="state-cta">{{text.cta}}</span>
+        <img src="{{images.profile}}" alt="profile" style="display:none;">
+        <div style="color:{{colors.primary}}">primary</div>
+        <div style="background:{{colors.background}}">bg</div>
+    </div>
+
+    <!-- Background Animation -->
+    <canvas id="neuro-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 left-0 p-6 flex justify-between items-center mix-blend-difference">
+        <a href="../../index.html" class="text-2xl font-bold tracking-widest serif text-white hover:text-amber-400 transition-colors">AXXILAK</a>
+        <div class="flex gap-6 items-center">
+            <a href="../../index.html"
+                class="hover-trigger group flex items-center gap-2 text-sm uppercase tracking-widest text-white hover:text-amber-400 transition-colors">
+                <span class="block w-8 h-[1px] bg-white group-hover:bg-amber-400 transition-all"></span>
+                Back to Gallery
+            </a>
+            <a href="#contact"
+                class="hover-trigger group flex items-center gap-2 text-sm uppercase tracking-widest text-white hover:text-amber-400 transition-colors">
+                Start a Project
+                <span class="block w-8 h-[1px] bg-white group-hover:bg-amber-400 transition-all"></span>
+            </a>
+            <button id="edit-mode-btn" class="hover-trigger group flex items-center gap-2 text-sm uppercase tracking-widest text-white hover:text-amber-400 transition-colors">
+                Edit
+            </button>
+            <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col justify-center items-center px-4 relative pb-48 pt-20">
+        <div class="text-center z-10">
+            <p class="text-amber-500 uppercase tracking-[0.3em] text-xs md:text-sm mb-6 reveal">Premium Digital
+                Architecture</p>
+            <h1 class="text-5xl md:text-8xl lg:text-9xl font-light mb-6 leading-tight reveal"
+                style="transition-delay: 100ms;">
+                WE BUILD <br>
+                <span class="serif italic gold-text">ICONS.</span>
+            </h1>
+            <p class="max-w-xl mx-auto text-gray-400 font-light text-lg leading-relaxed reveal"
+                style="transition-delay: 200ms;">
+                Axxilak Studios is a boutique web design agency. We reject templates. We forge bespoke digital
+                experiences for brands that refuse to blend in.
+            </p>
+
+            <div class="mt-12 reveal" style="transition-delay: 300ms;">
+                <a href="#work"
+                    class="hover-trigger inline-block px-8 py-4 border border-amber-500/30 text-amber-100 uppercase tracking-widest text-xs hover:bg-amber-500/10 hover:border-amber-500 transition-all duration-500">
+                    Explore Our Craft
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div
+            class="absolute bottom-10 flex flex-col items-center gap-2 opacity-50 animate-bounce"
+            style="left: calc(50% - 31px); transform: translateX(-50%); position: absolute;">
+            <span class="text-[10px] uppercase tracking-widest">Scroll</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- Marquee Separator -->
+    <div class="border-y border-white/10 bg-black/50 backdrop-blur-sm py-4">
+        <div class="marquee-container">
+            <div class="marquee-content text-4xl md:text-6xl font-thin text-white/20 uppercase font-serif">
+                Strategy • Design • Development • 3D Interaction • Branding • Strategy • Design • Development • 3D
+                Interaction • Branding •
+            </div>
+        </div>
+    </div>
+
+    <!-- Services / Philosophy -->
+    <section id="work" class="py-32 px-6 md:px-12 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <div class="reveal">
+                <h2 class="text-4xl md:text-5xl mb-8">The <span class="text-amber-500">Art</span> of Code.</h2>
+                <div class="space-y-8">
+                    <div
+                        class="glass-panel p-8 rounded-sm hover-trigger group hover:border-amber-500/30 transition-all duration-500">
+                        <h3 class="text-2xl mb-2 group-hover:text-amber-400 transition-colors">01. Bespoke Design</h3>
+                        <p class="text-gray-400 font-light">Your business is unique. Your website should be too. No
+                            drag-and-drop builders. We write clean, high-performance code tailored to your vision.</p>
+                    </div>
+                    <div
+                        class="glass-panel p-8 rounded-sm hover-trigger group hover:border-amber-500/30 transition-all duration-500">
+                        <h3 class="text-2xl mb-2 group-hover:text-amber-400 transition-colors">02. Interaction</h3>
+                        <p class="text-gray-400 font-light">Static pages are dead. We implement subtle animations, 3D
+                            elements, and micro-interactions that keep users engaged and buying.</p>
+                    </div>
+                    <div
+                        class="glass-panel p-8 rounded-sm hover-trigger group hover:border-amber-500/30 transition-all duration-500">
+                        <h3 class="text-2xl mb-2 group-hover:text-amber-400 transition-colors">03. Performance</h3>
+                        <p class="text-gray-400 font-light">Beauty means nothing if it doesn't load. Our sites are
+                            optimized for speed, SEO, and conversion.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Abstract Visual Representation of Code -->
+            <div class="relative h-[600px] w-full glass-panel reveal" style="transition-delay: 200ms;">
+                <div class="absolute inset-0 flex items-center justify-center overflow-hidden">
+                    <div class="w-64 h-64 border border-amber-500/20 rounded-full animate-[spin_10s_linear_infinite]">
+                    </div>
+                    <div class="absolute w-48 h-48 border border-white/10 rotate-45"></div>
+                    <div class="absolute w-96 h-[1px] bg-amber-500/20"></div>
+                    <div class="absolute w-[1px] h-96 bg-amber-500/20"></div>
+
+                    <div class="absolute top-10 left-10 text-xs font-mono text-amber-500/50">
+                        import { Future } from 'axxilak';<br>
+                        const vision = new Design();<br>
+                        vision.render();
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing / Packages (Simplified for High End Feel) -->
+    <section class="py-20 px-4 bg-white/5">
+        <div class="max-w-6xl mx-auto text-center mb-16 reveal">
+            <h2 class="text-4xl md:text-5xl mb-4">Investment</h2>
+            <p class="text-gray-400">Quality is remembered long after the price is forgotten.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            <!-- Card 1 -->
+            <div class="glass-panel p-10 flex flex-col hover-trigger reveal">
+                <h3 class="text-xl text-gray-400 mb-2">The Launchpad</h3>
+                <div class="text-4xl font-serif text-white mb-6">$2,500<span
+                        class="text-sm font-sans text-gray-500">+</span></div>
+                <ul class="text-sm text-gray-300 space-y-4 mb-8 flex-grow font-light">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> 5-Page
+                        Custom Site</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> Mobile
+                        Responsive</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> Basic
+                        SEO Setup</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> Contact
+                        Integration</li>
+                </ul>
+                <a href="#contact"
+                    class="w-full py-3 border border-white/20 text-center text-xs uppercase hover:bg-white hover:text-black transition-all">Select</a>
+            </div>
+
+            <!-- Card 2 (Featured) -->
+            <div class="glass-panel p-10 flex flex-col border-amber-500/30 relative hover-trigger reveal"
+                style="transition-delay: 100ms;">
+                <div
+                    class="absolute top-0 right-0 bg-amber-500 text-black text-[10px] font-bold px-3 py-1 uppercase tracking-wider">
+                    Most Popular</div>
+                <h3 class="text-xl text-amber-400 mb-2">The Signature</h3>
+                <div class="text-4xl font-serif text-white mb-6">$4,800<span
+                        class="text-sm font-sans text-gray-500">+</span></div>
+                <ul class="text-sm text-gray-300 space-y-4 mb-8 flex-grow font-light">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> up to
+                        10 Pages</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i>
+                        Advanced Animations</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> CMS
+                        Integration</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> Brand
+                        Style Guide</li>
+                </ul>
+                <a href="#contact"
+                    class="w-full py-3 bg-amber-500 text-black font-bold text-center text-xs uppercase hover:bg-amber-400 transition-all">Select</a>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="glass-panel p-10 flex flex-col hover-trigger reveal" style="transition-delay: 200ms;">
+                <h3 class="text-xl text-gray-400 mb-2">The Enterprise</h3>
+                <div class="text-4xl font-serif text-white mb-6">Custom</div>
+                <ul class="text-sm text-gray-300 space-y-4 mb-8 flex-grow font-light">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i>
+                        E-commerce Solutions</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> Custom
+                        Web Applications</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i> User
+                        Account Systems</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-amber-500 text-xs"></i>
+                        Priority Support</li>
+                </ul>
+                <a href="#contact"
+                    class="w-full py-3 border border-white/20 text-center text-xs uppercase hover:bg-white hover:text-black transition-all">Inquire</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="min-h-screen flex items-center justify-center px-4 py-20 relative overflow-hidden">
+
+        <div class="max-w-4xl w-full relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="reveal">
+                <h2 class="text-5xl md:text-6xl mb-6">Let's build<br>your <span
+                        class="text-amber-500 italic serif">legacy.</span></h2>
+                <p class="text-gray-400 mb-8 font-light text-lg">Ready to separate your business from the noise? Fill
+                    out the form, and we will be in touch within 24 hours.</p>
+
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 text-gray-300">
+                        <div class="w-10 h-10 border border-white/10 flex items-center justify-center rounded-full">
+                            <i class="fa-solid fa-envelope text-amber-500"></i>
+                        </div>
+                        <span class="font-light">contact@axxilak.com</span>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-white/10 flex items-center justify-center rounded-full hover:border-amber-500 hover:text-amber-400 transition-all group">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-white/10 flex items-center justify-center rounded-full hover:border-amber-500 hover:text-amber-400 transition-all group">
+                            <i class="fa-brands fa-tiktok"></i>
+                        </a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-white/10 flex items-center justify-center rounded-full hover:border-amber-500 hover:text-amber-400 transition-all group">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-white/10 flex items-center justify-center rounded-full hover:border-amber-500 hover:text-amber-400 transition-all group">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <form id="contact-form" action="mailto:contact@axxilak.com" method="POST" enctype="text/plain" class="glass-panel p-8 md:p-12 space-y-6 reveal" style="transition-delay: 200ms;">
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Name</label>
+                    <input type="text" name="name" required
+                        class="w-full bg-transparent border-b border-white/20 py-2 text-white focus:outline-none focus:border-amber-500 transition-colors hover-trigger">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Email</label>
+                    <input type="email" name="email" required
+                        class="w-full bg-transparent border-b border-white/20 py-2 text-white focus:outline-none focus:border-amber-500 transition-colors hover-trigger">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Project Vision (Optional)</label>
+                    <textarea rows="4" name="message"
+                        class="w-full bg-transparent border-b border-white/20 py-2 text-white focus:outline-none focus:border-amber-500 transition-colors hover-trigger"></textarea>
+                </div>
+                <button type="submit" onclick="showThanks(event)"
+                    class="w-full bg-white text-black py-4 font-bold uppercase tracking-widest text-xs hover:bg-amber-500 transition-colors hover-trigger mt-4">
+                    Send Request
+                </button>
+                <div id="form-success" class="hidden text-center p-4 border border-green-500/30 text-green-400 bg-green-500/10 rounded">
+                    <p class="text-sm font-bold">Message Sent!</p>
+                    <p class="text-xs opacity-80">We'll be in touch within 24 hours.</p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+
+    <footer class="py-8 text-center text-gray-300 text-xs uppercase tracking-widest border-t border-white/5">
+        &copy; 2026 Axxilak Studios. All Rights Reserved.
+    </footer>
+
+    <script src="../engines/transitions/molten-pour.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                // Fallback
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').src = 'icons/moon.svg';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+
+        // --- Scroll Reveal ---
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- 3. Particle Network Canvas Animation ---
+        const canvas = document.getElementById('neuro-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        const mouse = { x: null, y: null, radius: 150 };
+
+        // Resize Canvas
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            initParticles();
+        }
+        window.addEventListener('resize', resize);
+
+        // Particle Class
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5; // slow velocity
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.color = Math.random() > 0.95 ? '#d4af37' : '#ffffff'; // Occasional gold particle
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off edges
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Mouse Interaction
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < mouse.radius) {
+                    // Gentle push away or pull towards? Let's do gentle pull for "connection" feel
+                    const forceDirectionX = dx / distance;
+                    const forceDirectionY = dy / distance;
+                    const force = (mouse.radius - distance) / mouse.radius;
+                    const directionX = forceDirectionX * force * 0.5; // Power
+                    const directionY = forceDirectionY * force * 0.5;
+
+                    this.x += directionX;
+                    this.y += directionY;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            // Calculate number of particles based on screen size
+            const numberOfParticles = (width * height) / 15000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Draw Connections
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / 120 - 0.8})`; // Very faint lines
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        resize();
+        animate();
+
+        // Form Button Interaction - Formspree Integration
+        const contactForm = document.getElementById('contact-form');
+        const formBtn = contactForm.querySelector('button');
+        const formInputs = contactForm.querySelectorAll('input, textarea');
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validate inputs
+            let isValid = true;
+            formInputs.forEach(input => {
+                if (!input.value) isValid = false;
+            });
+
+            if (!isValid) {
+                formBtn.classList.add('animate-pulse', 'bg-red-500', 'text-white');
+                formBtn.innerText = "Incomplete Data";
+                setTimeout(() => {
+                    formBtn.classList.remove('animate-pulse', 'bg-red-500', 'text-white');
+                    formBtn.innerText = "Send Request";
+                }, 1000);
+                return;
+            }
+
+            // Show transmitting state
+            const originalText = formBtn.innerText;
+            formBtn.innerText = "Transmitting...";
+            formBtn.classList.remove('bg-white', 'text-black');
+            formBtn.classList.add('bg-amber-500', 'text-white');
+            formBtn.disabled = true;
+
+            try {
+                // Replace with your Formspree endpoint after setup
+                const formData = new FormData(contactForm);
+                const response = await fetch('https://formspree.io/f/[REPLACE_WITH_YOUR_FORMSPREE_ID]', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Success state
+                    formBtn.innerText = "Message Received";
+                    formInputs.forEach(i => i.value = "");
+
+                    setTimeout(() => {
+                        formBtn.innerText = originalText;
+                        formBtn.classList.add('bg-white', 'text-black');
+                        formBtn.classList.remove('bg-amber-500', 'text-white');
+                        formBtn.disabled = false;
+                    }, 3000);
+                } else {
+                    throw new Error('Form submission failed');
+                }
+            } catch (error) {
+                // Error state
+                formBtn.innerText = "Submission Failed";
+                formBtn.classList.remove('bg-amber-500', 'text-white');
+                formBtn.classList.add('bg-red-500', 'text-white');
+
+                setTimeout(() => {
+                    formBtn.innerText = originalText;
+                    formBtn.classList.add('bg-white', 'text-black');
+                    formBtn.classList.remove('bg-red-500', 'text-white');
+                    formBtn.disabled = false;
+                }, 2000);
+            }
+        });
+
+    </script>
+
+    
+
+    
+    <script src="../../coherence_engine.js"></script>
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'liquid-gold-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('liquid-gold-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+
+</html>

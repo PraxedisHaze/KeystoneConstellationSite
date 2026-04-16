@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX | Professional Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* === THEME TRANSITION OVERLAY === */
+        #theme-transition-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            clip-path: circle(0% at 50% 50%);
+            transition: clip-path 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #theme-transition-overlay.active {
+            clip-path: circle(150% at 50% 50%);
+        }
+
+        /* === BOOT OVERLAY === */
+        #boot-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            padding: 2rem;
+        }
+
+        .boot-text {
+            text-align: left;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .boot-line {
+            opacity: 0;
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        @keyframes fadeInLine {
+            to {
+                opacity: 1;
+                transform: translateX(10px);
+            }
+        }
+
+        .boot-fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        :root {
+            --primary: #d4af37;
+            --bg: #0a0a0a;
+            --bg-alt: #111111;
+            --text: #ffffff;
+            --accent: #2563eb;
+            /* Electric Blue */
+            --gray: #f4f4f5;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            margin: 0;
+            padding: 0;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-apex {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-apex:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .border-apex {
+            border: 1px solid #e4e4e7;
+        }
+
+        .bg-apex {
+            background-color: var(--gray);
+        }
+
+        .card-apex {
+            background: white;
+            border: 1px solid #e4e4e7;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+
+        .card-apex:hover {
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
+        }
+
+        /* === CYBER GRID BACKGROUND === */
+        .cyber-grid {
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, rgba(37, 99, 235, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(37, 99, 235, 0.15) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+        }
+
+
+        /* === THEME TOGGLE === */
+        :root {
+            --bg: #0b1120;
+            --text: #ffffff;
+            --accent: #2563eb;
+            --gray: #1e293b;
+        }
+
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --bg-alt: #f9fafb;
+            --text: #1a1a1a;
+            --accent: #1d4ed8;
+            --gray: #f4f4f5;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        nav.theme-aware {
+            background-color: var(--bg);
+            border-bottom-color: var(--gray);
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* === THEME AWARE COMPONENTS === */
+        .dark-theme-button {
+            background-color: var(--gray) !important;
+            color: var(--text) !important;
+            border-color: var(--accent) !important;
+        }
+
+        [data-theme="light"] .dark-theme-button {
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
+            border-color: #e4e4e7 !important;
+        }
+
+        .theme-aware {
+            background-color: var(--bg-alt) !important;
+            border-color: rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 10px 50px -10px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        [data-theme="light"] .theme-aware {
+            background-color: var(--bg-alt) !important;
+            border-color: #e4e4e7 !important;
+        }
+
+        .theme-aware-card {
+            background-color: rgba(255, 255, 255, 0.03) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        [data-theme="light"] .theme-aware-card {
+            background-color: #ffffff !important;
+            border-color: #e4e4e7 !important;
+        }
+
+        .theme-aware-section {
+            background-color: var(--bg-alt) !important;
+            border-color: rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 10px 50px -10px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        [data-theme="light"] .theme-aware-section {
+            background-color: var(--bg-alt) !important;
+            border-color: #e5e7eb !important;
+        }
+
+        /* Override Tailwind bg-white and bg-apex for these specific cases */
+        .bg-white { background-color: transparent !important; }
+        [data-theme="light"] .bg-white { background-color: #ffffff !important; }
+        
+        .bg-apex { background-color: transparent !important; }
+        [data-theme="light"] .bg-apex { background-color: #f4f4f5 !important; }
+
+        .card-apex { background-color: transparent !important; }
+
+        /* === QUILL EDITOR STYLING === */
+        #quill-editor-container .ql-container {
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            border: none !important;
+        }
+
+        #quill-editor-container .ql-editor {
+            padding: 8px;
+            min-height: 80px;
+            line-height: 1.5;
+        }
+
+        #quill-editor-container .ql-toolbar {
+            background: #f5f5f5;
+            border: none !important;
+            border-radius: 3px 3px 0 0;
+            padding: 6px;
+        }
+
+        #quill-editor-container .ql-toolbar.ql-snow .ql-stroke {
+            stroke: #999;
+        }
+
+        #quill-editor-container .ql-toolbar.ql-snow .ql-fill {
+            fill: #999;
+        }
+
+        #quill-editor-container .ql-toolbar.ql-snow button:hover .ql-stroke,
+        #quill-editor-container .ql-toolbar.ql-snow button:focus .ql-stroke,
+        #quill-editor-container .ql-toolbar.ql-snow button.ql-active .ql-stroke {
+            stroke: #2563eb;
+        }
+
+        #quill-editor-container .ql-toolbar.ql-snow button.ql-active .ql-fill {
+            fill: #2563eb;
+        }
+
+        /* ... QUILL EDITOR TEXT COLOR (APEX PALETTE) === */
+        #quill-editor .ql-container,
+        #quill-editor .ql-editor {
+            color: #00ff00;
+        }
+
+        /* === STANDARDIZED BUTTON LINKS === */
+        .btn-link {
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+    <!-- Boot Overlay (Moved outside 3D scene to prevent hit-box interference) -->
+    <div id="boot-overlay">
+        <div class="boot-text" id="boot-log"></div>
+    </div>
+
+    <!-- Global Grid (Moved outside 3D scene) -->
+    <div id="global-grid" class="fixed inset-0 cyber-grid z-0 pointer-events-none" style="height: 120vh; top: -10vh;">
+    </div>
+
+    <!-- Nav (OUTSIDE 3D scene - never transformed) -->
+    <nav class="sticky top-0 w-full backdrop-blur-md border-b z-50 theme-aware" style="position: relative; z-index: 100;" data-anothen-internal>
+        <div class="max-w-7xl mx-auto p-4 md:p-6 flex justify-between items-center relative" data-anothen-internal>
+            <a href="#" class="text-xl font-extrabold tracking-tighter flex items-center gap-2 hover:opacity-80 transition-opacity" data-anothen-internal>
+                <div class="w-3 h-3 bg-[var(--accent)]"></div>
+                APEX
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex gap-8 items-center text-sm font-medium">
+                <button data-handler="scrollTo('#solutions')" class="btn-link hover:text-[var(--accent)] transition">Solutions</button>
+                <button data-handler="scrollTo('#about-text')" class="btn-link hover:text-[var(--accent)] transition">About</button>
+                <button data-handler="scrollTo('#contact')" class="btn-apex rounded-sm" style="border: none; cursor: pointer;">Get Started</button>
+                <button data-handler="toggleTheme()" class="theme-toggle" aria-label="Toggle Dark Mode">
+                    <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+                </button>
+                <button id="edit-mode-btn"
+                    class="px-3 py-1 border border-[var(--accent)] text-[var(--accent)] rounded-sm hover:bg-[var(--accent)]/10 transition text-xs font-bold"
+                    aria-label="Edit Mode">
+                    ✏️ EDIT
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-2xl focus:outline-none"
+                data-handler="toggleMobileMenu()" aria-label="Open Menu">
+                &#9776;
+            </button>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu"
+            class="hidden md:hidden absolute w-full bg-white border-b border-zinc-200 p-4 flex flex-col gap-4 shadow-xl">
+            <button data-handler="scrollTo('#solutions')" class="btn-link text-sm font-medium hover:text-[var(--accent)] text-left">Solutions</button>
+            <button data-handler="scrollTo('#about-text')" class="btn-link text-sm font-medium hover:text-[var(--accent)] text-left">About</button>
+            <button data-handler="scrollTo('#contact')" class="btn-apex rounded-sm text-center" style="border: none; cursor: pointer; width: 100%;">Get Started</button>
+        </div>
+    </nav>
+
+    <!-- 3D SCENE (nav is outside so it's never transformed) -->
+    <div id="apex-3d-scene">
+        <!-- Hero -->
+        <header class="py-24 md:py-32 px-6 relative overflow-hidden">
+
+
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-[var(--accent)] text-xs font-bold font-mono rounded-full mb-8 border border-blue-100">
+                <span class="w-2 h-2 bg-[var(--accent)] rounded-full animate-pulse"></span>
+                SYSTEM ONLINE v2.0
+            </div>
+            <h1 class="text-5xl md:text-8xl font-extrabold tracking-tight mb-8 leading-[1.1]">
+                <span>Scale Your</span> <br>
+                <span class="text-[var(--accent)]">Digital Authority.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-zinc-500 mb-12 max-w-2xl mx-auto font-light">
+                High-performance architecture for startups and consultants.
+                Built for speed, optimized for conversion, crystallized for the future.
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <button data-handler="scrollTo('#contact')" class="btn-apex rounded-sm text-lg shadow-lg shadow-blue-500/20" style="border: none; cursor: pointer;">Initialize
+                    Project</button>
+                <button data-handler="scrollTo('#solutions')"
+                    class="px-8 py-3 border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 transition rounded-sm text-lg font-medium dark-theme-button">View
+                    Solutions</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats (About) -->
+    <section id="about" class="bg-apex py-20 border-y border-zinc-200 theme-aware">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+            <div class="group cursor-default">
+                <div
+                    class="text-4xl font-extrabold mb-2 text-[var(--accent)] group-hover:scale-110 transition-transform duration-300">
+                    100%</div>
+                <div class="text-xs uppercase font-bold text-zinc-400 tracking-widest">Precision</div>
+            </div>
+            <div class="group cursor-default">
+                <div
+                    class="text-4xl font-extrabold mb-2 text-[var(--accent)] group-hover:scale-110 transition-transform duration-300">
+                    0.2s</div>
+                <div class="text-xs uppercase font-bold text-zinc-400 tracking-widest">Latency</div>
+            </div>
+            <div class="group cursor-default">
+                <div
+                    class="text-4xl font-extrabold mb-2 text-[var(--accent)] group-hover:scale-110 transition-transform duration-300">
+                    500+</div>
+                <div class="text-xs uppercase font-bold text-zinc-400 tracking-widest">Deployments</div>
+            </div>
+            <div class="group cursor-default">
+                <div
+                    class="text-4xl font-extrabold mb-2 text-[var(--accent)] group-hover:scale-110 transition-transform duration-300">
+                    ∞</div>
+                <div class="text-xs uppercase font-bold text-zinc-400 tracking-widest">Scalability</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solutions -->
+    <section id="solutions" class="py-24 px-6 max-w-7xl mx-auto -mt-12 relative z-20">
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="card-apex p-10 rounded-sm theme-aware-card">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Fast-Track Build</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Rapid deployment architecture for time-sensitive
+                    missions. No bloat, just performance.</p>
+            </div>
+            <div class="card-apex p-10 rounded-sm theme-aware-card">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Sovereign Security</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Built-in privacy and data integrity. Your presence is
+                    your own, locked and secure.</p>
+            </div>
+            <div class="card-apex p-10 rounded-sm theme-aware-card">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 012 2v3H7v-3z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Global Reach</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Responsive across all devices and regions. Your
+                    authority knows no boundaries.</p>
+            </div>
+            <!-- Expanded Solutions -->
+            <div class="card-apex p-10 rounded-sm theme-aware-card">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Cloud Infrastructure</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Elastic scaling that breathes with your traffic.
+                    Always up, always ready.</p>
+            </div>
+            <div class="card-apex p-10 rounded-sm theme-aware-card">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Advanced Analytics</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Deep insights into every interaction. Data isn't
+                    just numbers; it's authority.</p>
+            </div>
+            <div class="card-apex p-10 rounded-sm theme-aware-card">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.288a2 2 0 01-1.108.209A4.45 4.45 0 0110 15.428V12a3 3 0 013-3h.428a2 2 0 001.414-.586l.586-.586a2 2 0 011.414-.586h.586A2 2 0 0121 8.414v.586a2 2 0 01-.586 1.414l-.586.586a2 2 0 00-.586 1.414V12a3 3 0 01-3 3h-1.428a2 2 0 00-1.414.586l-.586.586a2 2 0 01-1.414.586h-.586a2 2 0 01-1.414-.586L9 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.288a2 2 0 01-1.108.209A4.45 4.45 0 014 15.428V12a3 3 0 013-3h.428a2 2 0 001.414-.586l.586-.586a2 2 0 011.414-.586h.586A2 2 0 019 8.414v.586a2 2 0 01-.586 1.414l-.586.586a2 2 0 00-.586 1.414V12a3 3 0 01-3 3h-1.428a2 2 0 00-1.414.586l-.586.586a2 2 0 01-1.414.586h-.586a2 2 0 01-1.414-.586L4 15.428">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">AI Integration</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Neural-optimized workflows for the next era of
+                    enterprise. Intelligence is the baseline.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Text (Architect) -->
+    <section id="about-text"
+        class="min-h-screen py-32 px-6 bg-zinc-50 border-t border-zinc-200 theme-aware-section flex items-center">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12 mt-10">
+            <div class="md:w-1/2">
+                <h2 class="text-3xl font-extrabold mb-6 tracking-tight">The Architect.</h2>
+                <p class="text-zinc-600 mb-6 leading-relaxed">
+                    We do not build websites. We build <span class="font-bold text-zinc-900">infrastructure for
+                        authority.</span>
+                    Apex was born from the need for a digital presence that moves as fast as you do.
+                    Every pixel is calculated. Every interaction is optimized.
+                </p>
+                <p class="text-zinc-600 leading-relaxed">
+                    Designed for founders, consultants, and visionaries who demand precision.
+                </p>
+            </div>
+            <div class="md:w-1/2 relative -mt-16 md:-mt-32">
+                <div class="absolute inset-0 bg-[var(--accent)]/10 translate-x-4 translate-y-4 rounded-sm"></div>
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000&auto=format&fit=crop"
+                    alt="High-Performance Architecture"
+                    class="relative z-10 rounded-sm shadow-lg grayscale hover:grayscale-0 transition-all duration-500 w-full object-cover h-[500px]">
+            </div>
+        </div>
+    </section>
+
+    <!-- Visual Infrastructure (Gallery) -->
+    <section id="gallery" class="py-24 px-6 max-w-7xl mx-auto -mt-48 relative z-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="group overflow-hidden rounded-sm relative aspect-video md:aspect-square">
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000&auto=format&fit=crop"
+                    alt="Infrastructure A"
+                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                    <span class="text-xs font-bold tracking-widest text-white uppercase">Neural Grid</span>
+                </div>
+            </div>
+            <div class="group overflow-hidden rounded-sm relative aspect-video md:aspect-square">
+                <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1000&auto=format&fit=crop"
+                    alt="Infrastructure B"
+                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                    <span class="text-xs font-bold tracking-widest text-white uppercase">Sovereign Core</span>
+                </div>
+            </div>
+            <div class="group overflow-hidden rounded-sm relative aspect-video md:aspect-square">
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000&auto=format&fit=crop"
+                    alt="Infrastructure C"
+                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                    <span class="text-xs font-bold tracking-widest text-white uppercase">Apex Logic</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SNAKE GAME (Hidden) -->
+    <div id="snake-modal"
+        class="fixed inset-0 bg-black/90 z-[20000] hidden flex items-center justify-center backdrop-blur-md">
+        <div class="bg-black border-2 border-[var(--accent)] p-4 rounded shadow-[0_0_50px_rgba(37,99,235,0.5)]">
+            <div class="flex justify-between items-center mb-4 text-[var(--accent)] font-mono text-xs">
+                <span>> APEX_SNAKE_PROTOCOL.EXE</span>
+                <button onclick="closeSnake()" class="hover:text-white">[X]</button>
+            </div>
+            <canvas id="snake-canvas" width="400" height="400"
+                class="border border-[var(--accent)] bg-[#050505]"></canvas>
+            <div class="mt-4 text-center font-mono text-xs text-zinc-500">
+                SCORE: <span id="snake-score" class="text-white">0</span> | WASD or ARROWS to Move
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer / Contact -->
+    <footer id="contact"
+        class="mt-[25vh] py-32 bg-zinc-950 text-white px-6 min-h-[80vh] flex flex-col justify-center">
+        <div class="max-w-7xl mx-auto w-full">
+            <!-- Top Row: Contact Form -->
+            <div class="max-w-2xl mb-24">
+                <div class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-6">Initialize Partnership</div>
+                <form action="mailto:apex@axxilak.com" method="POST" enctype="text/plain" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" name="name" placeholder="Full Name" required
+                        class="bg-zinc-900 border border-zinc-800 p-4 outline-none focus:border-[var(--accent)] transition text-sm text-white">
+                    <input type="email" name="email" placeholder="Email Address" required
+                        class="bg-zinc-900 border border-zinc-800 p-4 outline-none focus:border-[var(--accent)] transition text-sm text-white">
+                    <textarea name="message" rows="4" placeholder="Your Mission Requirements"
+                        class="md:col-span-2 bg-zinc-900 border border-zinc-800 p-4 outline-none focus:border-[var(--accent)] transition text-sm text-white"></textarea>
+                    <button type="submit" onclick="showThanks(event)" class="md:col-span-2 btn-apex py-4 rounded-sm text-sm font-bold">Initiate
+                        Protocol</button>
+                    <div id="form-success"
+                        class="md:col-span-2 hidden text-center p-4 border border-green-500 text-green-500 bg-green-500/10 text-xs rounded">
+                        <p class="font-bold">Transmission Received!</p>
+                        <p class="opacity-80">Command will respond within 24 hours.</p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bottom Row: Branding and Nav -->
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12 pt-12 border-t border-zinc-900">
+                <!-- Column 1: Mission -->
+                <div class="max-w-xs">
+                    <a href="#" class="inline-flex items-center gap-2 text-2xl font-extrabold mb-6 hover:opacity-80 transition-opacity">
+                        <div class="w-4 h-4 bg-[var(--accent)]"></div>
+                        APEX<span class="text-[var(--accent)]">.</span>
+                    </a>
+                    <p class="text-zinc-500 text-sm leading-relaxed mb-8">
+                        Elevating digital presence for the world's most ambitious leaders. 
+                        High-performance architecture for startups and consultants.
+                    </p>
+                    <div class="flex gap-4 text-zinc-600">
+                        <span class="text-[10px] font-mono tracking-widest uppercase">Version 2.0.4</span>
+                        <span class="text-[10px] font-mono tracking-widest uppercase">Axxilak Sovereign</span>
+                    </div>
+                </div>
+
+                <!-- Column 2: Navigation -->
+                <div class="flex flex-col gap-6">
+                    <div class="text-xs font-bold uppercase tracking-widest text-zinc-500">Navigation</div>
+                    <nav class="flex flex-col gap-4">
+                        <button data-handler="scrollTo('#solutions')" class="btn-link text-sm text-zinc-400 hover:text-[var(--accent)] transition-colors text-left">Solutions</button>
+                        <button data-handler="scrollTo('#about')" class="btn-link text-sm text-zinc-400 hover:text-[var(--accent)] transition-colors text-left">Precision</button>
+                        <button data-handler="scrollTo('#about-text')" class="btn-link text-sm text-zinc-400 hover:text-[var(--accent)] transition-colors text-left">The Architect</button>
+                        <button data-handler="scrollTo('#gallery')" class="btn-link text-sm text-zinc-400 hover:text-[var(--accent)] transition-colors text-left">Infrastructure</button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div
+            class="max-w-7xl mx-auto mt-24 pt-8 border-t border-zinc-900 text-[10px] text-zinc-600 uppercase tracking-widest flex justify-between">
+            <span>© 2026 APEX WEBLING // AXXILAK STUDIO</span>
+            <span id="system-status"
+                class="cursor-pointer select-none hover:text-[var(--accent)] transition-colors">SYSTEM STATUS:
+                NORMAL</span>
+        </div>
+    </footer>
+
+    <!-- EDIT MODE: LENS CONTAINER (for draggable/resizable frame) -->
+    <div id="lens-container" class="hidden z-[5000]"></div>
+
+    <!-- EDIT MODE: PALETTE CONTAINER (for context-aware tools) -->
+    <div id="palette-container" data-anothen-internal
+        class="fixed bottom-6 right-6 w-96 bg-zinc-900 border-2 border-[var(--accent)] rounded-sm shadow-2xl z-[20000] hidden max-h-[600px] overflow-y-auto text-white">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-[var(--accent)]">APEX EDITOR</h3>
+                <button onclick="toggleEditMode()" class="text-zinc-500 hover:text-white">✕</button>
+            </div>
+            <!-- Palette content injected here by JS -->
+            <div id="palette-content"></div>
+            <!-- ACTION BUTTONS -->
+            <div class="flex gap-3 mt-6 pt-6 border-t border-zinc-800">
+                <button id="btn-preview-mode"
+                    class="flex-1 p-2 bg-zinc-700 text-white text-[10px] font-bold rounded hover:bg-zinc-600 transition uppercase tracking-widest">PREVIEW</button>
+                <button onclick="exportApex()"
+                    class="flex-1 p-2 bg-green-600 text-white text-[10px] font-bold rounded hover:bg-green-700 transition uppercase tracking-widest">EXPORT</button>
+                <button onclick="resetApex()"
+                    class="flex-1 p-2 bg-red-600 text-white text-[10px] font-bold rounded hover:bg-red-700 transition uppercase tracking-widest">RESET</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DRAGGABLE SECTION OVERLAY (Edit Mode) -->
+    <style id="edit-mode-styles">
+        .edit-mode .section-drag-handle {
+            display: block !important;
+        }
+
+        /* Draggable Elements */
+        #lens-container {
+            cursor: grab;
+            user-select: none;
+        }
+
+        #lens-container:active {
+            cursor: grabbing;
+        }
+
+        /* ===== DARK THEME (Default) ===== */
+        #palette-container {
+            cursor: grab;
+            user-select: none;
+            color: #00ff00;
+            z-index: 99999 !important;
+        }
+
+        #palette-container:active {
+            cursor: grabbing;
+        }
+
+        /* Text in white/light boxes = black */
+        #palette-container .palette-input,
+        #palette-container input,
+        #palette-container textarea,
+        #palette-container select {
+            color: #000000 !important;
+        }
+
+        /* Text on dark areas = neon green */
+        #palette-container .palette-label,
+        #palette-container .palette-title,
+        #palette-container .palette-header,
+        #palette-container button {
+            color: #00ff00 !important;
+        }
+
+        /* ===== LIGHT THEME ===== */
+        [data-theme="light"] #palette-container {
+            color: #003366;
+        }
+
+        [data-theme="light"] #palette-container .palette-input,
+        [data-theme="light"] #palette-container input,
+        [data-theme="light"] #palette-container textarea,
+        [data-theme="light"] #palette-container select {
+            color: #1a1a1a !important;
+        }
+
+        [data-theme="light"] #palette-container .palette-label,
+        [data-theme="light"] #palette-container .palette-title,
+        [data-theme="light"] #palette-container .palette-header,
+        [data-theme="light"] #palette-container button {
+            color: #d4af37 !important;
+        }
+
+        /* Tool Palette Control Styles */
+        .tool-palette {
+            font-family: Inter, sans-serif;
+            font-size: 14px;
+        }
+
+        .palette-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .palette-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1f2937;
+        }
+
+        .palette-count {
+            font-size: 12px;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .palette-empty-message {
+            text-align: center;
+            color: #9ca3af;
+            padding: 24px 0;
+        }
+
+        .palette-control {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .palette-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+        }
+
+        .palette-input {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        .palette-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .palette-input--text,
+        .palette-input--number {
+            width: 100%;
+        }
+
+        .palette-color-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .palette-input--color {
+            width: 50px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .palette-input--color::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .palette-input--color::-webkit-color-swatch {
+            border: none;
+        }
+
+        .palette-input--hex {
+            flex: 1;
+        }
+
+        .palette-input--select {
+            width: 100%;
+        }
+
+        .palette-slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .palette-input--slider {
+            flex: 1;
+        }
+
+        .palette-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .tool-palette--empty {
+            padding: 24px;
+            text-align: center;
+        }
+
+        /* === THE SPARK: Visual Feedback === */
+        .apex-spark {
+            animation: apex-spark-glow 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        @keyframes apex-spark-glow {
+            0% { box-shadow: 0 0 0px var(--accent); outline: 2px solid transparent; }
+            50% { box-shadow: 0 0 30px var(--accent), inset 0 0 15px var(--accent); outline: 2px solid var(--accent); }
+            100% { box-shadow: 0 0 0px var(--accent); outline: 2px solid transparent; }
+        }
+
+        /* 3D Scene Wrapper Stability */
+        #apex-3d-scene {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ===== HIGHLIGHT AND GRAYSCALE EFFECTS ===== */
+        .apex-highlighted {
+            outline: 4px solid #00ff00 !important;
+            outline-offset: 2px !important;
+            box-shadow: 0 0 30px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.2) !important;
+            position: relative !important;
+            z-index: 9999 !important;
+            animation: apex-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes apex-pulse {
+            0%, 100% { box-shadow: 0 0 30px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.2); }
+            50% { box-shadow: 0 0 50px #00ff00, inset 0 0 30px rgba(0, 255, 0, 0.4); }
+        }
+
+        /* Grayscale mode: desaturate everything except highlighted element */
+        body.apex-grayscale-mode {
+            filter: grayscale(85%);
+        }
+
+        /* 3D MODE: Disable hover scaling to prevent header jump in transition zones */
+        body.apex-3d-active .group-hover\:scale-110:hover {
+            transform: none !important;
+        }
+
+        /* Cursor Logic: Gold Standard */
+        /* Cursor now visible during edit mode - reticle + palette glow provide visual feedback */
+
+        /* Ensure UI elements always show a cursor */
+        [data-anothen-internal],
+        [data-anothen-internal] *,
+        #palette-container,
+        #palette-container *,
+        #apex-context-bar,
+        #apex-3d-exit {
+            cursor: auto !important;
+        }
+
+        body.apex-grayscale-mode .apex-highlighted {
+            filter: grayscale(0%) !important;
+        }
+
+        /* Danger highlight for deletion target */
+        .apex-highlighted.apex-danger-target {
+            outline: 4px solid #ef4444 !important;
+            box-shadow: 0 0 40px #ef4444, inset 0 0 30px rgba(239, 68, 68, 0.3) !important;
+            animation: apex-danger-pulse 1s ease-in-out infinite !important;
+        }
+
+        @keyframes apex-danger-pulse {
+            0%, 100% { box-shadow: 0 0 40px #ef4444, inset 0 0 30px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 60px #ef4444, inset 0 0-40px rgba(239, 68, 68, 0.5); }
+        }
+
+        .apex-edit-locked {
+            outline: 3px solid #00ff00 !important;
+            outline-offset: 4px !important;
+            animation: apex-edit-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes apex-edit-pulse {
+            0%, 100% { outline-color: #00ff00; }
+            50% { outline-color: #00ffff; }
+        }
+
+        /* Content field highlight when element is locked */
+        #quill-editor.apex-editor-active {
+            border: 2px solid #00ff00 !important;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), inset 0 0 10px rgba(0, 255, 0, 0.2) !important;
+            animation: apex-content-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes apex-content-pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), inset 0 0 10px rgba(0, 255, 0, 0.2);
+                border-color: #00ff00;
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 255, 0, 0.9), inset 0 0 15px rgba(0, 255, 0, 0.4);
+                border-color: #00ffff;
+            }
+        }
+
+        /* === CONTEXTUAL ACTION BAR === */
+        #apex-context-bar {
+            position: fixed;
+            pointer-events: auto;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            background: #00ff00;
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 2px 2px 0 0;
+            box-shadow: 0 -4px 15px rgba(0, 255, 0, 0.3);
+            transition: opacity 0.2s, transform 0.2s;
+            transform: translateY(0);
+        }
+
+        #apex-context-bar.hidden {
+            display: none;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .context-tag {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 4px;
+            border-radius: 1px;
+            text-transform: uppercase;
+        }
+    </style>
+
+    <!-- ... Templates ... -->
+
+    <script src="../engines/transitions/precision-blueprint.js"></script>
+    <script>
+        // Snake Game Logic
+        const snakeCanvas = document.getElementById('snake-canvas');
+        const sCtx = snakeCanvas.getContext('2d');
+        const modal = document.getElementById('snake-modal');
+        const statusBtn = document.getElementById('system-status');
+        const scoreEl = document.getElementById('snake-score');
+
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 15, y: 15 };
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameLoop;
+        let clicks = 0;
+
+        // Trigger
+        statusBtn.addEventListener('click', () => {
+            clicks++;
+            if (clicks === 3) {
+                modal.classList.remove('hidden');
+                resetGame();
+                clicks = 0;
+            }
+            // Reset clicks if user waits too long
+            setTimeout(() => clicks = 0, 1000);
+        });
+
+        function closeSnake() {
+            modal.classList.add('hidden');
+            clearInterval(gameLoop);
+        }
+
+        function resetGame() {
+            snake = [{ x: 10, y: 10 }];
+            food = { x: 15, y: 15 };
+            dx = 1; dy = 0;
+            score = 0;
+            scoreEl.innerText = score;
+            clearInterval(gameLoop);
+            gameLoop = setInterval(drawSnake, 100);
+        }
+
+        function drawSnake() {
+            // Move
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+
+            // Eat
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                scoreEl.innerText = score;
+                food = {
+                    x: Math.floor(Math.random() * 20),
+                    y: Math.floor(Math.random() * 20)
+                };
+            } else {
+                snake.pop();
+            }
+
+            // Collide
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
+                clearInterval(gameLoop);
+                alert("GAME OVER // SCORE: " + score);
+                return;
+            }
+
+            // Draw
+            sCtx.fillStyle = '#050505';
+            sCtx.fillRect(0, 0, 400, 400);
+
+            sCtx.fillStyle = '#2563eb'; // Accent
+            snake.forEach(part => sCtx.fillRect(part.x * 20, part.y * 20, 18, 18));
+
+            sCtx.fillStyle = '#d4af37'; // Food
+            sCtx.fillRect(food.x * 20, food.y * 20, 18, 18);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (modal.classList.contains('hidden')) return;
+            switch (e.key) {
+                case 'ArrowUp': case 'w': if (dy !== 1) { dx = 0; dy = -1; } break;
+                case 'ArrowDown': case 's': if (dy !== -1) { dx = 0; dy = 1; } break;
+                case 'ArrowLeft': case 'a': if (dx !== 1) { dx = -1; dy = 0; } break;
+                case 'ArrowRight': case 'd': if (dx !== -1) { dx = 1; dy = 0; } break;
+            }
+        });
+
+        // Theme Toggle...
+        function toggleTheme() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+
+        // Parallax Grid
+        window.addEventListener('scroll', () => {
+            const grid = document.getElementById('global-grid');
+            if (grid) {
+                const scrolled = window.pageYOffset;
+                grid.style.transform = `translateY(${scrolled * 0.3}px)`;
+            }
+        });
+        // Boot Sequence Logic (uses state)
+        let lineIndex = 0;
+        function typeBootLine() {
+            const bootLog = document.getElementById('boot-log');
+            const overlay = document.getElementById('boot-overlay');
+
+            if (lineIndex < apexState.bootMessages.length) {
+                const line = document.createElement('div');
+                line.className = 'boot-line';
+                line.style.animation = 'fadeInLine 0.2s forwards';
+                line.innerText = apexState.bootMessages[lineIndex];
+                bootLog.appendChild(line);
+                lineIndex++;
+                setTimeout(typeBootLine, apexState.scrollSpeed);
+            } else {
+                setTimeout(() => {
+                    overlay.classList.add('boot-fade-out');
+                    setTimeout(() => overlay.remove(), 800);
+                }, 1000);
+            }
+        }
+
+        // Boot sequence state (used by typeBootLine)
+        let apexState = {
+            bootMessages: [
+                '> INITIALIZING APEX PROTOCOL...',
+                '> ANALYZING LATTICE...',
+                '> CORE STATUS: ACTIVE',
+                '> ENCRYPTION: SOVEREIGN',
+                '> SYSTEM ONLINE.'
+            ],
+            scrollSpeed: 300
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            typeBootLine();
+            if (typeof attachHandlers === 'function') attachHandlers();
+        });
+
+        // === APEX HANDLER UTILITY ===
+        function attachHandlers() {
+            document.querySelectorAll('[data-handler]').forEach(btn => {
+                const handlerStr = btn.dataset.handler;
+                if (handlerStr.startsWith('scrollTo(')) {
+                    const selector = handlerStr.match(/'(.*?)'/)[1];
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        const target = document.querySelector(selector);
+                        if (target) target.scrollIntoView({ behavior: 'smooth' });
+                        // If it's a mobile menu item, close the menu
+                        const mobileMenu = document.getElementById('mobile-menu');
+                        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                    };
+                } else if (handlerStr === 'toggleTheme()') {
+                    btn.onclick = () => window.toggleTheme();
+                } else if (handlerStr === 'toggleEditMode()') {
+                    btn.onclick = (e) => window.toggleEditMode(e);
+                } else if (handlerStr === 'toggleMobileMenu()') {
+                    btn.onclick = () => {
+                        const menu = document.getElementById('mobile-menu');
+                        if (menu) menu.classList.toggle('hidden');
+                    };
+                } else if (handlerStr === 'closeSnake()') {
+                    btn.onclick = () => window.closeSnake();
+                } else if (handlerStr === 'showThanks(event)') {
+                    btn.onclick = (e) => window.showThanks(e);
+                } else if (handlerStr === 'exportApex()') {
+                    btn.onclick = () => window.exportApex();
+                } else if (handlerStr === 'resetApex()') {
+                    btn.onclick = () => window.resetApex();
+                }
+            });
+        }
+    </script>
+
+    <!-- OLD EDITOR SYSTEM REMOVED - Replaced by new lens/detector/palette integration -->
+
+    </div><!-- END apex-3d-scene -->
+
+    <script src="../../coherence_engine.js"></script>
+
+    <!-- === MAGNIFYING GLASS INSPECTOR APPLING === -->
+    <!-- Component dependencies (ES modules loaded below) -->
+
+    <!-- Apex-specific integration -->
+    <script>
+        // Set webling name before importing module (for dynamic storage keys)
+        window.WEBLING_NAME = 'apex';
+    </script>
+
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        import { HandlerDispatcher } from './js/handler-dispatcher.js';
+
+        // Initialize universal handler dispatcher (handles data-handler attributes)
+        const dispatcher = new HandlerDispatcher();
+
+        // Edit Mode State: Inspector can toggle this to disable buttons
+        window.inspectorEditMode = false;
+
+        let inspector = null;
+        let editMode = false;
+
+        function initInspector(isUserAction = false) {
+            if (!inspector) {
+                inspector = new MagnifyingGlassInspector();
+            }
+
+            if (isUserAction) {
+                // Hide boot overlay if user starts editing manually (use CSS hide, not DOM removal - prevents reflow)
+                const overlay = document.getElementById('boot-overlay');
+                if (overlay) overlay.style.display = 'none';
+            }
+        }
+
+        function toggleEditMode(e) {
+            initInspector(true);
+            editMode = !editMode;
+
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        }
+
+        // Export customized functions to window for HTML buttons
+        window.toggleEditMode = toggleEditMode;
+
+        // Attach button listener
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', toggleEditMode);
+        }
+
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+
+            // Remove inspector elements
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay').forEach(el => el.remove());
+
+            // Remove inspector scripts (both module and non-module)
+            doc.querySelectorAll('script[type="module"], script:not([src])').forEach(script => {
+                if (script.textContent.includes('WEBLING_NAME') || script.textContent.includes('MagnifyingGlassInspector')) {
+                    script.remove();
+                }
+            });
+
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const weblingName = window.WEBLING_NAME || 'apex';
+            link.download = `${weblingName}-customized.html`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            const displayName = weblingName.charAt(0).toUpperCase() + weblingName.slice(1);
+            alert(`${displayName} exported! Download started.`);
+        }
+
+        window.resetApex = function() {
+            if (confirm('Reset all customizations? This cannot be undone.')) {
+                const weblingName = window.WEBLING_NAME || 'apex';
+                localStorage.removeItem(`${weblingName}-edits-state`);
+                localStorage.removeItem(`${weblingName}-lens-state`);
+                location.reload();
+            }
+        }
+
+        // Initialize inspector on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            initInspector();
+        });
+    </script>
+</body>
+
+</html>

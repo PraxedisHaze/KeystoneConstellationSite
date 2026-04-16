@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak Forge v3.1 | Sovereign Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* === SPATIAL UI SYSTEM === */
+        :root {
+            --gold: #d4af37;
+            --dark: #0f172a;
+            --panel: #1e293b;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Pseudo-Haptics: The "Heavy Click" Feel */
+        .tactile-btn {
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1);
+        }
+
+        .tactile-btn:active {
+            transform: scale(0.97) translateY(1px);
+            opacity: 0.9;
+        }
+
+        /* The Infinite Grid Background */
+        .infinite-grid {
+            background-color: #050505;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            box-shadow: inset 0 0 100px #000;
+        }
+
+        /* Ergonomic Scrollbar (Wider hit area) */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 5px;
+            border: 2px solid #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+
+        /* Range Slider (Precision Input) */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--gold);
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+        }
+
+        /* Loader */
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--gold);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Golden Pulse for the "Buy" Action */
+        @keyframes goldenPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(212, 175, 55, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+            }
+        }
+
+        .buy-pulse {
+            animation: goldenPulse 2s infinite;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col">
+
+    <!-- HEADER: The Command Bar -->
+    <header
+        class="h-16 bg-[#0b1120] border-b border-white/5 flex items-center justify-between px-6 shrink-0 z-30 shadow-2xl">
+        <div class="flex items-center gap-4">
+            <!-- Back to Collection (Dynamic Integration) -->
+            <a href="../index.html"
+                class="tactile-btn w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                title="Return to Marketplace">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+
+            <!-- Brand Mark -->
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-[#d4af37] to-[#8b7355] rounded-lg flex items-center justify-center font-bold text-slate-900 text-xl shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                A</div>
+
+            <!-- Context Info -->
+            <div>
+                <h1 class="font-bold text-lg text-white tracking-wide leading-none">Axxilak <span
+                        class="text-[#d4af37]">Forge</span></h1>
+                <div
+                    class="flex items-center gap-2 text-[10px] text-slate-500 uppercase tracking-widest font-mono mt-1">
+                    <span>v3.1 Sovereign</span>
+                    <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
+                    <span id="save-status" class="text-green-500 transition-colors duration-500">System Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- The "Action" Zone (Fitts' Law optimized) -->
+        <div class="flex items-center gap-4">
+            <!-- Ergonomic Toggles -->
+            <div class="hidden md:flex bg-white/5 rounded-lg p-1 border border-white/5">
+                <button onclick="toggleHandedness()" title="Toggle Southpaw Layout (Shift+S)"
+                    class="tactile-btn w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-hand text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Free Tier -->
+            <button onclick="downloadHtmlOnly()"
+                class="tactile-btn text-slate-400 hover:text-white px-4 py-2 text-xs font-medium transition-colors border border-white/10 rounded hover:border-white/30 hidden md:flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> HTML Only
+            </button>
+
+            <!-- The Premium Trigger ($50) -->
+            <button onclick="buyAndDownload()"
+                class="tactile-btn buy-pulse bg-[#d4af37] hover:bg-[#b5952f] text-slate-900 font-bold py-2 px-6 rounded text-sm shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-briefcase"></i> <span class="tracking-wide">Purchase License ($50)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <!-- Flex direction toggles based on "Southpaw" mode -->
+    <main id="workspace" class="flex-1 flex overflow-hidden flex-row">
+
+        <!-- SIDEBAR: The Control Panel -->
+        <aside id="sidebar-panel"
+            class="w-80 bg-[#0f172a] border-r border-white/5 flex flex-col shrink-0 z-20 shadow-xl transition-all duration-300">
+
+            <!-- 1. Template Selector (Expanded Dynamic List) -->
+            <div class="p-5 border-b border-white/5 bg-[#141e33]">
+                <label
+                    class="text-[9px] text-[#d4af37] uppercase font-bold tracking-[0.2em] mb-3 block">Architecture</label>
+                <div class="relative group">
+                    <select id="template-selector" onchange="switchTemplate(this.value)"
+                        class="w-full bg-[#0b1120] text-gray-200 text-sm font-medium border border-white/10 rounded-lg p-3 appearance-none focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] outline-none cursor-pointer transition-all hover:border-white/20">
+                        <option value="liquid-gold">Liquid Gold (Premium)</option>
+                        <option value="consultant">The Consultant</option>
+                        <option value="velvet">Velvet (Minimalist)</option>
+                        <option value="iron-ink">Iron & Ink</option>
+                        <option value="scholar">The Scholar</option>
+                        <option value="oracle">Oracle</option>
+                        <option value="apex">Apex</option>
+                        <option value="aura">Aura</option>
+                        <option value="canvas">Canvas</option>
+                        <option value="cipher">Cipher</option>
+                        <option value="gaia">Gaia</option>
+                        <option value="neon-tokyo">Neon Tokyo</option>
+                        <option value="summit">Summit</option>
+                        <option value="ether">Ether</option>
+                    </select>
+                    <div
+                        class="absolute right-3 top-3.5 text-slate-500 pointer-events-none group-hover:text-[#d4af37] transition-colors">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. The Controls (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scroll space-y-8">
+
+                <!-- Dynamic Controls injected here -->
+                <div id="controls-container"></div>
+
+                <!-- Hardcoded Core Controls (Fallback/Demo) -->
+                <div>
+                    <h2
+                        class="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2 opacity-80">
+                        <i class="fa-solid fa-pen-nib text-[#d4af37]"></i> Identity
+                    </h2>
+                    <div class="space-y-5">
+                        <div class="group">
+                            <label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1.5 block group-hover:text-[#d4af37] transition-colors">Display
+                                Name</label>
+                            <input type="text" id="ctrl-name"
+                                class="w-full bg-[#0b1120] border border-white/10 rounded-md p-2.5 text-sm text-white focus:border-[#d4af37] outline-none transition-all placeholder-white/20"
+                                oninput="updateState('text.name', this.value)">
+                        </div>
+                        <div class="group">
+                            <label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1.5 block group-hover:text-[#d4af37] transition-colors">Role
+                                / Tagline</label>
+                            <input type="text" id="ctrl-tagline"
+                                class="w-full bg-[#0b1120] border border-white/10 rounded-md p-2.5 text-sm text-white focus:border-[#d4af37] outline-none transition-all"
+                                oninput="updateState('text.tagline', this.value)">
+                        </div>
+                        <div class="group">
+                            <label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1.5 block group-hover:text-[#d4af37] transition-colors">Professional
+                                Bio</label>
+                            <textarea id="ctrl-bio" rows="4"
+                                class="w-full bg-[#0b1120] border border-white/10 rounded-md p-2.5 text-sm text-white focus:border-[#d4af37] outline-none transition-all resize-none"
+                                oninput="updateState('text.bio', this.value)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2
+                        class="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2 opacity-80">
+                        <i class="fa-solid fa-palette text-[#d4af37]"></i> Aesthetics
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2 block">Primary</label>
+                            <div class="flex items-center gap-2 bg-[#0b1120] p-1.5 rounded-md border border-white/10">
+                                <input type="color" id="ctrl-primary"
+                                    class="w-6 h-6 rounded cursor-pointer border-none bg-transparent p-0"
+                                    oninput="updateState('colors.primary', this.value)">
+                                <span class="text-[10px] font-mono text-slate-400 flex-1 text-right"
+                                    id="lbl-primary">#D4AF37</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label
+                                class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2 block">Canvas</label>
+                            <div class="flex items-center gap-2 bg-[#0b1120] p-1.5 rounded-md border border-white/10">
+                                <input type="color" id="ctrl-bg"
+                                    class="w-6 h-6 rounded cursor-pointer border-none bg-transparent p-0"
+                                    oninput="updateState('colors.background', this.value)">
+                                <span class="text-[10px] font-mono text-slate-400 flex-1 text-right"
+                                    id="lbl-bg">#0A0A0A</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2
+                        class="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2 opacity-80">
+                        <i class="fa-solid fa-image text-[#d4af37]"></i> Media
+                    </h2>
+                    <div class="relative group cursor-pointer">
+                        <input type="file" id="ctrl-img-upload" accept="image/*" class="hidden"
+                            onchange="handleSmartImageUpload(this)">
+                        <label for="ctrl-img-upload"
+                            class="flex flex-col items-center justify-center w-full h-28 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-[#d4af37] hover:bg-[#d4af37]/5 transition-all bg-[#0b1120]">
+                            <i
+                                class="fa-solid fa-cloud-arrow-up text-slate-500 mb-2 text-xl group-hover:text-[#d4af37] transition-colors"></i>
+                            <span class="text-xs text-slate-400 group-hover:text-white font-medium">Upload
+                                Portrait</span>
+                            <span class="text-[9px] text-slate-600 mt-1">Smart Compress Active</span>
+                        </label>
+                        <div id="compression-indicator"
+                            class="hidden absolute inset-0 bg-[#0f172a]/90 flex items-center justify-center rounded-lg z-10 backdrop-blur-sm">
+                            <div class="text-center">
+                                <div class="loader mb-2 mx-auto"></div>
+                                <span class="text-[9px] text-[#d4af37] uppercase tracking-widest">Optimizing...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 3. Telemetry (Bottom Bar) -->
+            <div
+                class="p-3 border-t border-white/5 bg-[#0b1120] flex justify-between items-center text-[9px] text-slate-500 font-mono">
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                    <span>MEMORY: <span id="state-size" class="text-slate-300">0.0 KB</span></span>
+                </div>
+                <span>SESSION: ACTIVE</span>
+            </div>
+        </aside>
+
+        <!-- CENTER: The Infinite Canvas -->
+        <div class="flex-1 flex flex-col relative infinite-grid transition-all duration-300">
+
+            <!-- Floating Toolbar (Island Design) -->
+            <div
+                class="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 bg-[#0f172a]/90 backdrop-blur-md border border-white/10 p-1.5 rounded-full shadow-2xl">
+                <button onclick="setPreviewMode('desktop')" id="btn-desktop"
+                    class="tactile-btn px-4 py-1.5 rounded-full text-white text-xs font-medium bg-white/10 hover:bg-white/20 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-desktop"></i>
+                </button>
+                <button onclick="setPreviewMode('mobile')" id="btn-mobile"
+                    class="tactile-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-all text-xs font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                </button>
+                <div class="w-px h-4 bg-white/10 mx-1"></div>
+                <button onclick="resetTemplate()"
+                    class="tactile-btn w-8 h-8 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
+                    title="Reset">
+                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Iframe Container -->
+            <div class="flex-1 flex items-center justify-center p-8 overflow-hidden">
+                <div id="preview-wrapper"
+                    class="w-full h-full bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out relative border border-[#333]">
+                    <iframe id="preview-frame" class="w-full h-full border-none bg-white"
+                        sandbox="allow-scripts allow-same-origin"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- === HIDDEN TEMPLATES (FALLBACKS) === -->
+    <!-- 1. CONSULTANT -->
+    <script type="text/template" id="tpl-consultant">
+        <!DOCTYPE html><html lang="en"><head><style>:root{--primary:{{colors.primary}};--bg:{{colors.background}};--text:{{colors.text}};}body{font-family:'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);margin:0;display:flex;flex-direction:column;min-height:100vh}.container{max-width:900px;margin:0 auto;padding:2rem}h1{font-size:3rem;line-height:1.1}.btn{background:var(--primary);color:#000;padding:10px 20px;text-decoration:none;font-weight:bold;display:inline-block}.img-box img{max-width:100%;box-shadow:-20px 20px 0 var(--primary)}input,textarea{width:100%;padding:10px;margin-bottom:10px;background:rgba(255,255,255,0.05);border:1px solid #333;color:inherit}</style></head><body><div class="container"><header style="display:flex;justify-content:space-between;align-items:center;padding:2rem 0"><div style="font-weight:900;font-size:1.5rem">{{text.name}}</div><a href="#contact" class="btn">Contact</a></header><section style="display:flex;gap:4rem;align-items:center;padding:4rem 0"> <div style="flex:1"><p style="color:var(--primary);font-weight:bold;text-transform:uppercase;letter-spacing:2px;font-size:0.8rem">{{text.tagline}}</p><h1>{{text.bio_short}}</h1><p>{{text.bio}}</p></div><div class="img-box" style="flex:1"><img src="{{images.profile}}"></div></section><section id="contact" style="margin-top:4rem;border-top:1px solid #333;padding-top:4rem"><h3>Send a Message</h3><form><input type="text" placeholder="Name"><input type="email" placeholder="Email"><textarea placeholder="Message..." rows="4"></textarea><button class="btn">Send</button></form></section></div></body></html>
+    </script>
+
+    <!-- 2. LIQUID GOLD (Populated) -->
+    <script type="text/template" id="tpl-liquid-gold">
+        <!DOCTYPE html><html lang="en"><head><style>:root{--gold:{{colors.primary}};--dark:{{colors.background}};--light:#f1f1f1}body{background:var(--dark);color:var(--light);font-family:'Garamond',serif;text-align:center;margin:0}.container{max-width:800px;margin:0 auto;padding:60px 20px}img{width:150px;height:150px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;margin:0 auto;display:block}h1{font-size:4rem;font-weight:100;letter-spacing:0.1em;text-transform:uppercase;margin:20px 0}.cta{border:1px solid var(--gold);color:var(--gold);padding:15px 30px;text-decoration:none;text-transform:uppercase;letter-spacing:2px;display:inline-block;transition:0.3s}.cta:hover{background:var(--gold);color:black}input,textarea{width:100%;background:#111;border:none;border-bottom:1px solid #333;padding:15px;color:white;margin-bottom:20px;font-family:sans-serif}input:focus,textarea:focus{border-bottom-color:var(--gold);outline:none}</style></head><body><div class="container"><img src="{{images.profile}}"><p style="color:var(--gold);letter-spacing:3px;text-transform:uppercase;font-size:0.8rem;margin-top:20px">{{text.tagline}}</p><h1>{{text.name}}</h1><p style="font-family:sans-serif;line-height:1.8;color:#888;margin-bottom:40px">{{text.bio}}</p><a href="#contact" class="cta">{{text.cta}}</a><div id="contact" style="margin-top:80px;text-align:left"><label style="color:var(--gold);font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:10px">Inquiry</label><input type="text" placeholder="Your Name"><input type="email" placeholder="Your Email"><textarea placeholder="How can we help?" rows="4"></textarea><button class="cta" style="width:100%;cursor:pointer">Send Message</button></div></div></body></html>
+    </script>
+
+    <!-- 3. VELVET (Populated) -->
+    <script type="text/template" id="tpl-velvet">
+        <!DOCTYPE html><html lang="en"><head><style>:root{--accent:{{colors.primary}};--bg:{{colors.background}};--text:{{colors.text}}}body{background:var(--bg);color:var(--text);font-family:'Arial',sans-serif;margin:0;padding:40px;height:100vh;box-sizing:border-box;display:flex;align-items:center;justify-content:center}.layout{display:grid;grid-template-columns:1fr 1fr;gap:60px;max-width:1200px;width:100%}h1{font-size:5rem;line-height:0.9;margin:0;letter-spacing:-2px}.meta{border-left:2px solid var(--accent);padding-left:20px;margin-top:30px;font-family:monospace}img{width:100%;height:500px;object-fit:cover;border-radius:20px}textarea{width:100%;background:#f4f4f5;border:none;padding:20px;border-radius:10px;margin-top:20px;font-family:inherit}@media(max-width:768px){.layout{grid-template-columns:1fr;height:auto}h1{font-size:3rem}}</style></head><body><div class="layout"><div><h1>{{text.name}}<span style="color:var(--accent)">.</span></h1><div class="meta"><p>{{text.tagline}}</p><p>{{text.bio}}</p></div><textarea placeholder="Write a message..."></textarea></div><div><img src="{{images.profile}}"></div></div></body></html>
+    </script>
+
+    <script>
+        // --- MASTER LOGIC V3.1 (DYNAMIC SOVEREIGN) ---
+
+        const defaults = {
+            colors: { primary: "#d4af37", background: "#0a0a0a", text: "#f5f5f5" },
+            text: { name: "Alex Vayner", tagline: "Strategic Consultant", bio: "Helping businesses navigate complexity through data-driven strategies and intuitive design thinking.", bio_short: "Strategy Meets Design", cta: "Work With Me" },
+            images: { profile: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&w=400&q=80" },
+            activeTemplate: "consultant"
+        };
+
+        let currentState = JSON.parse(JSON.stringify(defaults));
+        let southpawMode = false;
+        let currentTemplateHTML = ""; // To store the fetched template
+
+        // --- 1. INITIALIZATION & ROUTING ---
+        window.onload = function () {
+            // Check URL Params (Pre-selection from Marketplace)
+            const params = new URLSearchParams(window.location.search);
+            const tplParam = params.get('template');
+
+            // Check Session Storage (Returning user)
+            const storedState = sessionStorage.getItem('axxilak_state');
+
+            if (tplParam) {
+                // Priority 1: URL Param (Fresh user from Gallery)
+                console.log("Loading template from URL:", tplParam);
+                switchTemplate(tplParam);
+            } else if (storedState) {
+                // Priority 2: Session (Returning user)
+                console.log("Restoring session state...");
+                currentState = JSON.parse(storedState);
+                document.getElementById('template-selector').value = currentState.activeTemplate;
+                syncInputs();
+                loadTemplateSource(currentState.activeTemplate);
+            } else {
+                // Priority 3: Default (Consultant)
+                console.log("Loading default...");
+                loadTemplateSource('consultant');
+            }
+
+            // Restore Southpaw Preference
+            if (localStorage.getItem('southpaw') === 'true') {
+                toggleHandedness();
+            }
+        };
+
+        // --- 2. DYNAMIC TEMPLATE LOADING ---
+        async function loadTemplateSource(tplName) {
+            currentState.activeTemplate = tplName;
+
+            // Attempt to load from file if available, otherwise use fallback
+            let fetchedHTML = "";
+            try {
+                // Only try to fetch if we are in an environment that supports relative path fetch
+                // (http/https/file, NOT blob which is the simulation environment)
+                // We check if the protocol is one that likely supports the relative path structure.
+                const protocol = window.location.protocol;
+                if (protocol.startsWith('http') || protocol === 'file:') {
+                    // Add cache-busting parameter to force fresh load
+                    const path = `./Weblings/${tplName}/index.html?t=${Date.now()}`;
+                    const response = await fetch(path);
+                    if (response.ok) {
+                        fetchedHTML = await response.text();
+                        console.log(`Loaded ${tplName} from ${path}`);
+                    }
+                }
+            } catch (e) {
+                // In simulation mode (blob URL), fetch usually fails or is not supported for relative paths.
+                // We silently catch this to allow the fallback to take over.
+                console.log(`Fetch skipped or failed for ${tplName} (using embedded fallback).`);
+            }
+
+            if (fetchedHTML) {
+                currentTemplateHTML = fetchedHTML;
+            } else {
+                // Fallback Logic: Check for embedded script tag
+                const fallbackEl = document.getElementById(`tpl-${tplName}`);
+                if (fallbackEl) {
+                    currentTemplateHTML = fallbackEl.innerHTML;
+                } else {
+                    // Ultimate Fallback for unimplemented templates (Iron & Ink etc.)
+                    // This ensures the editor doesn't break when selecting a 'Coming Soon' template
+                    const baseTpl = document.getElementById('tpl-consultant').innerHTML;
+                    // Simple replacement to indicate we are on a fallback
+                    currentTemplateHTML = baseTpl
+                        .replace('{{text.name}}', `[${tplName.toUpperCase()} PREVIEW]`)
+                        .replace('{{text.bio}}', 'This template is currently loading from a fallback placeholder. In production, this would be the full specific design.');
+                }
+            }
+
+            renderPreview();
+            syncInputs(); // Re-sync inputs in case template defaults differ
+        }
+
+        // --- 3. ERGONOMIC FUNCTIONS ---
+
+        function toggleHandedness() {
+            southpawMode = !southpawMode;
+            localStorage.setItem('southpaw', southpawMode);
+            const workspace = document.getElementById('workspace');
+            const sidebar = document.getElementById('sidebar-panel');
+
+            if (southpawMode) {
+                workspace.classList.remove('flex-row');
+                workspace.classList.add('flex-row-reverse');
+                sidebar.classList.add('border-l');
+                sidebar.classList.remove('border-r');
+            } else {
+                workspace.classList.remove('flex-row-reverse');
+                workspace.classList.add('flex-row');
+                sidebar.classList.remove('border-l');
+                sidebar.classList.add('border-r');
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.shiftKey && e.key.toLowerCase() === 's') toggleHandedness();
+        });
+
+        // --- 4. CORE ENGINE ---
+
+        function renderPreview() {
+            if (!currentTemplateHTML) return;
+
+            let tpl = currentTemplateHTML;
+
+            // Regex Replacement
+            for (const [section, data] of Object.entries(currentState)) {
+                if (typeof data === 'object') {
+                    for (const [key, val] of Object.entries(data)) {
+                        const regex = new RegExp(`{{${section}.${key}}}`, 'g');
+                        tpl = tpl.replace(regex, val);
+                    }
+                }
+            }
+            // Computed props
+            tpl = tpl.replace(/{{text.bio_short}}/g, currentState.text.bio.substring(0, 50));
+
+            const frame = document.getElementById('preview-frame');
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            doc.open(); doc.write(tpl); doc.close();
+
+            // Auto-Save to Session
+            sessionStorage.setItem('axxilak_state', JSON.stringify(currentState));
+
+            // Visual Confirmation
+            const status = document.getElementById('save-status');
+            status.innerText = "Saving...";
+            status.classList.replace('text-green-500', 'text-yellow-500');
+            setTimeout(() => {
+                status.innerText = "System Ready";
+                status.classList.replace('text-yellow-500', 'text-green-500');
+                updateStateSize();
+            }, 300);
+        }
+
+        function updateState(path, value) {
+            const [sec, key] = path.split('.');
+            currentState[sec][key] = value;
+            if (sec === 'colors') {
+                document.getElementById(key === 'primary' ? 'lbl-primary' : 'lbl-bg').innerText = value.toUpperCase();
+            }
+            renderPreview();
+        }
+
+        async function handleSmartImageUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('compression-indicator').classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX = 800;
+                        let w = img.width, h = img.height;
+                        if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } } else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                        canvas.width = w; canvas.height = h;
+                        ctx.drawImage(img, 0, 0, w, h);
+                        currentState.images.profile = canvas.toDataURL('image/jpeg', 0.7);
+
+                        document.getElementById('compression-indicator').classList.add('hidden');
+                        renderPreview();
+                    };
+                };
+            }
+        }
+
+        function switchTemplate(val) {
+            // Update the dropdown to reflect the new selection
+            document.getElementById('template-selector').value = val;
+
+            // Load the new source code dynamically
+            loadTemplateSource(val);
+
+            // Apply Theme Defaults (Optional: Could also fetch a defaults.json per template)
+            if (val === 'velvet') { currentState.colors.primary = "#ff3366"; currentState.colors.background = "#ffffff"; }
+            else if (val === 'liquid-gold') { currentState.colors.primary = "#d4af37"; currentState.colors.background = "#050505"; }
+
+            // Sync Color Inputs
+            syncInputs();
+        }
+
+        function syncInputs() {
+            document.getElementById('ctrl-primary').value = currentState.colors.primary;
+            document.getElementById('ctrl-bg').value = currentState.colors.background;
+            document.getElementById('ctrl-name').value = currentState.text.name;
+            document.getElementById('ctrl-tagline').value = currentState.text.tagline;
+            document.getElementById('ctrl-bio').value = currentState.text.bio;
+        }
+
+        function updateStateSize() {
+            const json = JSON.stringify(currentState);
+            const size = new Blob([json]).size;
+            document.getElementById('state-size').innerText = (size / 1024).toFixed(1) + " KB";
+        }
+
+        function setPreviewMode(mode) {
+            const wrapper = document.getElementById('preview-wrapper');
+            const dBtn = document.getElementById('btn-desktop');
+            const mBtn = document.getElementById('btn-mobile');
+
+            if (mode === 'mobile') {
+                wrapper.style.maxWidth = '375px'; wrapper.style.height = '80%'; wrapper.style.borderRadius = '30px';
+                mBtn.classList.replace('text-slate-400', 'text-white'); mBtn.classList.add('bg-white/10');
+                dBtn.classList.replace('text-white', 'text-slate-400'); dBtn.classList.remove('bg-white/10');
+            } else {
+                wrapper.style.maxWidth = '100%'; wrapper.style.height = '100%'; wrapper.style.borderRadius = '0';
+                dBtn.classList.replace('text-slate-400', 'text-white'); dBtn.classList.add('bg-white/10');
+                mBtn.classList.replace('text-white', 'text-slate-400'); mBtn.classList.remove('bg-white/10');
+            }
+        }
+
+        function resetTemplate() { if (confirm("Reset Workspace?")) { sessionStorage.clear(); location.reload(); } }
+
+        // --- 5. SALES & DELIVERY ---
+
+        function buyAndDownload() {
+            // Price: $50.00
+            const b64 = btoa(JSON.stringify(currentState));
+            // SIMULATION MODE:
+            window.location.href = `../download.html?custom=${b64}`;
+            // PRODUCTION MODE:
+            // window.location.href = `https://gumroad.com/l/YOUR_PRODUCT?price=50&custom=${b64}`;
+        }
+
+        function downloadHtmlOnly() {
+            const doc = document.getElementById('preview-frame').contentDocument;
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([doc.documentElement.outerHTML], { type: "text/html" }));
+            link.download = "my_webling.html";
+            link.click();
+        }
+    </script>
+</body>
+
+</html>

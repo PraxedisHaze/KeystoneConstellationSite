@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholar</title>
+    <style>
+        :root { --bg: #fdfbf7; --text: #2c2c2c; --accent: #8c2f00; }
+        body { background: var(--bg); color: var(--text); font-family: Georgia, serif; padding: 40px; margin: 0; line-height: 1.6; }
+        h1 { font-size: 2.5rem; margin: 0.5em 0; font-weight: 600; }
+        p { max-width: 65ch; }
+        .meta { font-size: 0.9rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2rem; }
+        .section { margin: 3rem 0; padding-top: 2rem; border-top: 1px solid #ddd; }
+        input, textarea { width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ccc; margin: 5px 0; font-family: inherit; }
+        button { background: var(--text); color: var(--bg); padding: 10px 20px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="meta">Est. 2026</div>
+    <h1>{{text.name}}</h1>
+    <p>{{text.tagline}}</p>
+    <p>{{text.bio}}</p>
+
+    <div class="section">
+        <h3>Correspondence</h3>
+        <input type="text" placeholder="Name">
+        <input type="email" placeholder="Email">
+        <textarea placeholder="Message (Optional)" rows="3"></textarea>
+        <button>Send Message</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura</title>
+    <style>
+        :root { --bg: #ffffff; --text: #1a1a1a; --p1: #ec4899; --p2: #8b5cf6; }
+        body { background: linear-gradient(135deg, #fdf2f8 0%, #eff6ff 50%, #f5f3ff 100%); color: var(--text); font-family: Arial, sans-serif; padding: 40px; margin: 0; text-align: center; }
+        h1 { font-size: 2.5rem; margin: 0.5em 0; background: linear-gradient(135deg, var(--p1), var(--p2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { max-width: 600px; margin: 0 auto; }
+        .btn { background: linear-gradient(135deg, var(--p1), var(--p2)); color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 20px; }
+        .section { margin: 3rem 0; max-width: 500px; margin-left: auto; margin-right: auto; }
+        input, textarea { width: 100%; padding: 10px; background: rgba(255,255,255,0.7); border: 1px solid #ccc; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>{{text.name}}</h1>
+    <p>{{text.tagline}}</p>
+    <p>{{text.bio}}</p>
+
+    <div class="section">
+        <h3>Send Your Frequency</h3>
+        <input type="text" placeholder="Name">
+        <input type="email" placeholder="Email">
+        <textarea placeholder="Message (Optional)" rows="3"></textarea>
+        <button class="btn">Send Flow</button>
+    </div>
+</body>
+</html>

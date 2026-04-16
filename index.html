@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keystone Constellation | Business Operating System</title>
+    <meta name="description"
+        content="A local-first Business Operating System supporting the Anothen architecture and geometric frameworks.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=2026020101">
+    <link rel="icon" type="image/png" href="favicon.png?v=2026020101">
+    <link rel="apple-touch-icon" href="favicon.png?v=2026020101">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts: Cinzel + Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@200;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #d4af37;
+            --bg: #030303;
+            --glass: rgba(20, 20, 20, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        @keyframes blub-in {
+            0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+            70% { opacity: 1; transform: translateY(-2px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1.0); }
+        }
+
+        .animate-blub {
+            animation: blub-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at bottom, #111a22 0%, #030303 100%);
+            color: #f0f0f0;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            cursor: auto;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Custom Cursor */
+        #cursor-dot,
+        #cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+            opacity: 1;
+        }
+
+        #cursor-outline {
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--primary);
+            opacity: 0.7;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Gold Gradient Text */
+        .gold-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shine 20s linear infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                background-position: -1000px;
+            }
+
+            100% {
+                background-position: 1000px;
+            }
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Dynamic Mouseover Physics */
+        .hover-trigger {
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .hover-trigger::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), rgba(0, 212, 255, 0.2), transparent);
+            transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hover-trigger::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, #ffd700, #00d4ff, #ffc700);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hover-trigger > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hover-trigger:hover {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(0, 212, 255, 0.08) 100%);
+            border-color: rgba(255, 215, 0, 0.9);
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 30px 60px rgba(255, 215, 0, 0.3),
+                        0 0 30px rgba(0, 212, 255, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .hover-trigger:hover::before {
+            left: 100%;
+        }
+
+        .hover-trigger:hover::after {
+            opacity: 0.6;
+        }
+
+        /* Marquee */
+        .marquee {
+            overflow: hidden;
+            white-space: nowrap;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: rgba(212, 175, 55, 0.02);
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: scroll 20s linear infinite;
+            padding-right: 2rem;
+        }
+
+        .marquee-content span {
+            margin-right: 3rem;
+            opacity: 0.3;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Form */
+        input,
+        textarea {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: border-color 0.3s;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-bottom-color: var(--primary);
+        }
+
+        .form-button {
+            background: white;
+            color: black;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .form-button:hover {
+            background-color: var(--primary);
+        }
+
+        /* Particle Canvas */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            /* opacity: 0.5; REMOVED: This was artificially ghosting the entire physical WebGL scene into the DOM! */
+        }
+
+        /* Section Spacing */
+        section {
+            padding: 6rem 5%;
+        }
+
+        @media (max-width: 768px) {
+            section {
+                padding: 3rem 5%;
+            }
+        }
+
+        /* Flagship Liquid Gold Section */
+        .flagship-section {
+            position: relative;
+            overflow: hidden;
+            padding: 6rem 5%;
+        }
+
+        #flagshipCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.2;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .flagship-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            padding: 80px 40px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .flagship-title {
+            font-size: 56px;
+            font-weight: 700;
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+            font-style: italic;
+        }
+
+        .flagship-tagline {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 48px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+
+        .flagship-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .flagship-feature-item {
+            padding: 32px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .flagship-feature-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .flagship-feature-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .flagship-feature-title {
+            font-weight: 600;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .flagship-feature-desc {
+            color: #f0f0f0;
+            font-size: 13px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+        }
+
+        .flagship-button {
+            padding: 14px 28px;
+            background: white;
+            border: none;
+            color: black;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            letter-spacing: 1.2px;
+            font-family: 'Outfit', sans-serif;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .flagship-button:hover {
+            background-color: var(--primary);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- Cursor: Restored to user ownership -->
+
+    <!-- 3D Cinematic Canvas Container -->
+    <img id="saturnMap" src="saturn.webp" style="display:none;" />
+    <div id="space-background" style="position: fixed; inset: 0; z-index: -2; background: url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=2560&auto=format&fit=crop') center center / cover no-repeat; opacity: 0; transition: opacity 2s ease-in-out;"></div>
+    <div id="strucity-container" style="position: fixed; inset: 0; z-index: -1;"></div>
+
+    <!-- Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
+        <nav class="flex items-center justify-between px-6 md:px-12 py-6">
+            <a href="#" class="flex items-center gap-4 hover:opacity-80 transition group">
+                <img src="favicon.png" alt="Axxilak Logo" class="h-[50px] w-auto drop-shadow-[0_0_15px_rgba(212,175,55,0.6)] group-hover:scale-105 transition duration-500">
+                <div class="flex flex-col justify-center items-start animate-blub text-left">
+                    <div class="serif font-bold text-2xl tracking-[0.05em] text-white leading-none">
+                        KEYSTONE <span class="font-light opacity-80">Constellation</span>
+                    </div>
+                    <div class="text-[10px] tracking-[0.3em] text-amber-400/60 font-light mt-1" style="font-family: 'Outfit', sans-serif;">
+                        Calculus of Presence.
+                    </div>
+                </div>
+            </a>
+            <div class="flex gap-8 items-center">
+                <a href="free-stuff.html" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">Free Stuff</a>
+                <a href="#contact" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">Contact</a>
+                <a href="axxilak_portfolio/index.html" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">About Me</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col items-center justify-center gap-8 text-center">
+        <div class="max-w-3xl">
+            <h1 class="text-6xl md:text-8xl font-light serif leading-tight mb-8">
+                Architectural <span class="gold-text">PRESENCE</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-300 mb-6 font-light max-w-3xl mx-auto">
+                The structure of reality is non-coercive.<br>We build tools that match the physics of sovereign creation.
+            </p>
+            <p class="text-base text-slate-200 mb-8 font-light max-w-3xl mx-auto">
+                <span class="serif">APPLINGS:</span> Small, sharp, local-first tools for the ADHD mind. Built to serve exactly one function perfectly. Download once, own forever, use offline. The architecture of harmlessness.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <a href="#tools"
+                    class="inline-block px-8 py-4 bg-white text-black font-semibold hover:bg-amber-400 transition">
+                    View Instrumentation
+                </a>
+                <a href="#contact"
+                    class="inline-block px-8 py-4 border-2 border-white text-white font-semibold hover:bg-white hover:text-black transition">
+                    Request Build
+                </a>
+            </div>
+            </div>
+            <h1 class="text-6xl md:text-8xl font-light serif leading-tight mt-16 mb-8 text-white">
+                Working together<br>to make the world a <span class="gold-text">better place.</span>
+            </h1>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 animate-bounce">
+            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                </path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Marquee Separator -->
+    <div class="marquee py-8">
+        <div class="marquee-content">
+            <span>RESPONSIVE DESIGN</span>
+            <span>FULLY CUSTOMIZABLE</span>
+            <span>PROFESSIONAL WEBLINGS</span>
+            <span>RESPONSIVE DESIGN</span>
+            <span>FULLY CUSTOMIZABLE</span>
+            <span>PROFESSIONAL WEBLINGS</span>
+        </div>
+    </div>
+
+    <!-- Value Proposition -->
+    <section class="py-20">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">How Weblings Work</h2>
+            <p class="text-center text-slate-400 mb-16 font-light italic">Designed for actual ownership. Your vision,
+                your terms, forever.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="glass-panel p-8 md:p-12 rounded-sm hover-trigger reveal">
+                    <div class="text-4xl mb-6 text-amber-400">
+                        <i class="fas fa-lock-open"></i>
+                    </div>
+                    <h3 class="serif text-2xl mb-4">Actual Ownership</h3>
+                    <p class="text-slate-300 font-light">
+                        Download once. Own forever. One-time purchase, zero ongoing costs. Your site, your data, your
+                        rules.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-panel p-8 md:p-12 rounded-sm hover-trigger reveal" style="transition-delay: 100ms;">
+                    <div class="text-4xl mb-6 text-amber-400">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="serif text-2xl mb-4">Edit Without Code</h3>
+                    <p class="text-slate-300 font-light">
+                        Visual editor built-in. Click to edit text, swap images, change colors. No technical knowledge
+                        required.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-panel p-8 md:p-12 rounded-sm hover-trigger reveal" style="transition-delay: 200ms;">
+                    <div class="text-4xl mb-6 text-amber-400">
+                        <i class="fas fa-sliders-h"></i>
+                    </div>
+                    <h3 class="serif text-2xl mb-4">Fully Customizable</h3>
+                    <p class="text-slate-300 font-light">
+                        Colors, fonts, layout, content. Change everything. Extend with your own code. It's yours to reshape.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Applings Inventory -->
+    <section id="tools" class="py-20 relative z-10">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">The Applings</h2>
+            <p class="text-center text-slate-400 text-sm mb-12 font-light italic">
+                Sovereign instrumentation. Built to run locally. Built to last forever.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Context Counter -->
+                <div class="glass-panel p-8 rounded-sm hover-trigger reveal">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="serif text-2xl text-white">Context Counter</h3>
+                        <span class="text-xs uppercase tracking-widest text-amber-400 border border-amber-400/30 px-2 py-1 rounded-sm">Free</span>
+                    </div>
+                    <p class="text-slate-300 font-light mb-6">
+                        Paste text. Instantly read the LLM token cost. Protect your context budget before you send.
+                    </p>
+                    <a href="products/context_counter/index.html" class="inline-block px-6 py-2 bg-white/10 text-white text-xs uppercase tracking-widest hover:bg-amber-400 hover:text-black transition">Open Tool</a>
+                </div>
+
+                <!-- Edge Electrify -->
+                <div class="glass-panel p-8 rounded-sm hover-trigger reveal" style="transition-delay: 100ms;">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="serif text-2xl text-white">Edge Electrify</h3>
+                        <span class="text-xs uppercase tracking-widest text-amber-400 border border-amber-400/30 px-2 py-1 rounded-sm">Free</span>
+                    </div>
+                    <p class="text-slate-300 font-light mb-6">
+                        A brutalist UI proving ground. Drop any element inside, hook the CSS, and watch the event loop spin.
+                    </p>
+                    <a href="products/edge_electrify/index.html" class="inline-block px-6 py-2 bg-white/10 text-white text-xs uppercase tracking-widest hover:bg-amber-400 hover:text-black transition">Open Tool</a>
+                </div>
+
+                <!-- Anothen Bolt Generator -->
+                <div class="glass-panel p-8 rounded-sm hover-trigger reveal border-l-2 border-l-amber-400 md:col-span-2" style="transition-delay: 200ms;">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="serif text-2xl text-white">Anothen Bolt Generator</h3>
+                        <span class="text-xs uppercase tracking-widest text-slate-400">$100.00</span>
+                    </div>
+                    <p class="text-slate-300 font-light mb-6">
+                        Deterministic context assembly protocol for sovereign architectures. Generates perfectly isolated Anothen instruction frames for LLM ingestion. The true zero-loss bridge.
+                    </p>
+                    <a href="#" class="inline-block px-6 py-2 bg-amber-400 text-black text-xs uppercase tracking-widest font-bold hover:bg-white transition relative z-10">Purchase</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">Questions? Ideas?</h2>
+            <p class="text-center text-slate-400 mb-12 font-light">
+                Need something custom? Have feedback about the weblings?
+                <br><br>
+                <span class="text-amber-400">Let's talk. We're here to listen.</span>
+            </p>
+
+            <form id="contact-form" action="https://formspree.io/f/mkojaejr" method="POST"
+                class="glass-panel p-8 md:p-12 space-y-6 rounded-sm reveal">
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Name</label>
+                    <input type="text" name="name" required placeholder="Your name"
+                        class="w-full bg-transparent py-3 text-white">
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Email</label>
+                    <input type="email" name="email" required placeholder="your@email.com"
+                        class="w-full bg-transparent py-3 text-white">
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Project Vision</label>
+                    <textarea name="message" rows="5" required placeholder="Tell us about your project..."
+                        class="w-full bg-transparent py-3 text-white" style="resize: vertical;"></textarea>
+                </div>
+
+                <button type="submit"
+                    class="w-full form-button py-4 rounded-sm text-center uppercase tracking-widest font-semibold">
+                    Send Message
+                </button>
+
+                <p class="text-xs text-slate-500 text-center">Or email: <a href="mailto:contact@axxilak.com"
+                        class="text-amber-400 hover:underline">contact@axxilak.com</a> <button id="copy-email" class="text-amber-400 hover:text-amber-300 transition ml-2" title="Copy email to clipboard" style="background: none; border: none; cursor: pointer; padding: 0; font-size: 0.75rem; vertical-align: baseline;">
+                        <i class="fas fa-copy"></i>
+                    </button></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-12">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <h4 class="serif text-xl mb-4">KEYSTONE <span class="font-light opacity-60">Constellation</span></h4>
+                    <p class="text-slate-400 text-sm font-light">
+                        Weblings are designed for creators who believe ownership matters.<br><br>
+                        <span class="text-amber-400">Your voice. Your site. Your terms.</span>
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-sm uppercase tracking-widest mb-4">Explore</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#weblings" class="hover:text-amber-400 transition">Browse Weblings</a></li>
+                        <li><a href="free-stuff.html" class="hover:text-amber-400 transition">Free Stuff</a></li>
+                        <li><a href="#contact" class="hover:text-amber-400 transition">Get in Touch</a></li>
+                        <li><a href="axxilak_portfolio/index.html" class="hover:text-amber-400 transition">Our Story</a></li>
+                        <li class="pt-2"><a href="https://axxilak.com" class="text-amber-400 hover:text-white transition font-semibold"><i class="fas fa-link mr-2"></i>Partner Site: Axxilak.com</a></li>
+                    </ul>
+                </div>
+                <!-- <div>
+                    <h4 class="text-sm uppercase tracking-widest mb-4">Social</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-amber-400 transition">Twitter</a></li>
+                        <li><a href="#" class="hover:text-amber-400 transition">Instagram</a></li>
+                        <li><a href="#" class="hover:text-amber-400 transition">LinkedIn</a></li>
+                    </ul>
+                </div> -->
+            </div>
+            <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
+                <p class="mb-4">&copy; 2026 Keystone Constellation. All rights reserved.</p>
+                <p class="text-xs text-slate-600 italic">
+                    Explore each webling. You might notice some thoughtful details along the way.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "./js/three.module.min.js",
+        "three-custom-shader-material/vanilla": "./js/csm.es.js"
+      }
+    }
+    </script>
+    <script src="js/textures.js"></script>
+    <script type="module" src="js/flower_of_life_3d.js"></script>
+    <script>
+        // Initialize the Cinematic Strucity 3D Engine
+        document.addEventListener('DOMContentLoaded', () => {
+            window.flowerEngine = new CinematicStrucity3D('strucity-container');
+        });
+
+        // Scroll Reveal
+        const reveals = document.querySelectorAll('.reveal');
+        const revealOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const revealOnScroll = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    revealOnScroll.unobserve(entry.target);
+                }
+            });
+        }, revealOptions);
+
+        reveals.forEach((reveal) => revealOnScroll.observe(reveal));
+
+        // Transition system removed for MVP. See _archive/transition-system/ to restore.
+    </script>
+
+    <!-- Transition system removed for MVP. Archived in _archive/transition-system/ -->
+</body>
+
+</html>
+< ! - -   B u i l d   T r i g g e r :   0 1 / 3 0 / 2 0 2 6   0 7 : 3 5 : 1 4   - - > 
+     
+     

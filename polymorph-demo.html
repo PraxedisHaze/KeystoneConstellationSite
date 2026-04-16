@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POLYMORPH Demo - Axxilak</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .demo-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #landing-layer {
+            z-index: 2;
+            opacity: 1;
+            pointer-events: auto;
+            transition: opacity 0.1s linear;
+        }
+
+        #apex-layer {
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s linear;
+        }
+
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #d4af37;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            min-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-panel h2 {
+            color: #d4af37;
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .slider-group {
+            margin-bottom: 16px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #d4af37 0%, #d4af37 var(--value), #333 var(--value), #333 100%);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #d4af37;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #d4af37;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .status {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid #d4af37;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 16px;
+            font-size: 11px;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .active-label {
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .crossover-indicator {
+            margin-top: 12px;
+            padding: 8px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #ff6b6b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+            display: none;
+        }
+
+        .crossover-indicator.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <iframe id="landing-layer" class="layer" src="index.html"></iframe>
+        <iframe id="apex-layer" class="layer" src="Weblings/apex/index.html"></iframe>
+    </div>
+
+    <div class="control-panel">
+        <h2>⚡ POLYMORPH DEMO</h2>
+
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>FADE LANDING → APEX</span>
+                <span id="percentage">0%</span>
+            </div>
+            <input
+                type="range"
+                id="fade-slider"
+                min="0"
+                max="100"
+                value="0"
+            >
+        </div>
+
+        <div class="status">
+            <div class="status-item">
+                <span>Landing Page:</span>
+                <span id="landing-status" class="active-label">ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <span>APEX Webling:</span>
+                <span id="apex-status">inactive</span>
+            </div>
+            <div class="crossover-indicator" id="crossover">
+                ⚠️ CROSSOVER POINT
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const slider = document.getElementById('fade-slider');
+        const landingLayer = document.getElementById('landing-layer');
+        const apexLayer = document.getElementById('apex-layer');
+        const percentageLabel = document.getElementById('percentage');
+        const landingStatus = document.getElementById('landing-status');
+        const apexStatus = document.getElementById('apex-status');
+        const crossoverIndicator = document.getElementById('crossover');
+
+        // Hard threshold at 50%
+        const THRESHOLD = 50;
+
+        slider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+
+            // Update visual percentage
+            percentageLabel.textContent = value + '%';
+
+            // Calculate opacity for landing page (goes from 1 to 0)
+            const landingOpacity = Math.max(0, (100 - value) / 100);
+            landingLayer.style.opacity = landingOpacity;
+
+            // Calculate opacity for apex (goes from 0 to 1)
+            const apexOpacity = Math.max(0, (value - 0) / 100);
+            apexLayer.style.opacity = apexOpacity;
+
+            // Hard switch at 50% threshold
+            if (value < THRESHOLD) {
+                // Landing Page is active
+                landingLayer.style.pointerEvents = 'auto';
+                apexLayer.style.pointerEvents = 'none';
+                landingStatus.textContent = 'ACTIVE';
+                landingStatus.classList.add('active-label');
+                apexStatus.textContent = 'inactive';
+                apexStatus.classList.remove('active-label');
+            } else {
+                // APEX is active
+                landingLayer.style.pointerEvents = 'none';
+                apexLayer.style.pointerEvents = 'auto';
+                landingStatus.textContent = 'inactive';
+                landingStatus.classList.remove('active-label');
+                apexStatus.textContent = 'ACTIVE';
+                apexStatus.classList.add('active-label');
+            }
+
+            // Show crossover indicator when at threshold
+            if (Math.abs(value - THRESHOLD) <= 2) {
+                crossoverIndicator.classList.add('active');
+            } else {
+                crossoverIndicator.classList.remove('active');
+            }
+
+            // Update slider background gradient to show filled portion
+            slider.style.setProperty('--value', value + '%');
+        });
+
+        // Initialize
+        slider.dispatchEvent(new Event('input'));
+    </script>
+</body>
+</html>

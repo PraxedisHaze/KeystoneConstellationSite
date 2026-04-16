@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXXILAK STUDIO | Visual Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/studio.css">
+</head>
+<body class="bg-zinc-900 text-white overflow-hidden h-screen flex">
+
+    <!-- LEFT SIDEBAR: TOOLS -->
+    <aside class="w-16 flex flex-col items-center py-4 bg-black border-r border-zinc-800 z-50">
+        <div class="mb-8 text-amber-400 font-bold text-xl">A.</div>
+        
+        <button class="tool-btn active" data-tool="select" title="Select Element (V)">
+            <i class="fas fa-mouse-pointer"></i>
+        </button>
+        <button class="tool-btn" data-tool="text" title="Edit Text (T)">
+            <i class="fas fa-font"></i>
+        </button>
+        <button class="tool-btn" data-tool="image" title="Swap Image (I)">
+            <i class="fas fa-image"></i>
+        </button>
+        <button class="tool-btn" data-tool="move" title="Move/Drag (M)">
+            <i class="fas fa-arrows-alt"></i>
+        </button>
+        
+        <div class="flex-grow"></div>
+        
+        <button class="tool-btn text-green-400" id="btn-export" title="Export Webling">
+            <i class="fas fa-download"></i>
+        </button>
+    </aside>
+
+    <!-- CENTER: CANVAS -->
+    <main class="flex-grow bg-zinc-800 relative flex flex-col">
+        <!-- Top Bar: Canvas Controls -->
+        <div class="h-12 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between px-4">
+            <div class="text-xs text-zinc-500 font-mono">CANVAS: <span id="canvas-label" class="text-white">Empty</span></div>
+            <div class="flex gap-2">
+                <button class="device-btn active" data-width="100%"><i class="fas fa-desktop"></i></button>
+                <button class="device-btn" data-width="768px"><i class="fas fa-tablet-alt"></i></button>
+                <button class="device-btn" data-width="375px"><i class="fas fa-mobile-alt"></i></button>
+            </div>
+            <label class="bg-blue-600 hover:bg-blue-700 text-xs px-3 py-1 rounded cursor-pointer transition">
+                Load Webling
+                <input type="file" id="file-input" accept=".html" class="hidden">
+            </label>
+        </div>
+
+        <!-- The Frame -->
+        <div class="flex-grow relative overflow-auto p-8 flex justify-center bg-dots">
+            <iframe id="webling-frame" class="bg-white shadow-2xl transition-all duration-300" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR: PROPERTIES -->
+    <aside class="w-72 bg-zinc-900 border-l border-zinc-800 flex flex-col z-50">
+        <div class="h-12 border-b border-zinc-800 flex items-center px-4 font-bold text-xs uppercase tracking-wider">
+            Properties
+        </div>
+        
+        <div class="flex-grow overflow-y-auto p-4 space-y-6" id="properties-panel">
+            <div class="text-center text-zinc-500 text-xs mt-10">Select an element to edit styles.</div>
+        </div>
+    </aside>
+
+    <script src="js/engine.js"></script>
+</body>
+</html>

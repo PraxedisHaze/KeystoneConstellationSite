@@ -1,0 +1,15 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="raceGlowMoon">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Race Car Moon - Chrome crescent -->
+  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79" stroke="#ff1744" stroke-width="1.5" filter="url(#raceGlowMoon)"/>
+  <!-- Speed accent -->
+  <line x1="3" y1="12" x2="5" y2="12" stroke="#00bfff" stroke-width="1" opacity="0.7" filter="url(#raceGlowMoon)"/>
+</svg>

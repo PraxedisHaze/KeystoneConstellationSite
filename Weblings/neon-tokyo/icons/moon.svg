@@ -1,0 +1,15 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Neon Tokyo moon - glitchy, color-shifted -->
+  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79" stroke="#ff00ff" stroke-width="1.5" filter="url(#glow2)"/>
+  <!-- Glitch offset -->
+  <path d="M21.2 12.9A9 9 0 1 1 11.31 3.1 7 7 0 0 0 21.2 12.9" stroke="#00ffff" stroke-width="0.8" opacity="0.5" filter="url(#glow2)"/>
+</svg>

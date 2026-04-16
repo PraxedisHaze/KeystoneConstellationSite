@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRON & INK | Brutalist Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Archivo+Black&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #e5e5e5;
+            --text: #050505;
+            --accent: #ff3300; /* International Orange */
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            cursor: crosshair;
+        }
+
+        .display-font { font-family: 'Archivo Black', sans-serif; }
+
+        /* Brutalist Grid */
+        .grid-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Hard Shadow Button */
+        .btn-brutal {
+            background: var(--text);
+            color: var(--bg);
+            border: 2px solid var(--text);
+            transition: transform 0.1s;
+        }
+
+        .btn-brutal:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 4px 4px 0 var(--accent);
+        }
+
+        .btn-brutal:active {
+            transform: translate(0, 0);
+            box-shadow: none;
+        }
+
+        /* Marquee Text */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            background: var(--text);
+            color: var(--bg);
+        }
+        
+        .marquee-content {
+            display: inline-block;
+            animation: scroll 15s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Heavy Borders */
+        .border-heavy {
+            border: 3px solid var(--text);
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #e5e5e5;
+            --accent: #ff3300;
+        }
+
+        [data-theme="dark"] .message-box, 
+        [data-theme="dark"] .message-box textarea {
+            background: #2a2a2a;
+            color: #e5e5e5;
+        }
+
+        [data-theme="dark"] .btn-brutal {
+            background: #e5e5e5;
+            color: #1a1a1a;
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+
+        /* Draggable Message Box */
+        .message-box {
+            border: 3px solid var(--text);
+            background: white;
+            position: relative;
+            touch-action: none;
+        }
+
+        .drag-handle {
+            width: 100%;
+            height: 24px;
+            background: var(--text);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .message-box textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: white;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            padding: 12px;
+            resize: vertical;
+            min-height: 120px;
+        }
+    
+        /* Editor Overrides */
+        .apex-highlighted { outline: 3px solid #00ff00 !important; outline-offset: -3px !important; box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.4) !important; pointer-events: auto !important; }
+        body.edit-mode { cursor: none !important; }
+    </style>
+    
+</head>
+<body class="p-4 md:p-8">
+    <div class="grid-lines"></div>
+
+    <!-- Header -->
+    <header class="flex justify-between items-start mb-20 border-b-2 border-black pb-4">
+        <a href="../../index.html" class="hover:opacity-70 transition-opacity">
+            <h1 class="text-xs font-bold uppercase tracking-tighter">FIG. 002 — ARCHIVE</h1>
+            <div class="text-4xl md:text-6xl font-black tracking-tighter mt-2 display-font">
+                IRON<span class="text-[var(--accent)]">&</span>INK
+            </div>
+        </a>
+        <div class="flex flex-col items-end gap-4">
+            <div class="hidden md:flex flex-col items-end gap-4">
+                <div class="text-right">
+                    <p class="text-xs uppercase">Lat: 40.7128° N</p>
+                    <p class="text-xs uppercase">Lon: 74.0060° W</p>
+                    <p class="text-xs uppercase mt-2 font-bold">STATUS: DEPLOYED</p>
+                </div>
+                <a href="../../index.html" class="text-xs uppercase font-bold hover:text-[var(--accent)] transition-colors flex items-center gap-2">
+                    <span class="block w-4 h-[1px] bg-black"></span>
+                    Back to Gallery
+                </a>
+            </div>
+            <div class="md:hidden">
+                <a href="../../index.html" class="text-xs uppercase font-bold hover:text-[var(--accent)] transition-colors flex items-center gap-2 mb-2">
+                    <span class="block w-4 h-[1px] bg-black"></span>
+                    Back
+                </a>
+            </div>
+            <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+            <button id="edit-mode-btn" class="text-xs uppercase font-bold hover:text-[var(--accent)] transition-colors mt-2">Edit</button>
+        </div>
+    </header>
+
+    <!-- Manifesto Section -->
+    <main class="grid md:grid-cols-12 gap-8 mb-24">
+        <div class="col-span-12 md:col-span-8">
+            <p class="text-2xl md:text-4xl font-bold leading-tight mb-8">
+                WE DO NOT DECORATE.<br>
+                WE DOCUMENT.
+            </p>
+            <p class="text-sm md:text-base max-w-prose border-l-2 border-black pl-4">
+                Iron & Ink is a high-contrast repository for the sovereign writer. 
+                No animations. No fade-ins. Just raw text and structural integrity.
+                Designed for manifestos, technical logs, and critical theory.
+            </p>
+        </div>
+        <div class="col-span-12 md:col-span-4 flex flex-col justify-end">
+            <div class="border-heavy p-6 bg-white rotate-1 hover:rotate-0 transition-transform duration-300">
+                <h3 class="font-bold text-xl mb-4 bg-[var(--accent)] text-white inline-block px-2">LATEST SIGNAL</h3>
+                <p class="text-xs mb-4">2026-01-25 // 14:00 UTC</p>
+                <p class="text-sm font-bold">"The architecture of the page dictates the architecture of the thought."</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Running Tape -->
+    <div class="marquee-container border-y-2 border-black py-3 mb-24 rotate-[-1deg] w-[105%] -ml-2">
+        <div class="marquee-content font-bold text-xl">
+            TRUTH IS HEAVY /// NO DECORATION /// STRUCTURAL INTEGRITY /// RAW DATA /// TRUTH IS HEAVY /// NO DECORATION /// STRUCTURAL INTEGRITY /// RAW DATA ///
+        </div>
+    </div>
+
+    <!-- Works Index -->
+    <section class="mb-24">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-4 w-4 bg-[var(--accent)]"></div>
+            <h2 class="text-xl font-bold uppercase">Index of Works</h2>
+        </div>
+
+        <div class="border-t-2 border-black">
+            <!-- Item 01 -->
+            <div class="grid grid-cols-12 py-4 border-b border-black hover:bg-[var(--accent)] hover:text-white transition-colors cursor-pointer group">
+                <div class="col-span-2 font-bold">001</div>
+                <div class="col-span-8 font-bold text-lg">The Architecture of Silence</div>
+                <div class="col-span-2 text-right opacity-0 group-hover:opacity-100">READ -></div>
+            </div>
+            <!-- Item 02 -->
+            <div class="grid grid-cols-12 py-4 border-b border-black hover:bg-[var(--accent)] hover:text-white transition-colors cursor-pointer group">
+                <div class="col-span-2 font-bold">002</div>
+                <div class="col-span-8 font-bold text-lg">Concrete & Code</div>
+                <div class="col-span-2 text-right opacity-0 group-hover:opacity-100">READ -></div>
+            </div>
+            <!-- Item 03 -->
+            <div class="grid grid-cols-12 py-4 border-b border-black hover:bg-[var(--accent)] hover:text-white transition-colors cursor-pointer group">
+                <div class="col-span-2 font-bold">003</div>
+                <div class="col-span-8 font-bold text-lg">Systematic Erasure</div>
+                <div class="col-span-2 text-right opacity-0 group-hover:opacity-100">READ -></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Message Box -->
+    <section class="border-t-4 border-black pt-12 mb-12">
+        <div class="message-box mb-8">
+            <div class="drag-handle" id="dragHandle">≡ COMPOSE MESSAGE</div>
+            <textarea id="messageText" placeholder="TYPE YOUR TRANSMISSION..."></textarea>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="pt-12 pb-20 flex flex-col md:flex-row justify-between gap-8">
+        <div class="text-xs font-bold max-w-xs">
+            AXXILAK // IRON_INK<br>
+            VERSION 1.0.0<br>
+            NO COPYRIGHT INTENDED.<br>
+            INFORMATION WANTS TO BE FREE.
+        </div>
+
+        <form action="mailto:iron@axxilak.com" method="POST" enctype="text/plain" class="w-full md:w-1/2">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-2">Name</label>
+                    <input type="text" name="name" required class="w-full bg-transparent border-b-2 border-black p-2 outline-none font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-2">Email</label>
+                    <input type="email" name="email" required class="w-full bg-transparent border-b-2 border-black p-2 outline-none font-bold placeholder-gray-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-2">Message (Optional)</label>
+                    <textarea name="message" rows="3" placeholder="TRANSMISSION..." class="w-full bg-transparent border-b-2 border-black p-2 outline-none font-bold resize-none"></textarea>
+                </div>
+                <button type="submit" onclick="showThanks(event)" class="btn-brutal px-6 py-2 font-bold uppercase text-sm w-full">Transmit</button>
+                <div id="form-success" class="hidden text-center p-3 border-2 border-black bg-white text-black font-bold text-xs uppercase">
+                    <p>TRANSMISSION SUCCESSFUL</p>
+                </div>
+            </div>
+        </form>
+    </footer>
+    <script src="../engines/transitions/titanium-hydraulics.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'dark') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'light');
+                    } else {
+                        body.setAttribute('data-theme', 'dark');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'dark');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+                if (body.getAttribute('data-theme') === 'dark') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+    </script>
+    <script>
+        // Draggable Message Box
+        const dragHandle = document.getElementById('dragHandle');
+        const messageBox = document.querySelector('.message-box');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX = 0;
+        let initialY = 0;
+
+        dragHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            initialX = e.clientX - messageBox.offsetLeft;
+            initialY = e.clientY - messageBox.offsetTop;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                messageBox.style.position = 'fixed';
+                messageBox.style.left = currentX + 'px';
+                messageBox.style.top = currentY + 'px';
+                messageBox.style.width = '400px';
+                messageBox.style.zIndex = '1000';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Touch support for mobile
+        dragHandle.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            initialX = e.touches[0].clientX - messageBox.offsetLeft;
+            initialY = e.touches[0].clientY - messageBox.offsetTop;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+                messageBox.style.position = 'fixed';
+                messageBox.style.left = currentX + 'px';
+                messageBox.style.top = currentY + 'px';
+                messageBox.style.width = '400px';
+                messageBox.style.zIndex = '1000';
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+    </script>
+
+    
+
+    
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'iron-ink-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('iron-ink-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>
+

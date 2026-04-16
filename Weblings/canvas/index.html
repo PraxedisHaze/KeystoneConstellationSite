@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CANVAS | Minimalist Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../engines/apex-editor/apex-editor.css">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #333333;
+            --gray: #f9f9f9;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.05em;
+        }
+
+        .img-container {
+            background-color: var(--gray);
+            transition: opacity 0.4s;
+        }
+
+        .img-container:hover {
+            opacity: 0.8;
+        }
+
+        .nav-link {
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #000;
+        }
+
+        /* Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --bg: #f2f2f2;
+            --text: #1a1a1a;
+            --gray: #e5e5e5;
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="p-8 md:p-16 lg:p-24">
+
+    <!-- Nav -->
+    <nav class="fixed top-0 left-0 w-full p-8 md:p-16 flex justify-between items-center z-50 mix-blend-difference pointer-events-none">
+        <div class="font-bold text-sm tracking-widest pointer-events-auto">CANVAS.</div>
+        <div class="flex gap-12 text-[10px] uppercase tracking-[0.3em] font-light pointer-events-auto items-center">
+            <a href="#work" class="nav-link">Work</a>
+            <a href="#about" class="nav-link">About</a>
+            <a href="#contact" class="nav-link">Contact</a>
+            <button id="edit-mode-btn" class="nav-link text-[10px] uppercase tracking-[0.3em] font-light pointer-events-auto">Edit</button>
+            <button onclick="toggleTheme()" class="theme-toggle pointer-events-auto" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="min-h-screen flex items-center justify-center mb-32">
+        <div class="max-w-xl text-center reveal">
+            <h1 class="text-3xl md:text-5xl font-light mb-8 leading-relaxed">
+                The content is the <br>
+                architecture.
+            </h1>
+            <div class="h-px w-12 bg-black mx-auto opacity-20"></div>
+        </div>
+    </header>
+
+    <!-- Gallery -->
+    <section id="work" class="grid grid-cols-1 md:grid-cols-2 gap-24 mb-64 max-w-7xl mx-auto">
+        <div class="reveal">
+            <div class="img-container aspect-[4/5] mb-6">
+                <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1945&auto=format&fit=crop" class="w-full h-full object-cover" alt="Art 1">
+            </div>
+            <div class="text-[10px] uppercase tracking-widest opacity-40">Study 01 / Movement</div>
+        </div>
+        <div class="reveal md:mt-32">
+            <div class="img-container aspect-[4/5] mb-6">
+                <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1974&auto=format&fit=crop" class="w-full h-full object-cover" alt="Art 2">
+            </div>
+            <div class="text-[10px] uppercase tracking-widest opacity-40">Study 02 / Light</div>
+        </div>
+        <div class="reveal">
+            <div class="img-container aspect-[4/5] mb-6">
+                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Art 3">
+            </div>
+            <div class="text-[10px] uppercase tracking-widest opacity-40">Study 03 / Void</div>
+        </div>
+        <div class="reveal md:mt-32">
+            <div class="img-container aspect-[4/5] mb-6">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Art 4">
+            </div>
+            <div class="text-[10px] uppercase tracking-widest opacity-40">Study 04 / Shadow</div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="mb-64 flex justify-center">
+        <div class="max-w-lg text-center reveal">
+            <h2 class="text-xs uppercase tracking-[0.5em] mb-12 opacity-30">Our Philosophy</h2>
+            <p class="text-lg md:text-xl font-light leading-loose text-gray-500">
+                We believe that less is not empty. <br>
+                Canvas is a minimalist architecture for those who let their work speak for itself. 
+                Pure code, pure space, pure focus.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer / Contact -->
+    <footer id="contact" class="py-32 border-t border-gray-100">
+        <div class="flex flex-col md:flex-row justify-between items-start gap-12 max-w-7xl mx-auto reveal">
+            <div class="text-[10px] uppercase tracking-[0.5em] opacity-40">
+                Canvas Webling / Axxilak Studio / MMXXVI
+            </div>
+            <div class="flex flex-col items-end gap-4 w-full md:w-auto">
+                <form action="mailto:canvas@axxilak.com" method="POST" enctype="text/plain" class="w-full md:w-auto">
+                    <div class="mb-4">
+                        <label class="block text-[10px] uppercase tracking-widest opacity-60 mb-2">Name</label>
+                        <input type="text" name="name" required class="w-full bg-transparent border-b border-gray-200 py-2 outline-none focus:border-black transition text-sm">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[10px] uppercase tracking-widest opacity-60 mb-2">Email</label>
+                        <input type="email" name="email" required class="w-full bg-transparent border-b border-gray-200 py-2 outline-none focus:border-black transition text-sm">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-[10px] uppercase tracking-widest opacity-60 mb-2">Message (Optional)</label>
+                        <textarea name="message" rows="3" placeholder="Tell us about your project..." class="w-full bg-transparent border-b border-gray-200 py-2 outline-none focus:border-black transition text-sm resize-none"></textarea>
+                    </div>
+                    <button type="submit" onclick="showThanks(event)" class="text-[10px] uppercase tracking-widest font-light px-4 py-2 border border-black hover:bg-black hover:text-white transition">Send Inquiry</button>
+                    <div id="form-success" class="hidden mt-4 text-[10px] uppercase tracking-widest p-3 border border-green-500 text-green-700 bg-green-50">
+                        <p class="font-bold">Message Received!</p>
+                        <p class="opacity-80">We'll be in touch within 24 hours.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../engines/transitions/brush-stroke.js"></script>
+    <script type="module">
+        // Theme Toggle
+        window.toggleTheme = function() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        };
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        window.showThanks = function(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+
+        // Scroll Reveal
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        reveals.forEach(reveal => observer.observe(reveal));
+
+        import MagnifyingGlassInspector from '../engines/apex-editor/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'canvas-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('canvas-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>
+

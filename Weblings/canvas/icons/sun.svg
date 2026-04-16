@@ -1,0 +1,9 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Canvas sun - minimal, whitespace-aware, refined -->
+  <circle cx="12" cy="12" r="4.5" stroke="#333333" opacity="0.7"/>
+  <!-- Very subtle rays, almost whispers -->
+  <line x1="12" y1="3" x2="12" y2="4.5" stroke="#333333" opacity="0.5"/>
+  <line x1="12" y1="19.5" x2="12" y2="21" stroke="#333333" opacity="0.5"/>
+  <line x1="3" y1="12" x2="4.5" y2="12" stroke="#333333" opacity="0.5"/>
+  <line x1="19.5" y1="12" x2="21" y2="12" stroke="#333333" opacity="0.5"/>
+</svg>

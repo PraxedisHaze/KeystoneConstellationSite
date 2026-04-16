@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summit</title>
+    <style>
+        :root { --bg: #ffffff; --text: #1a1a1a; --accent: #0066cc; }
+        body { background: var(--bg); color: var(--text); font-family: Arial, sans-serif; padding: 40px; margin: 0; }
+        h1 { font-size: 2.5rem; margin: 0.5em 0; border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; }
+        p { max-width: 600px; }
+        .section { margin: 3rem 0; max-width: 500px; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; margin: 5px 0; }
+        button { background: var(--accent); color: white; padding: 10px 20px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>{{text.name}}</h1>
+    <p>{{text.tagline}}</p>
+    <p>{{text.bio}}</p>
+
+    <div class="section">
+        <h3>Reach the Summit</h3>
+        <input type="text" placeholder="Name">
+        <input type="email" placeholder="Email">
+        <textarea placeholder="Message (Optional)" rows="3"></textarea>
+        <button>Send Message</button>
+    </div>
+</body>
+</html>

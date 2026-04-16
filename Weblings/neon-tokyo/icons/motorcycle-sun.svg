@@ -1,0 +1,21 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="bikeGlow">
+      <feGaussianBlur stdDeviation="1.2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Motorcycle Sun - Raw, rebellious, orange/purple -->
+  <circle cx="12" cy="12" r="5" stroke="#ff6600" stroke-width="1.8" filter="url(#bikeGlow)"/>
+  <!-- Raw, jagged rays -->
+  <line x1="12" y1="1" x2="12" y2="3" stroke="#ff6600" stroke-width="2" filter="url(#bikeGlow)"/>
+  <line x1="12" y1="21" x2="12" y2="23" stroke="#ff6600" stroke-width="2" filter="url(#bikeGlow)"/>
+  <line x1="1.5" y1="12" x2="3.5" y2="12" stroke="#ff6600" stroke-width="2" filter="url(#bikeGlow)"/>
+  <line x1="20.5" y1="12" x2="22.5" y2="12" stroke="#ff6600" stroke-width="2" filter="url(#bikeGlow)"/>
+  <!-- Purple accent rays (rebellious) -->
+  <line x1="4" y1="4" x2="5.5" y2="5.5" stroke="#b300ff" stroke-width="1.5" opacity="0.8" filter="url(#bikeGlow)"/>
+  <line x1="18.5" y1="18.5" x2="20" y2="20" stroke="#b300ff" stroke-width="1.5" opacity="0.8" filter="url(#bikeGlow)"/>
+</svg>

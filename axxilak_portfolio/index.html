@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak | Portfolio</title>
+    <!-- Google Fonts: Cinzel + Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@200;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        @keyframes blub-in {
+            0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+            70% { opacity: 1; transform: translateY(-2px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1.0); }
+        }
+
+        .animate-blub {
+            animation: blub-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* RESET & BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #e0e0e0;
+            --accent-color: #D4AF37;
+            /* Metallic Gold */
+            --card-bg: #111111;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* TYPOGRAPHY */
+        h1,
+        h2,
+        h3 {
+            font-weight: 300;
+            letter-spacing: -0.02em;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--accent-color);
+        }
+
+        /* HEADER & HERO */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 5%;
+            position: relative;
+            /* Needed for absolute positioning of nav/scroll */
+        }
+
+        nav {
+            position: absolute;
+            top: 1.5rem;
+            left: 3rem;
+            right: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 0.1em;
+            color: var(--accent-color);
+        }
+
+        .nav-links a {
+            margin-left: 2rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.7;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--accent-color);
+        }
+
+        .hero-text {
+            max-width: 800px;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #fff, #D4AF37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.intro {
+            font-size: 1.2rem;
+            max-width: 500px;
+            opacity: 0.8;
+            border-left: 1px solid var(--accent-color);
+            padding-left: 1.5rem;
+        }
+
+        /* SCROLL INDICATOR */
+        .scroll-indicator-container {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .scroll-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: opacity 0.3s ease;
+        }
+
+        .scroll-indicator:hover {
+            opacity: 1;
+        }
+
+        .scroll-text {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 3rem;
+            background: linear-gradient(to bottom, #ffffff, transparent);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+            50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+        }
+
+        /* SECTIONS */
+        section {
+            padding: 8rem 5%;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+            display: inline-block;
+        }
+
+        /* PROJECT GRID */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border: 1px solid #222;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 300px;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        .project-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .project-card p {
+            font-size: 0.95rem;
+            color: #aaa;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .project-card a {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-top: auto;
+        }
+
+        /* ABOUT SECTION */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 4rem 5%;
+            border-top: 1px solid #222;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+            section {
+                padding: 4rem 5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HERO -->
+    <header>
+        <nav>
+            <!-- Axxilak Brand Header (Raw CSS Version) -->
+            <a href="../index.html" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; opacity: 1; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <img src="../favicon.png" alt="Axxilak Logo" style="height: 50px; width: auto; filter: drop-shadow(0 0 15px rgba(212,175,55,0.6));">
+                <div class="animate-blub" style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left;">
+                    <div style="font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.5rem; letter-spacing: 0.05em; color: white; line-height: 1;">
+                        AXXILAK <span style="font-family: 'Cinzel', serif; font-weight: 300; opacity: 0.8;">Studios</span>
+                    </div>
+                    <div style="font-family: 'Outfit', sans-serif; font-size: 10px; letter-spacing: 0.3em; color: rgba(212, 175, 55, 0.6); font-weight: 300; margin-top: 4px;">
+                        We make beautiful apps.
+                    </div>
+                </div>
+            </a>
+            
+            <div class="nav-links">
+                <a href="#work">Work</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </nav>
+
+        <div class="hero-text">
+            <h1>Designing Digital<br>Experiences.</h1>
+            <p class="intro">
+                I build accessible, pixel-perfect, and performant web interfaces using modern gold standards.
+            </p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <!-- Using container with w-100 and justify-center to guarantee centering -->
+        <div class="scroll-indicator-container">
+            <div class="scroll-indicator"
+                onclick="document.getElementById('work').scrollIntoView({behavior: 'smooth'})">
+                <span class="scroll-text">Scroll</span>
+                <div class="scroll-line"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- WORK -->
+    <section id="work">
+        <div class="container">
+            <h2>Selected Work</h2>
+            <div class="project-grid">
+                <!-- Project 1 -->
+                <article class="project-card">
+                    <h3>Project One</h3>
+                    <p>A brief description of the project. Focus on the problem you solved and the result.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 2 -->
+                <article class="project-card">
+                    <h3>Project Two</h3>
+                    <p>Another project description. Keep it concise. Let the work speak for itself.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 3 -->
+                <article class="project-card">
+                    <h3>Project Three</h3>
+                    <p>Minimalism isn't about having less. It's about making room for more of what matters.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 4 -->
+                <article class="project-card">
+                    <h3>The Golden Ratio</h3>
+                    <p>Exploring mathematical harmony in digital interfaces. Nature's blueprint for design.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 5 -->
+                <article class="project-card">
+                    <h3>Silence is Loud</h3>
+                    <p>A study on white space. How emptiness guides the eye more effectively than clutter.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 6 -->
+                <article class="project-card">
+                    <h3>Negative Space</h3>
+                    <p>Using the background as an active element in the composition.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 7 -->
+                <article class="project-card">
+                    <h3>Typography Talk</h3>
+                    <p>When the font itself becomes the image. A typographic experiment.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 8 -->
+                <article class="project-card">
+                    <h3>Grid Systems</h3>
+                    <p>Breaking the rules only works after you master them. Swiss style for the web.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 9 -->
+                <article class="project-card">
+                    <h3>Color Theory</h3>
+                    <p>The psychology of gold and black. Communicating luxury without words.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 10 -->
+                <article class="project-card">
+                    <h3>Digital Dust</h3>
+                    <p>Particle systems and canvas interactions. The code behind the background.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 11 -->
+                <article class="project-card">
+                    <h3>Pixel Perfect</h3>
+                    <p>Obsessive attention to detail in icon design and SVG optimization.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+
+                <!-- Project 12 -->
+                <article class="project-card">
+                    <h3>Final Render</h3>
+                    <p>3D visualization and lighting techniques in a flat web environment.</p>
+                    <a href="#">View Case Study</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about">
+        <div class="container">
+            <h2>About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>
+                        I am a multidisciplinary designer and developer with a passion for creating immersive digital
+                        experiences.
+                        My work lies at the intersection of design and technology, ensuring that every pixel serves a
+                        purpose
+                        and every interaction feels natural.
+                    </p>
+                    <br>
+                    <p>
+                        Currently available for freelance projects and collaborations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" style="background-color: #0a0a0a; position: relative; z-index: 1;">
+        <div class="container">
+            <h2>Let's Work Together</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>I'm always interested in hearing about new projects and opportunities.</p>
+                    <br>
+                    <form style="margin-top: 2rem; max-width: 500px;">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Name</label>
+                            <input type="text" placeholder="Your name" style="width: 100%; padding: 0.75rem; background: #111; border: 1px solid #333; color: #e0e0e0; font-family: inherit;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Email</label>
+                            <input type="email" placeholder="your@email.com" style="width: 100%; padding: 0.75rem; background: #111; border: 1px solid #333; color: #e0e0e0; font-family: inherit;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Message</label>
+                            <textarea placeholder="Tell me about your project..." rows="5" style="width: 100%; padding: 0.75rem; background: #111; border: 1px solid #333; color: #e0e0e0; font-family: inherit;"></textarea>
+                        </div>
+                        <button type="submit" style="padding: 0.75rem 2rem; background: #D4AF37; color: #0a0a0a; border: none; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;">Send</button>
+                    </form>
+                    <br>
+                    <p style="margin-top: 3rem;">
+                        <strong>Direct Contact:</strong><br>
+                        <a href="mailto:contact@axxilak.com">contact@axxilak.com</a><br>
+                        <a href="https://linkedin.com" target="_blank">LinkedIn</a> | <a href="https://twitter.com" target="_blank">Twitter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Portfolio. All Rights Reserved.</p>
+    </footer>
+
+</body>
+
+</html>

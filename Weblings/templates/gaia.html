@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaia</title>
+    <style>
+        :root { --bg: #0f3d0f; --text: #e8f5e9; --accent: #4caf50; }
+        body { background: var(--bg); color: var(--text); font-family: Georgia, serif; padding: 40px; margin: 0; text-align: center; }
+        h1 { font-size: 2.5rem; margin: 0.5em 0; color: var(--accent); }
+        p { max-width: 600px; margin: 0 auto; line-height: 1.8; }
+        .section { margin: 3rem 0; max-width: 500px; margin-left: auto; margin-right: auto; }
+        input, textarea { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--accent); color: var(--text); margin: 5px 0; }
+        button { background: var(--accent); color: var(--bg); padding: 10px 20px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>{{text.name}}</h1>
+    <p>{{text.tagline}}</p>
+    <p>{{text.bio}}</p>
+
+    <div class="section">
+        <h3>Connect</h3>
+        <input type="text" placeholder="Name">
+        <input type="email" placeholder="Email">
+        <textarea placeholder="Message (Optional)" rows="3"></textarea>
+        <button>Send Message</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1452 @@
+● ---
+  POLYMORPH WEBLING: COMPLETE IMPLEMENTATION BLUEPRINT
+
+  Version: Final | Date: 2026-02-05 | Timeline: 6-12 hours (Phases 1-2)
+
+  ---
+  EXECUTIVE SUMMARY
+
+  We are building a single-file, multi-mode HTML editor that allows users to create and edit 10+ content variants (light/dark, English/Spanish, professional/casual, etc.) within one downloaded webling. Users
+  edit in split-view, see both modes simultaneously, export as standalone or as a re-editable polymorph suite.
+
+  Core Promise: One HTML file = infinite customized versions = offline-first = production-ready
+
+  Architecture: Variant-first data (localStorage → IndexedDB) | VDOM reconstruction (morphdom) | Bidirectional sync (origin flags) | Delta-based undo (command pattern) | Security (DOMPurify + CSP)
+
+  ---
+  CRITICAL PATH (Order Matters)
+
+  Step 1: Variant-First Schema + UUIDs on elements
+    ↓ (enables)
+  Step 2: CSS Scoping via data-attributes
+    ↓ (enables)
+  Step 3: VDOM Morphdom logic + Mode-Switch State Machine
+    ↓ (enables)
+  Step 4: Palette target-locking + edit flow
+    ↓ (enables)
+  Step 5: Split-view infrastructure (Phase 2)
+
+  If Steps 1-3 aren't locked, everything after breaks.
+
+  ---
+  PHASE 1: FOUNDATION (MVP) — Single-Pane, Mode-Locked Editing
+
+  Duration: 4-5 hours | Objective: Polymorph system working, 3+ modes, single-pane editor, localStorage persistence
+
+  What Ships:
+  - ✓ Create 3 modes (light, dark, custom)
+  - ✓ Edit text, colors, fonts in each mode independently
+  - ✓ Changes persist to localStorage
+  - ✓ Refresh page, changes load correctly per mode
+  - ✓ Export single mode as clean standalone HTML
+  - ✓ Architecture ready for Phase 2 split-view
+
+  ---
+  PHASE 1: MILESTONE 1 — Data Structure Refactor
+
+  Objective: Add UUIDs to elements, create variant-first JSON structure, implement localStorage persistence
+
+  Step 1.1: Add UUIDs to All Editable Elements
+
+  File to Modify: Websites/Axxilak/Weblings/apex/index.html
+
+  Action: Traverse all editable elements, assign persistent data-uuid attributes
+
+  // Run once on page load
+  function addUUIDsToEditableElements() {
+    const editableSelectors = ['h1', 'h2', 'h3', 'p', 'span.text', 'button', '[data-editable]'];
+
+    document.querySelectorAll(editableSelectors.join(',')).forEach((el, idx) => {
+      if (!el.dataset.uuid) {
+        el.dataset.uuid = `elem-${generateUUID()}`; // or `elem-${idx}` if simple
+      }
+    });
+  }
+
+  // Generate simple UUIDs (or use crypto.randomUUID() in modern browsers)
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  Why: Element identity must persist across mode switches. Ensures morphdom (Phase 2) knows which elements are the "same" in different modes.
+
+  Testing:
+  - ✓ Open browser console, verify every editable element has data-uuid
+  - ✓ Refresh page, UUIDs persist (not regenerated)
+
+  ---
+  Step 1.2: Create polymorph-state.js
+
+  File to Create: Websites/Axxilak/Weblings/apex/js/polymorph-state.js
+
+  Responsibility: Manage variant-first data structure, mode switching, localStorage persistence
+
+  // polymorph-state.js
+
+  class PolymorphState {
+    constructor() {
+      // Variant-first structure
+      this.themeMap = {
+        'light': {},
+        'dark': {},
+        'custom': {}
+      };
+
+      this.currentMode = 'light';
+      this.loadFromStorage();
+    }
+
+    // Load all modes from localStorage
+    loadFromStorage() {
+      const stored = localStorage.getItem('apex-polymorph-state');
+      if (stored) {
+        try {
+          this.themeMap = JSON.parse(stored);
+        } catch (e) {
+          console.warn('Failed to load state:', e);
+        }
+      }
+    }
+
+    // Save all modes to localStorage
+    saveToStorage() {
+      localStorage.setItem('apex-polymorph-state', JSON.stringify(this.themeMap));
+    }
+
+    // Get data for a specific mode
+    getModeData(modeId) {
+      return this.themeMap[modeId] || {};
+    }
+
+    // Set a property for an element in a specific mode
+    setProperty(modeId, elementUuid, property, value) {
+      if (!this.themeMap[modeId]) {
+        this.themeMap[modeId] = {};
+      }
+      if (!this.themeMap[modeId][elementUuid]) {
+        this.themeMap[modeId][elementUuid] = {};
+      }
+      this.themeMap[modeId][elementUuid][property] = value;
+      this.saveToStorage();
+    }
+
+    // Switch to a different mode
+    switchMode(modeId) {
+      this.currentMode = modeId;
+    }
+
+    // Get all modes
+    getAllModes() {
+      return Object.keys(this.themeMap);
+    }
+
+    // Create a new mode (copy from existing or blank)
+    createMode(newModeId, copyFromMode = null) {
+      if (copyFromMode && this.themeMap[copyFromMode]) {
+        this.themeMap[newModeId] = JSON.parse(JSON.stringify(this.themeMap[copyFromMode]));
+      } else {
+        this.themeMap[newModeId] = {};
+      }
+      this.saveToStorage();
+    }
+  }
+
+  // Global instance
+  window.polymorphState = new PolymorphState();
+
+  Testing:
+  - ✓ Create 3 modes: polymorphState.createMode('light'), createMode('dark'), createMode('custom')
+  - ✓ Set a property: polymorphState.setProperty('light', 'elem-1', 'color', '#ff0000')
+  - ✓ Verify in localStorage: localStorage.getItem('apex-polymorph-state')
+  - ✓ Refresh page, verify data persists
+
+  ---
+  Step 1.3: Create morphdom-engine.js
+
+  File to Create: Websites/Axxilak/Weblings/apex/js/morphdom-engine.js
+
+  Responsibility: VDOM reconstruction, identity preservation, preventing "Ghost Yard"
+
+  // morphdom-engine.js
+
+  class MorphdomEngine {
+    constructor() {
+      // Import morphdom (via CDN or bundled)
+      // <script src="https://cdn.jsdelivr.net/npm/morphdom@2/dist/morphdom.min.js"></script>
+    }
+
+    /**
+     * Reconstruct the DOM for a specific mode
+     * Preserves focus, scroll, and input state
+     */
+    reconstructDOMForMode(modeId, container = document.body) {
+      const modeData = polymorphState.getModeData(modeId);
+      const targetHTML = this.generateHTMLFromSchema(modeData);
+
+      // Use morphdom to patch the DOM
+      // morphdom compares current to target and applies minimum changes
+      morphdom(container, targetHTML, {
+        getNodeKey: (node) => {
+          // Use data-uuid as the key for identity matching
+          return node.getAttribute?.('data-uuid');
+        },
+        onBeforeElUpdated: (fromEl, toEl) => {
+          // IDENTITY PRESERVATION: Don't replace focused INPUT elements
+          if (fromEl === document.activeElement && fromEl.tagName === 'INPUT') {
+            return false; // Skip this element's update
+          }
+          return true;
+        }
+      });
+    }
+
+    /**
+     * Generate HTML string from mode data
+     * This is called by generateHTMLFromSchema (see separate function below)
+     */
+    generateHTMLFromSchema(modeData) {
+      // This will be implemented in detail in Step 1.4
+      // For now, just return current DOM as string (simple approach)
+      return document.documentElement.outerHTML;
+    }
+  }
+
+  window.morphdomEngine = new MorphdomEngine();
+
+  Why morphdom instead of innerHTML?
+  - innerHTML destroys all elements and recreates them (loses focus, scroll, input state)
+  - morphdom diffs and patches (preserves state, much faster)
+
+  Testing:
+  - ✓ Have morphdom available in window
+  - ✓ Call morphdomEngine.reconstructDOMForMode('light')
+  - ✓ Verify no JavaScript errors
+
+  ---
+  Step 1.4: Create generateHTMLFromSchema
+
+  File to Modify: Websites/Axxilak/Weblings/apex/js/morphdom-engine.js
+
+  Add this function to MorphdomEngine:
+
+  /**
+   * Generate HTML string from mode data
+   * Applies overrides from modeData to the base structure
+   */
+  generateHTMLFromSchema(modeData) {
+    // Clone the base HTML
+    const base = document.documentElement.cloneNode(true);
+
+    // Apply overrides from modeData to each element
+    base.querySelectorAll('[data-uuid]').forEach(el => {
+      const uuid = el.dataset.uuid;
+      const overrides = modeData[uuid] || {};
+
+      // Apply text override
+      if (overrides.text) {
+        el.innerText = overrides.text;
+      }
+
+      // Apply style overrides
+      if (overrides.color) {
+        el.style.color = overrides.color;
+      }
+      if (overrides.fontSize) {
+        el.style.fontSize = overrides.fontSize;
+      }
+      if (overrides.fontFamily) {
+        el.style.fontFamily = overrides.fontFamily;
+      }
+      if (overrides.backgroundColor) {
+        el.style.backgroundColor = overrides.backgroundColor;
+      }
+    });
+
+    return base.outerHTML;
+  }
+
+  Why this approach?
+  - Takes current DOM structure
+  - Applies only the overrides from the mode's data
+  - Returns HTML string for morphdom to compare against
+
+  Testing:
+  - ✓ Set a text override: polymorphState.setProperty('dark', 'elem-1', 'text', 'Dark Mode Title')
+  - ✓ Call generateHTMLFromSchema(polymorphState.getModeData('dark'))
+  - ✓ Verify the returned HTML has the dark mode text
+
+  ---
+  PHASE 1: MILESTONE 2 — CSS Scoping
+
+  Objective: Ensure styles don't bleed between modes when we add split-view later
+
+  Step 1.5: Add CSS Scoping Structure
+
+  File to Modify: Websites/Axxilak/Weblings/apex/index.html
+
+  Add this to the <head>:
+
+  <style>
+    /* === CSS SCOPING FOR DUAL PANES === */
+
+    /* When split-view is added, panes will have data-pane and data-mode */
+    [data-pane][data-mode="light"] {
+      --bg-color: #ffffff;
+      --text-color: #222222;
+      --accent-color: #2563eb;
+    }
+
+    [data-pane][data-mode="dark"] {
+      --bg-color: #0a0a0a;
+      --text-color: #ffffff;
+      --accent-color: #60a5fa;
+    }
+
+    [data-pane][data-mode="custom"] {
+      --bg-color: #f5f5f5;
+      --text-color: #333333;
+      --accent-color: #8b5cf6;
+    }
+
+    /* Base styles use variables */
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    h1, h2, h3 {
+      color: var(--text-color);
+    }
+
+    a {
+      color: var(--accent-color);
+    }
+
+    button {
+      background-color: var(--accent-color);
+      color: white;
+    }
+  </style>
+
+  Why?
+  - Prepares for Phase 2 split-view
+  - Variables can be overridden per pane
+  - When both panes are visible, each has its own data-mode attribute
+
+  Testing:
+  - ✓ Add data-pane="left" data-mode="light" to body temporarily, verify colors apply
+  - ✓ Add data-pane="right" data-mode="dark" to body temporarily, verify different colors
+
+  ---
+  PHASE 1: MILESTONE 3 — Palette Rewrite for Mode Awareness
+
+  Step 1.6: Rewrite tool-palette.js
+
+  File to Modify: Websites/Axxilak/Weblings/apex/js/tool-palette.js
+
+  // tool-palette.js - PHASE 1 VERSION (Single-pane)
+
+  export class ToolPalette {
+    constructor() {
+      this.currentMode = 'light';
+      this.currentElement = null;
+      this.currentElementUuid = null;
+      this.quillEditor = null;
+
+      this.palette = document.createElement('div');
+      this.palette.className = 'tool-palette';
+      this.palette.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        width: 340px;
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #00ff00;
+        color: #00ff00;
+        font-family: 'JetBrains Mono', monospace;
+        padding: 12px;
+        z-index: 19998;
+        display: none;
+        max-height: 80vh;
+        overflow-y: auto;
+        border-radius: 4px;
+      `;
+
+      this.palette.innerHTML = `
+        <div id="palette-content"></div>
+      `;
+
+      document.body.appendChild(this.palette);
+      this.contentArea = this.palette.querySelector('#palette-content');
+
+      // Listen for palette-edit events
+      document.addEventListener('palette-edit', (e) => this._handleEdit(e));
+    }
+
+    /**
+     * Update palette to show current element + mode data
+     */
+    update(element) {
+      this.currentElement = element;
+      this.currentElementUuid = element.dataset.uuid;
+
+      const modeData = polymorphState.getModeData(this.currentMode);
+      const elementData = modeData[this.currentElementUuid] || {};
+
+      // Get base element info
+      const selector = this._generateSelector(element);
+      const text = element.innerText || '';
+      const computedStyle = window.getComputedStyle(element);
+
+      // Check inheritance (is this inherited or overridden?)
+      const isOverridden = elementData.text || elementData.color || elementData.fontSize;
+      const inheritanceClass = isOverridden ? 'status-overridden' : 'status-inherited';
+      const inheritanceColor = isOverridden ? '#007bff' : '#ff8c00';
+
+      let html = `
+        <div style="margin-bottom: 12px;">
+          <h3 style="margin: 0 0 8px 0; border-bottom: 1px solid #333; color: #00ff00; font-size: 12px;">
+            [EDITING IN: ${this.currentMode.toUpperCase()}]
+          </h3>
+        </div>
+
+        <div style="margin-bottom: 10px; padding: 8px; background: #1a1a1a; border-left: 2px solid ${inheritanceColor};">
+          <label style="color: #888; font-size: 10px;">SELECTOR</label>
+          <div style="font-weight: bold; word-break: break-all; font-size: 11px;">${selector}</div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="color: #888; font-size: 10px;">TEXT</label>
+          <div id="quill-editor-container" style="background: white; border: 1px solid #ddd; border-radius: 3px; min-height: 100px; margin-bottom: 8px;"></div>
+          <button id="apply-text" style="width: 100%; padding: 6px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; font-family: 'JetBrains Mono'; border-radius: 3px;">APPLY
+   TEXT</button>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="color: #888; font-size: 10px;">COLOR</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="color" id="color-picker" value="${elementData.color || computedStyle.color}" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #444;">
+            <input type="text" id="color-text" value="${elementData.color || computedStyle.color}" style="flex: 1; padding: 4px; background: #222; border: 1px solid #444; color: #00ff00; font-family:
+  monospace; font-size: 11px;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="color: #888; font-size: 10px;">FONT SIZE</label>
+          <input type="text" id="font-size" value="${elementData.fontSize || computedStyle.fontSize}" style="width: 100%; padding: 6px; background: #222; border: 1px solid #444; color: #00ff00; font-family:
+  monospace; font-size: 11px;">
+        </div>
+
+        <div style="display: flex; gap: 6px;">
+          <button id="apply-all" style="flex: 1; padding: 8px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; font-family: 'JetBrains Mono'; border-radius:
+  3px;">APPLY</button>
+          <button id="reset-element" style="flex: 1; padding: 8px; background: #666; color: #fff; border: none; font-weight: bold; cursor: pointer; font-family: 'JetBrains Mono'; border-radius:
+  3px;">RESET</button>
+        </div>
+      `;
+
+      this.contentArea.innerHTML = html;
+
+      // Initialize Quill if text content exists
+      if (text) {
+        setTimeout(() => this._initQuillEditor(text), 100);
+      }
+
+      this._attachListeners();
+    }
+
+    _initQuillEditor(initialText) {
+      const container = document.getElementById('quill-editor-container');
+      if (!container) return;
+
+      if (this.quillEditor) {
+        this.quillEditor = null;
+      }
+
+      this.quillEditor = new Quill(container, {
+        theme: 'snow',
+        modules: {
+          toolbar: [['bold', 'italic', 'underline'], ['link']]
+        }
+      });
+
+      this.quillEditor.setContents([{ insert: initialText }]);
+    }
+
+    _attachListeners() {
+      // Color picker sync
+      const colorPicker = document.getElementById('color-picker');
+      const colorText = document.getElementById('color-text');
+
+      if (colorPicker) {
+        colorPicker.addEventListener('change', (e) => {
+          colorText.value = e.target.value;
+        });
+      }
+
+      if (colorText) {
+        colorText.addEventListener('change', (e) => {
+          colorPicker.value = e.target.value;
+        });
+      }
+
+      // Apply text
+      const applyTextBtn = document.getElementById('apply-text');
+      if (applyTextBtn && this.quillEditor) {
+        applyTextBtn.addEventListener('click', () => {
+          const text = this.quillEditor.getText().trim();
+          this._applyEdit('text', text);
+        });
+      }
+
+      // Apply all
+      const applyAllBtn = document.getElementById('apply-all');
+      if (applyAllBtn) {
+        applyAllBtn.addEventListener('click', () => {
+          this._applyEdit('color', document.getElementById('color-picker').value);
+          this._applyEdit('fontSize', document.getElementById('font-size').value);
+        });
+      }
+
+      // Reset
+      const resetBtn = document.getElementById('reset-element');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          this._applyEdit('reset', null);
+        });
+      }
+    }
+
+    _applyEdit(property, value) {
+      if (property === 'reset') {
+        // Clear this element's overrides for this mode
+        polymorphState.themeMap[this.currentMode][this.currentElementUuid] = {};
+        polymorphState.saveToStorage();
+        // Reset inline styles
+        this.currentElement.style.cssText = '';
+        if (this.currentElement.dataset.originalText) {
+          this.currentElement.innerText = this.currentElement.dataset.originalText;
+        }
+      } else {
+        // Save to themeMap
+        polymorphState.setProperty(this.currentMode, this.currentElementUuid, property, value);
+
+        // Apply to DOM immediately
+        if (property === 'text') {
+          this.currentElement.innerText = value;
+        } else {
+          this.currentElement.style[property] = value;
+        }
+      }
+
+      // Refresh palette UI
+      this.update(this.currentElement);
+    }
+
+    _generateSelector(el) {
+      if (el.id) return `#${el.id}`;
+      const tagName = el.tagName.toLowerCase();
+      if (el.className && typeof el.className === 'string') {
+        const classes = el.className.split(/\s+/).filter(c => c.trim()).join('.');
+        if (classes) return `${tagName}.${classes}`;
+      }
+      return tagName;
+    }
+
+    /**
+     * Switch the palette to a different mode
+     */
+    switchMode(modeId) {
+      this.currentMode = modeId;
+      if (this.currentElement) {
+        this.update(this.currentElement); // Refresh palette for new mode
+      }
+    }
+
+    show() { this.palette.style.display = 'block'; }
+    hide() { this.palette.style.display = 'none'; }
+
+    _handleEdit(event) {
+      // For future: handle external edit events (Phase 2+)
+    }
+  }
+
+  Testing:
+  - ✓ Click on an element, palette shows [EDITING IN: LIGHT]
+  - ✓ Edit text, color, font size
+  - ✓ Click APPLY, changes apply to DOM
+  - ✓ Switch modes, palette updates to show new mode's data
+
+  ---
+  PHASE 1: MILESTONE 4 — Mode Switching Logic
+
+  Step 1.7: Create sync-engine.js
+
+  File to Create: Websites/Axxilak/Weblings/apex/js/sync-engine.js
+
+  // sync-engine.js - PHASE 1 VERSION
+
+  class SyncEngine {
+    constructor() {
+      this.isInternal = false; // Flag to prevent loops (for Phase 2)
+      this.observer = null;
+    }
+
+    /**
+     * Initialize MutationObserver for editing
+     * In Phase 1, this is simple. In Phase 2, it becomes bidirectional.
+     */
+    initialize(container = document.body) {
+      this.observer = new MutationObserver((mutations) => {
+        // In Phase 1, just log. In Phase 2, this will sync to other panes.
+        if (this.isInternal) return; // Don't react to internal changes
+
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'characterData' || mutation.type === 'childList') {
+            const el = mutation.target.closest('[data-uuid]');
+            if (el) {
+              // User made a change - but we don't auto-save yet in Phase 1
+              // The palette handles saving via APPLY button
+            }
+          }
+        });
+      });
+
+      this.observer.observe(container, {
+        subtree: true,
+        characterData: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['style', 'class'],
+        attributeOldValue: true
+      });
+    }
+
+    pause() {
+      if (this.observer) this.observer.disconnect();
+    }
+
+    resume(container) {
+      this.initialize(container);
+    }
+  }
+
+  window.syncEngine = new SyncEngine();
+
+  Testing:
+  - ✓ Initialize sync engine: syncEngine.initialize()
+  - ✓ Pause/resume: syncEngine.pause() → syncEngine.resume()
+
+  ---
+  Step 1.8: Create mode-switch state machine
+
+  File to Create: Websites/Axxilak/Weblings/apex/js/mode-switch.js
+
+  // mode-switch.js
+
+  async function transitionToMode(targetModeId) {
+    // 1. LOCK - Pause observers to prevent mid-switch reactions
+    syncEngine.isInternal = true;
+    ui.showLoading(true);
+
+    try {
+      // 2. FETCH - Get mode data from storage
+      const modeData = polymorphState.getModeData(targetModeId);
+
+      // 3. MORPH - Use morphdom to reconstruct DOM
+      await morphdomEngine.reconstructDOMForMode(targetModeId);
+
+      // 4. STYLE - Update CSS variables for the pane
+      // In Phase 1, we just update the active mode globally
+      document.body.dataset.mode = targetModeId;
+      polymorphState.currentMode = targetModeId;
+
+      // 5. PALETTE - Update palette UI
+      if (window.palette) {
+        palette.switchMode(targetModeId);
+      }
+
+    } finally {
+      // 6. UNLOCK - Resume observers and clear loading
+      requestAnimationFrame(() => {
+        syncEngine.isInternal = false;
+        ui.showLoading(false);
+      });
+    }
+  }
+
+  // Wire to mode buttons (add to HTML)
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-mode-button]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modeId = btn.dataset.modeButton;
+        transitionToMode(modeId);
+      });
+    });
+  });
+
+  Testing:
+  - ✓ Add mode buttons to HTML: <button data-mode-button="light">Light</button>
+  - ✓ Click button, verify DOM updates
+  - ✓ Click rapidly, verify no crashes
+
+  ---
+  PHASE 1: MILESTONE 5 — Export (Single-Mode)
+
+  Step 1.9: Create export-engine.js
+
+  File to Create: Websites/Axxilak/Weblings/apex/js/export-engine.js
+
+  // export-engine.js
+
+  class ExportEngine {
+    /**
+     * Export current mode as standalone HTML
+     */
+    exportAsStandalone(modeId) {
+      const modeData = polymorphState.getModeData(modeId);
+
+      // 1. Reconstruct DOM for this mode
+      morphdomEngine.reconstructDOMForMode(modeId);
+
+      // 2. Bake metadata into head
+      this._injectMetadata(modeData);
+
+      // 3. Clone and purge editor artifacts
+      const cleanDOM = document.documentElement.cloneNode(true);
+      cleanDOM.querySelectorAll('.editor-only, [data-uuid]').forEach(el => {
+        if (el.classList.contains('editor-only')) {
+          el.remove();
+        } else {
+          // Keep UUID for now (optional: remove in final version)
+        }
+      });
+
+      // 4. Remove editor scripts
+      cleanDOM.querySelectorAll('script').forEach(script => {
+        const src = script.src || '';
+        const text = script.innerText || '';
+        if (src.includes('polymorph') || src.includes('sync-engine') ||
+            src.includes('tool-palette') || text.includes('transitionToMode')) {
+          script.remove();
+        }
+      });
+
+      // 5. Serialize to string
+      const html = `<!DOCTYPE html>${cleanDOM.outerHTML}`;
+
+      // 6. Download
+      this._downloadHTML(html, `webling-${modeId}.html`);
+    }
+
+    _injectMetadata(modeData) {
+      // Update og: tags for social sharing
+      const title = modeData.title || document.title;
+      const desc = modeData.description || 'Customized Webling';
+
+      document.title = title;
+
+      let ogTitle = document.head.querySelector('meta[property="og:title"]');
+      if (!ogTitle) {
+        ogTitle = document.createElement('meta');
+        ogTitle.setAttribute('property', 'og:title');
+        document.head.appendChild(ogTitle);
+      }
+      ogTitle.setAttribute('content', title);
+
+      let ogDesc = document.head.querySelector('meta[property="og:description"]');
+      if (!ogDesc) {
+        ogDesc = document.createElement('meta');
+        ogDesc.setAttribute('property', 'og:description');
+        document.head.appendChild(ogDesc);
+      }
+      ogDesc.setAttribute('content', desc);
+    }
+
+    _downloadHTML(html, filename) {
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  window.exportEngine = new ExportEngine();
+
+  Testing:
+  - ✓ Call exportEngine.exportAsStandalone('light')
+  - ✓ Verify download
+  - ✓ Open exported HTML, verify it's clean (no editor UI)
+
+  ---
+  PHASE 1: Wiring & Integration
+
+  Step 1.10: Update index.html to wire everything
+
+  File to Modify: Websites/Axxilak/Weblings/apex/index.html
+
+  Add these script imports to the bottom of <body>:
+
+  <!-- Polymorph Webling Scripts -->
+  <script src="./js/polymorph-state.js"></script>
+  <script src="./js/morphdom-engine.js"></script>
+  <script src="./js/sync-engine.js"></script>
+  <script src="./js/mode-switch.js"></script>
+  <script src="./js/export-engine.js"></script>
+  <script src="./js/tool-palette.js"></script>
+
+  <script>
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add UUIDs to all editable elements
+      addUUIDsToEditableElements();
+
+      // Initialize palette
+      window.palette = new ToolPalette();
+
+      // Initialize sync engine
+      syncEngine.initialize();
+
+      // Add mode button listeners
+      document.querySelectorAll('[data-mode-button]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          transitionToMode(btn.dataset.modeButton);
+        });
+      });
+
+      // Add export button listener
+      const exportBtn = document.querySelector('[data-export-button]');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          const modeId = polymorphState.currentMode;
+          exportEngine.exportAsStandalone(modeId);
+        });
+      }
+
+      console.log('Polymorph Webling initialized');
+    });
+  </script>
+
+  Add mode buttons to the navbar:
+
+  <div class="mode-selector" style="display: flex; gap: 8px; margin-left: auto;">
+    <button data-mode-button="light" style="padding: 8px 16px; background: #fff; color: #000; border: 1px solid #ddd; cursor: pointer;">Light</button>
+    <button data-mode-button="dark" style="padding: 8px 16px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer;">Dark</button>
+    <button data-mode-button="custom" style="padding: 8px 16px; background: #f5f5f5; color: #333; border: 1px solid #ddd; cursor: pointer;">Custom</button>
+    <button data-export-button style="padding: 8px 16px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer;">Export</button>
+  </div>
+
+  Testing:
+  - ✓ Load page, verify all console logs clear
+  - ✓ Click mode buttons, verify mode switches
+  - ✓ Edit element, click APPLY, verify change saves
+  - ✓ Switch modes, verify edits persist
+  - ✓ Refresh page, verify edits still there
+  - ✓ Click Export, verify download
+
+  ---
+  PHASE 1: Testing Checkpoints
+
+  Critical Path Test:
+  1. Load page → Verify 3 modes exist
+  2. Light mode: Edit heading text → Save
+  3. Switch to Dark mode → Verify heading is default
+  4. Dark mode: Edit heading color → Save
+  5. Switch to Light → Verify color is unchanged
+  6. Refresh page → Both edits persist
+  7. Export Light mode → Open exported file → Verify it's clean + standalone
+
+  Performance Test:
+  1. Switch modes 10x rapidly → Verify no UI lag
+  2. Check console for errors → Should be none
+  3. localStorage size → Should be < 1MB for 3 modes
+
+  Edge Cases:
+  1. Edit while in transition → Should be blocked (isInternal flag)
+  2. Delete a mode → Verify themeMap updates correctly
+  3. Create 10+ modes → Verify performance acceptable
+
+  ---
+  PHASE 1: Exit Criteria
+
+  ✓ Polymorph system working with localStorage
+  ✓ 3+ modes fully editable and persistent
+  ✓ Single-mode export working (clean HTML)
+  ✓ No infinite loops or race conditions
+  ✓ Architecture ready for Phase 2 (split-view infrastructure in place)
+  ✓ Code comments clear, tech debt minimal
+
+  Phase 1 Timeline: 4-5 hours
+
+  ---
+  PHASE 2: SPLIT-VIEW — Dual Panes + Bidirectional Sync
+
+  Duration: 2-3 hours | Objective: See two modes side-by-side, edit either side seamlessly
+
+  What Ships:
+  - ✓ Draggable divider between panes
+  - ✓ Left pane = one mode, Right pane = another mode
+  - ✓ Edit on left, right doesn't change (mode-specific)
+  - ✓ Bidirectional sync without infinite loops
+  - ✓ Smooth fade transitions between modes
+  - ✓ 300ms mode switches (sub-100ms target achieved)
+
+  ---
+  PHASE 2: MILESTONE 1 — Dual-Pane HTML Structure
+
+  Step 2.1: Create Split-View Layout
+
+  File to Modify: Websites/Axxilak/Weblings/apex/index.html
+
+  Wrap main content in split-view containers:
+
+  <!-- Add this to <body> -->
+  <div id="split-view-wrapper" style="display: flex; height: calc(100vh - 60px); gap: 0;">
+    <!-- LEFT PANE -->
+    <div id="pane-left" class="pane-wrapper" data-pane="left" data-mode="light" style="flex: 1; overflow-y: auto; border-right: 2px solid #333;">
+      <!-- Content cloned here -->
+    </div>
+
+    <!-- DIVIDER -->
+    <div id="divider-handle" style="width: 4px; background: #444; cursor: col-resize; z-index: 100; user-select: none;"></div>
+
+    <!-- RIGHT PANE (hidden initially) -->
+    <div id="pane-right" class="pane-wrapper" data-pane="right" data-mode="dark" style="flex: 1; overflow-y: auto; display: none; border-left: 2px solid #333;">
+      <!-- Content cloned here -->
+    </div>
+  </div>
+
+  Why this structure?
+  - data-pane identifies which pane
+  - data-mode identifies which mode
+  - Flex layout allows resizing via divider
+  - CSS scoping via [data-pane][data-mode="dark"] selectors (from Phase 1)
+
+  Testing:
+  - ✓ Verify layout renders without breaks
+  - ✓ Verify left pane visible, right hidden
+
+  ---
+  Step 2.2: Create split-view.js
+
+  File to Create: Websites/Axxilak/Weblings/apex/js/split-view.js
+
+  // split-view.js
+
+  class SplitView {
+    constructor() {
+      this.leftPane = document.getElementById('pane-left');
+      this.rightPane = document.getElementById('pane-right');
+      this.divider = document.getElementById('divider-handle');
+      this.isDragging = false;
+      this.startX = 0;
+      this.startFlex = 50;
+
+      this._attachDividerListeners();
+    }
+
+    _attachDividerListeners() {
+      this.divider.addEventListener('mousedown', (e) => {
+        this.isDragging = true;
+        this.startX = e.clientX;
+        document.addEventListener('mousemove', (e) => this._onDividerDrag(e));
+        document.addEventListener('mouseup', () => this._onDividerDragEnd());
+      });
+    }
+
+    _onDividerDrag(e) {
+      if (!this.isDragging) return;
+
+      const deltaX = e.clientX - this.startX;
+      const totalWidth = this.leftPane.parentElement.offsetWidth;
+      const newLeftWidth = ((this.leftPane.offsetWidth + deltaX) / totalWidth) * 100;
+
+      if (newLeftWidth > 20 && newLeftWidth < 80) {
+        this.leftPane.style.flex = newLeftWidth;
+        this.rightPane.style.flex = 100 - newLeftWidth;
+      }
+    }
+
+    _onDividerDragEnd() {
+      this.isDragging = false;
+    }
+
+    /**
+     * Show split-view (display both panes)
+     */
+    showSplitView(leftMode, rightMode) {
+      this.rightPane.style.display = 'block';
+      this.leftPane.dataset.mode = leftMode;
+      this.rightPane.dataset.mode = rightMode;
+
+      // Clone content into both panes
+      this._clonePaneContent(this.leftPane, leftMode);
+      this._clonePaneContent(this.rightPane, rightMode);
+
+      // Add event routing for palette dual-targeting
+      this._addPaneEventListeners();
+    }
+
+    _clonePaneContent(pane, modeId) {
+      // Use generateHTMLFromSchema to render the mode
+      const modeData = polymorphState.getModeData(modeId);
+      const targetHTML = morphdomEngine.generateHTMLFromSchema(modeData);
+
+      // Parse HTML and insert into pane
+      const temp = document.createElement('div');
+      temp.innerHTML = targetHTML;
+      const contentRoot = temp.querySelector('main') || temp.querySelector('body') || temp.firstElementChild;
+      pane.innerHTML = contentRoot?.innerHTML || '';
+    }
+
+    _addPaneEventListeners() {
+      [this.leftPane, this.rightPane].forEach(pane => {
+        pane.addEventListener('click', (e) => {
+          const targetEl = e.target.closest('[data-uuid]');
+          if (targetEl) {
+            palette.currentElement = targetEl;
+            palette.currentElementUuid = targetEl.dataset.uuid;
+            palette.currentMode = pane.dataset.mode;
+            palette.update(targetEl);
+          }
+        });
+      });
+    }
+
+    /**
+     * Hide split-view (show only left pane)
+     */
+    hideSplitView() {
+      this.rightPane.style.display = 'none';
+    }
+  }
+
+  window.splitView = new SplitView();
+
+  Testing:
+  - ✓ Call splitView.showSplitView('light', 'dark')
+  - ✓ Verify both panes visible, side-by-side
+  - ✓ Drag divider, verify resize works
+  - ✓ Click element on left pane, verify palette targets left mode
+
+  ---
+  PHASE 2: MILESTONE 2 — Bidirectional Sync with Loop Prevention
+
+  Step 2.3: Update sync-engine.js for Phase 2
+
+  File to Modify: Websites/Axxilak/Weblings/apex/js/sync-engine.js
+
+  // REPLACE the SyncEngine class with this PHASE 2 version:
+
+  class SyncEngine {
+    constructor() {
+      this.isInternal = false; // ← THE CRITICAL FLAG
+      this.observers = {};    // Per-pane observers
+    }
+
+    /**
+     * Initialize observers for BOTH panes (Phase 2)
+     */
+    initializeBidirectional(leftPane, rightPane) {
+      this._attachObserverToPane(leftPane, 'left');
+      this._attachObserverToPane(rightPane, 'right');
+    }
+
+    _attachObserverToPane(pane, paneId) {
+      const observer = new MutationObserver((mutations) => {
+        // THE ORIGIN FLAG: Don't react if we're in an internal sync
+        if (this.isInternal) {
+          return; // ← Blocks infinite loops!
+        }
+
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'characterData' || mutation.type === 'childList') {
+            const el = mutation.target.closest('[data-uuid]');
+            if (el) {
+              const modeId = pane.dataset.mode;
+              const uuid = el.dataset.uuid;
+
+              // User made a change on this pane/mode
+              // Sync to DOM + storage (don't sync to other pane - keep modes separate)
+              this._syncToStorage(modeId, uuid, el);
+            }
+          }
+        });
+      });
+
+      observer.observe(pane, {
+        subtree: true,
+        characterData: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['style', 'class', 'value'],
+        attributeOldValue: true
+      });
+
+      this.observers[paneId] = observer;
+    }
+
+    _syncToStorage(modeId, elementUuid, element) {
+      // Save the change to storage
+      polymorphState.setProperty(modeId, elementUuid, 'text', element.innerText);
+
+      // Dispatch palette-edit event so command manager can track undo/redo
+      const event = new CustomEvent('palette-edit', {
+        detail: { modeId, elementUuid, value: element.innerText }
+      });
+      document.dispatchEvent(event);
+    }
+
+    /**
+     * Broadcast a change to the OTHER pane (if in different mode)
+     * This is called AFTER a palette edit
+     */
+    broadcast(sourcePane, modeId, elementUuid, value) {
+      // Set the flag so observers don't react
+      this.isInternal = true;
+
+      // Find all elements with the same UUID in all panes
+      const allElements = document.querySelectorAll(`[data-uuid="${elementUuid}"]`);
+      allElements.forEach(el => {
+        el.innerText = value;
+      });
+
+      // Reset flag after microtask
+      requestAnimationFrame(() => {
+        this.isInternal = false;
+      });
+    }
+
+    pause() {
+      Object.values(this.observers).forEach(obs => obs.disconnect());
+    }
+
+    resume(leftPane, rightPane) {
+      this.initializeBidirectional(leftPane, rightPane);
+    }
+  }
+
+  The Critical Concept:
+
+  User edits LEFT pane
+    ↓
+  LEFT pane's MutationObserver fires
+    ↓
+  Check: isInternal? NO → Process change
+    ↓
+  Save to storage (LEFT mode only)
+    ↓
+  Set isInternal = true
+    ↓
+  Sync RIGHT pane's DOM (visual only, doesn't trigger observer)
+    ↓
+  Set isInternal = false in requestAnimationFrame
+    ↓
+  RIGHT pane's observer fires BUT:
+    ↓
+  Check: isInternal? YES → Return (ignore)
+    ↓
+  Loop prevented! ✓
+
+  Testing:
+  - ✓ Initialize: syncEngine.initializeBidirectional(leftPane, rightPane)
+  - ✓ Edit text on LEFT pane
+  - ✓ Verify RIGHT pane doesn't change (different modes)
+  - ✓ Edit color on RIGHT pane
+  - ✓ Verify LEFT pane doesn't change
+  - ✓ Check console for "isInternal" logs (should toggle)
+  - ✓ No infinite loops
+
+  ---
+  Step 2.4: Update tool-palette.js for Dual-Targeting
+
+  File to Modify: Websites/Axxilak/Weblings/apex/js/tool-palette.js
+
+  Add these methods to ToolPalette class:
+
+  /**
+   * In Phase 2, palette knows which pane it's targeting
+   */
+  switchMode(modeId) {
+    this.currentMode = modeId;
+    if (this.currentElement) {
+      this.update(this.currentElement);
+    }
+  }
+
+  _applyEdit(property, value) {
+    // THIS NOW INCLUDES: Which pane/mode we're targeting
+    if (property === 'reset') {
+      polymorphState.themeMap[this.currentMode][this.currentElementUuid] = {};
+      polymorphState.saveToStorage();
+      this.currentElement.style.cssText = '';
+    } else {
+      // Save to themeMap for THIS mode
+      polymorphState.setProperty(this.currentMode, this.currentElementUuid, property, value);
+
+      // Apply to DOM immediately
+      if (property === 'text') {
+        this.currentElement.innerText = value;
+      } else {
+        this.currentElement.style[property] = value;
+      }
+
+      // PHASE 2: Broadcast to sync engine (visual update only)
+      syncEngine.broadcast('palette', this.currentMode, this.currentElementUuid, value);
+    }
+
+    this.update(this.currentElement);
+  }
+
+  Testing:
+  - ✓ Click element on LEFT, palette shows LEFT mode
+  - ✓ Edit, click APPLY
+  - ✓ LEFT pane updates, RIGHT pane stays the same (different mode)
+  - ✓ Click element on RIGHT, palette switches to RIGHT mode
+  - ✓ Edit, LEFT pane unaffected
+
+  ---
+  PHASE 2: MILESTONE 3 — Mode Selector & Transitions
+
+  Step 2.5: Add Mode Selector UI
+
+  File to Modify: Websites/Axxilak/Weblings/apex/index.html
+
+  Update the navbar with mode buttons:
+
+  <div class="mode-selector" style="display: flex; gap: 8px; margin-left: auto; align-items: center;">
+    <!-- Single-pane mode buttons -->
+    <div id="single-mode-buttons" style="display: flex; gap: 8px;">
+      <button data-mode-button="light" class="mode-btn-single" style="padding: 8px 16px; background: #fff; color: #000; border: 1px solid #ddd; cursor: pointer;">Light</button>
+      <button data-mode-button="dark" class="mode-btn-single" style="padding: 8px 16px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer;">Dark</button>
+    </div>
+
+    <!-- Split-view toggle -->
+    <button id="toggle-split" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; font-weight: bold; cursor: pointer;">Split View</button>
+
+    <!-- Split-view mode selectors -->
+    <div id="split-mode-selectors" style="display: none; gap: 8px;">
+      <select id="left-mode-select" style="padding: 6px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer;">
+        <option value="light">Left: Light</option>
+        <option value="dark">Left: Dark</option>
+      </select>
+      <select id="right-mode-select" style="padding: 6px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer;">
+        <option value="dark" selected>Right: Dark</option>
+        <option value="light">Right: Light</option>
+      </select>
+    </div>
+
+    <button data-export-button style="padding: 8px 16px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer;">Export</button>
+  </div>
+
+  Add toggle logic:
+
+  // In DOMContentLoaded:
+
+  const toggleSplitBtn = document.getElementById('toggle-split');
+  const singleModeButtons = document.getElementById('single-mode-buttons');
+  const splitModeSelectors = document.getElementById('split-mode-selectors');
+  const leftModeSelect = document.getElementById('left-mode-select');
+  const rightModeSelect = document.getElementById('right-mode-select');
+
+  toggleSplitBtn.addEventListener('click', () => {
+    if (splitView.rightPane.style.display === 'none') {
+      // ENABLE split-view
+      toggleSplitBtn.innerText = 'Single View';
+      singleModeButtons.style.display = 'none';
+      splitModeSelectors.style.display = 'flex';
+
+      const leftMode = leftModeSelect.value;
+      const rightMode = rightModeSelect.value;
+      splitView.showSplitView(leftMode, rightMode);
+      syncEngine.initializeBidirectional(splitView.leftPane, splitView.rightPane);
+    } else {
+      // DISABLE split-view
+      toggleSplitBtn.innerText = 'Split View';
+      singleModeButtons.style.display = 'flex';
+      splitModeSelectors.style.display = 'none';
+      splitView.hideSplitView();
+      syncEngine.pause();
+    }
+  });
+
+  // Mode selector changes
+  [leftModeSelect, rightModeSelect].forEach(select => {
+    select.addEventListener('change', () => {
+      const leftMode = leftModeSelect.value;
+      const rightMode = rightModeSelect.value;
+      if (leftMode !== rightMode) {
+        splitView.showSplitView(leftMode, rightMode);
+      }
+    });
+  });
+
+  Testing:
+  - ✓ Click "Split View" button, both panes appear
+  - ✓ Change left/right mode selectors, panes update
+  - ✓ Click "Single View", return to single pane
+  - ✓ Mode transitions smooth (300ms fade)
+
+  ---
+  PHASE 2: Testing Checkpoints
+
+  Critical Path Test:
+  1. Load page → Single-pane mode visible
+  2. Click "Split View" → Both panes appear (light/dark)
+  3. Edit text on LEFT pane → Save
+  4. Verify RIGHT pane unchanged (different mode)
+  5. Edit color on RIGHT pane → Save
+  6. Click "Single View" → Back to single pane
+  7. Click LEFT mode button → See light mode (with text edit)
+  8. Click RIGHT mode button → See dark mode (with color edit)
+  9. Refresh → Both edits persist
+
+  Bidirectional Sync Test:
+  1. Split view active (light/dark)
+  2. Edit rapidly on both panes
+  3. Verify no infinite loops (check console)
+  4. Verify changes only affect their mode
+  5. Verify NO cross-contamination
+
+  Performance Test:
+  1. Mode switch: < 100ms ✓
+  2. Split-view toggle: < 300ms ✓
+  3. Divider drag: smooth, no jank ✓
+  4. Storage size: < 2MB for 10 modes ✓
+
+  ---
+  PHASE 2: Exit Criteria
+
+  ✓ Split-view working perfectly
+  ✓ Bidirectional sync without loops
+  ✓ Mode-specific edits preserved
+  ✓ Smooth transitions (300ms)
+  ✓ Export still works from both views
+  ✓ All performance targets met
+
+  Phase 2 Timeline: 2-3 hours
+
+  ---
+  PHASE 3-5: ROADMAP (Post-Launch Iterations)
+  ┌───────┬──────────────┬──────────┬───────────────────────────────────────────────────────────────────┐
+  │ Phase │    Focus     │ Duration │                          Key Deliverable                          │
+  ├───────┼──────────────┼──────────┼───────────────────────────────────────────────────────────────────┤
+  │ 3     │ UI Polish    │ 1-2h     │ Visual inheritance indicators (orange/blue), professional UX      │
+  ├───────┼──────────────┼──────────┼───────────────────────────────────────────────────────────────────┤
+  │ 4     │ Asset Engine │ 2-3h     │ IndexedDB for images/fonts, bypass 5MB limit                      │
+  ├───────┼──────────────┼──────────┼───────────────────────────────────────────────────────────────────┤
+  │ 5     │ Security     │ 1-2h     │ DOMPurify + CSP, polymorph export (re-editable), TiddlyWiki saver │
+  └───────┴──────────────┴──────────┴───────────────────────────────────────────────────────────────────┘
+  ---
+  KEY DECISION POINTS FOR TIMOTHY
+
+  Before we code, confirm:
+
+  1. Default Modes: Start with light/dark only, or add "custom" from the start?
+  2. Palette Position: Floating + draggable as-is, or preferences?
+  3. Export Scope: Single-mode only (Phase 1-2), or include polymorph export in Phase 2?
+  4. Undo/Redo: Implement in Phase 2, or defer to Phase 3?
+  5. localStorage Limit: Is <5MB acceptable for MVP, or plan for IndexedDB sooner?
+
+  ---
+  INTEGRATION CHECKPOINTS
+
+  After Phase 1:
+  - Polymorph system proven with single-pane editor
+  - Can edit, persist, export individual modes
+  - Ready for Phase 2 without major refactoring
+
+  After Phase 2:
+  - Split-view working, sync perfect, sync loops prevented
+  - Professional UX in place
+  - Ready for public launch
+  - Can add Phases 3-5 based on user feedback
+
+  ---
+  GOTCHAS & MITIGATIONS
+  ┌────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────┐
+  │                     Gotcha                     │                         Mitigation                          │
+  ├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ MutationObserver fires on internal DOM changes │ Use isInternal flag to block reactions                      │
+  ├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Focus lost during morphdom reconstruction      │ Use onBeforeElUpdated to preserve INPUT focus               │
+  ├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ localStorage bloats with Base64 images         │ Defer to Phase 4 (IndexedDB migration)                      │
+  ├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ CSS variables bleed between panes              │ Use [data-pane][data-mode] scoping                          │
+  ├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ Rapid mode switches cause race conditions      │ Lock observers during transition, use requestAnimationFrame │
+  ├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ XSS via pasted malicious HTML                  │ Phase 5 adds DOMPurify + CSP, not critical for MVP          │
+  └────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────┘
+  ---
+  FILES TO CREATE/MODIFY (Master List)
+  ┌────────────────────────────┬────────────────────────────────────────────────────────────┬───────┬─────────┐
+  │            File            │                           Action                           │ Phase │ Status  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/index.html            │ Modify (add script imports, mode buttons, split-view HTML) │ 1-2   │ Create  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/polymorph-state.js │ Create (variant-first data + storage)                      │ 1     │ Create  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/morphdom-engine.js │ Create (VDOM reconstruction)                               │ 1     │ Create  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/mode-switch.js     │ Create (transitionToMode state machine)                    │ 1     │ Create  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/sync-engine.js     │ Create (MutationObserver + loop prevention)                │ 1-2   │ Create  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/split-view.js      │ Create (dual panes + divider)                              │ 2     │ Create  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/export-engine.js   │ Create (HTML baking + download)                            │ 1     │ Create  │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/tool-palette.js    │ REWRITE (mode-aware, Quill integration)                    │ 1-2   │ Rewrite │
+  ├────────────────────────────┼────────────────────────────────────────────────────────────┼───────┼─────────┤
+  │ apex/js/command-manager.js │ Create (delta-based undo/redo)                             │ 3     │ Defer   │
+  └────────────────────────────┴────────────────────────────────────────────────────────────┴───────┴─────────┘
+  ---
+  TIMELINE ESTIMATES
+  ┌──────────────────────┬───────────┬─────────────┐
+  │        Phase         │ Duration  │   Status    │
+  ├──────────────────────┼───────────┼─────────────┤
+  │ Phase 1 (Foundation) │ 4-5 hours │ Go          │
+  ├──────────────────────┼───────────┼─────────────┤
+  │ Phase 2 (Split-View) │ 2-3 hours │ Go          │
+  ├──────────────────────┼───────────┼─────────────┤
+  │ Total (MVP)          │ 6-8 hours │ Ship Ready  │
+  ├──────────────────────┼───────────┼─────────────┤
+  │ Phase 3 (Polish)     │ 1-2 hours │ Post-launch │
+  ├──────────────────────┼───────────┼─────────────┤
+  │ Phase 4 (Assets)     │ 2-3 hours │ Post-launch │
+  ├──────────────────────┼───────────┼─────────────┤
+  │ Phase 5 (Security)   │ 1-2 hours │ Post-launch │
+  └──────────────────────┴───────────┴─────────────┘
+  ---
+  SUCCESS CRITERIA (Hard Requirements)
+
+  Phase 1-2 MVP:
+  - ✓ User can create 3+ modes
+  - ✓ Edit independently (no cross-contamination)
+  - ✓ Changes persist (localStorage)
+  - ✓ Split-view shows both modes live
+  - ✓ Export produces clean HTML
+  - ✓ Zero infinite loops
+  - ✓ Mode switches < 100ms
+  - ✓ Refresh reloads all edits correctly
+  - ✓ No JavaScript errors in console
+
+  Phase 1-2 Performance:
+  - ✓ Initial page load: < 2 seconds
+  - ✓ Mode switch: < 100ms
+  - ✓ localStorage size: < 5MB for 3+ modes
+  - ✓ Divider drag: smooth (60fps)
+
+  ---
+  READY FOR GEMMYB'S FINAL VALIDATION?
+
+  ---
+  This is the comprehensive, step-by-step blueprint. Every file. Every function. Every test. Ready to code immediately after your approval.

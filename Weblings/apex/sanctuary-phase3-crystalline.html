@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXXILAK | Sanctuary of Echoes - Crystalline</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Space+Grotesk:wght@300;500&family=JetBrains+Mono:wght@400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --void: #050505;
+            --lux-gold: #FFD700;
+            --lux-cyan: #00FFFF;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--void);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        #split-view-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .pane-wrapper {
+            flex: 1;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #1a1a1a;
+        }
+
+        .tool-palette {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 320px;
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid var(--lux-gold);
+            border-radius: 6px;
+            z-index: 20000;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+        }
+
+        .palette-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            color: var(--lux-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            letter-spacing: 0.2em;
+        }
+
+        /* Sanctuary Boundary Marker */
+        [data-anothen-internal] {
+            pointer-events: auto !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="split-view-wrapper">
+        <div id="pane-left" class="pane-wrapper" data-mode="light">
+            <main style="padding: 100px 3rem; color: #000; background: #fff;">
+                <h1 data-uuid="h1-title" contenteditable="true">The Sanctuary</h1>
+                <p data-uuid="p-desc" contenteditable="true">Edit freely—each mode preserves its own truth.</p>
+            </main>
+        </div>
+        <div id="pane-right" class="pane-wrapper" data-mode="dark" style="background: #0a0a0a; color: #fff;">
+            <main style="padding: 100px 3rem;">
+                <h1 data-uuid="h1-title" contenteditable="true">The Sanctuary</h1>
+                <p data-uuid="p-desc" contenteditable="true">Dark mode variant logic active.</p>
+            </main>
+        </div>
+    </div>
+
+    <div id="palette-ui" class="tool-palette" data-anothen-internal>
+        <div class="palette-header">>>> TARGET_LATTICE</div>
+        <div style="padding: 20px; color: #fff; font-size: 11px;">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888; text-transform: uppercase;">Element ID</label>
+                <div id="target-uuid" style="color: var(--lux-gold);">None</div>
+            </div>
+            <button onclick="document.body.classList.toggle('the-hunch')"
+                style="width:100%; padding:10px; background:transparent; border:1px solid var(--lux-cyan); color:var(--lux-cyan); cursor:pointer;">TOGGLE
+                HUNCH</button>
+        </div>
+    </div>
+
+    <script>
+        // SANCTUARY STABILITY ENGINE
+        const Palette = {
+            init() {
+                document.addEventListener('click', (e) => {
+                    // THE SANCTUARY BOUNDARY: Ignore clicks on internal UI to stop blinking
+                    if (e.target.closest('[data-anothen-internal]')) return;
+
+                    const el = e.target.closest('[data-uuid]');
+                    if (el) {
+                        // THE UNDEFINED SHIELD: Guard against null focus "Obliteration"
+                        if (el.innerText.trim() === 'undefined') {
+                            console.warn("[Axxilak] Blocked 'undefined' lattice leak.");
+                            return;
+                        }
+
+                        document.getElementById('palette-ui').style.display = 'block';
+                        document.getElementById('target-uuid').innerText = el.dataset.uuid;
+                    }
+                });
+            }
+        };
+        Palette.init();
+    </script>
+</body>
+
+</html>

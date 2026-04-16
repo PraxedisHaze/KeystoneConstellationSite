@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher</title>
+    <style>
+        :root { --bg: #000000; --text: #00ff41; }
+        body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; padding: 40px; margin: 0; }
+        h1 { font-size: 2rem; letter-spacing: 2px; margin: 0.5em 0; }
+        p { max-width: 600px; }
+        .section { margin: 3rem 0; max-width: 500px; border-top: 1px solid var(--text); padding-top: 1rem; }
+        input, textarea { width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid var(--text); color: var(--text); font-family: inherit; margin: 5px 0; }
+        button { background: var(--text); color: var(--bg); padding: 10px 20px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>{{text.name}}</h1>
+    <p>{{text.tagline}}</p>
+    <p>{{text.bio}}</p>
+
+    <div class="section">
+        <h3>/ACCESS_POINT</h3>
+        <input type="text" placeholder="USERNAME">
+        <input type="email" placeholder="USER@CIPHER.NET">
+        <textarea placeholder="TRANSMISSION..." rows="3"></textarea>
+        <button>Jack In</button>
+    </div>
+</body>
+</html>

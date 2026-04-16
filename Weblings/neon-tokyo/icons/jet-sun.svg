@@ -1,0 +1,23 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="jetGlow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Jet Sun - High-tech, precision, aerospace -->
+  <circle cx="12" cy="12" r="5" stroke="#00e5ff" stroke-width="1.5" filter="url(#jetGlow)"/>
+  <!-- Precise geometric rays -->
+  <line x1="12" y1="1.5" x2="12" y2="3.5" stroke="#00e5ff" stroke-width="1.5" filter="url(#jetGlow)"/>
+  <line x1="12" y1="20.5" x2="12" y2="22.5" stroke="#00e5ff" stroke-width="1.5" filter="url(#jetGlow)"/>
+  <line x1="1.5" y1="12" x2="3.5" y2="12" stroke="#00e5ff" stroke-width="1.5" filter="url(#jetGlow)"/>
+  <line x1="20.5" y1="12" x2="22.5" y2="12" stroke="#00e5ff" stroke-width="1.5" filter="url(#jetGlow)"/>
+  <!-- Precision diagonal rays -->
+  <line x1="4" y1="4" x2="5.6" y2="5.6" stroke="#7c4dff" stroke-width="1" opacity="0.8" filter="url(#jetGlow)"/>
+  <line x1="18.4" y1="18.4" x2="20" y2="20" stroke="#7c4dff" stroke-width="1" opacity="0.8" filter="url(#jetGlow)"/>
+  <line x1="4" y1="20" x2="5.6" y2="18.4" stroke="#7c4dff" stroke-width="1" opacity="0.8" filter="url(#jetGlow)"/>
+  <line x1="18.4" y1="5.6" x2="20" y2="4" stroke="#7c4dff" stroke-width="1" opacity="0.8" filter="url(#jetGlow)"/>
+</svg>

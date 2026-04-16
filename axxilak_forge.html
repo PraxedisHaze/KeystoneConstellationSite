@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak Forge | System Builder</title>
+    <!-- Tailwind for the Forge UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- JSZip for generating the download package -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Forge specific styles */
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        /* Range slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #d4af37;
+            margin-top: -6px;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- HEADER -->
+    <header class="h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 shrink-0">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-8 h-8 bg-gradient-to-br from-[#d4af37] to-[#8b7355] rounded flex items-center justify-center font-bold text-slate-900">
+                A</div>
+            <h1 class="font-bold text-lg tracking-wide">Axxilak <span class="text-slate-500 font-normal">Forge &
+                    Studio</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-xs text-slate-400 hidden md:block">
+                <i class="fa-solid fa-circle-info mr-1"></i> Changes auto-save to State
+            </div>
+            <button onclick="downloadDistribution()"
+                class="bg-[#d4af37] hover:bg-[#b5952f] text-slate-900 font-bold py-2 px-4 rounded text-sm transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Generate Distribution ZIP
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex-1 flex overflow-hidden">
+
+        <!-- LEFT: EDITOR CONTROLS -->
+        <aside class="w-80 bg-slate-800 border-r border-slate-700 flex flex-col shrink-0 z-10 overflow-y-auto">
+            <div class="p-5">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Global Design</h2>
+
+                <!-- Colors -->
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">Primary Color</label>
+                        <div class="flex gap-2">
+                            <input type="color" id="ctrl-primary"
+                                class="w-8 h-8 rounded cursor-pointer border-none bg-transparent" value="#d4af37"
+                                oninput="updateState('colors.primary', this.value)">
+                            <input type="text"
+                                class="flex-1 bg-slate-700 border border-slate-600 rounded text-xs px-2 text-slate-300 font-mono"
+                                value="#d4af37" readonly>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">Background Color</label>
+                        <div class="flex gap-2">
+                            <input type="color" id="ctrl-bg"
+                                class="w-8 h-8 rounded cursor-pointer border-none bg-transparent" value="#0a0a0a"
+                                oninput="updateState('colors.background', this.value)">
+                            <input type="text"
+                                class="flex-1 bg-slate-700 border border-slate-600 rounded text-xs px-2 text-slate-300 font-mono"
+                                value="#0a0a0a" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Content</h2>
+
+                <!-- Text Inputs -->
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">Name / Brand</label>
+                        <input type="text" id="ctrl-name"
+                            class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white focus:border-[#d4af37] outline-none"
+                            value="Alex Vayner" oninput="updateState('text.name', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">Tagline</label>
+                        <input type="text" id="ctrl-tagline"
+                            class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white focus:border-[#d4af37] outline-none"
+                            value="Strategic Consultant" oninput="updateState('text.tagline', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">Bio / Intro</label>
+                        <textarea id="ctrl-bio" rows="3"
+                            class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white focus:border-[#d4af37] outline-none"
+                            oninput="updateState('text.bio', this.value)">Helping businesses navigate complexity through data-driven strategies and intuitive design thinking.</textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">Button Text</label>
+                        <input type="text" id="ctrl-cta"
+                            class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white focus:border-[#d4af37] outline-none"
+                            value="Work With Me" oninput="updateState('text.cta', this.value)">
+                    </div>
+                </div>
+
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Assets</h2>
+
+                <!-- Image Upload -->
+                <div class="mb-4">
+                    <label class="text-xs text-slate-300 block mb-1">Profile Image</label>
+                    <div class="relative">
+                        <input type="file" id="ctrl-img-upload" accept="image/*" class="hidden"
+                            onchange="handleImageUpload(this)">
+                        <label for="ctrl-img-upload"
+                            class="flex items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded cursor-pointer hover:border-[#d4af37] hover:bg-slate-700 transition-all">
+                            <div class="text-center">
+                                <i class="fa-solid fa-cloud-arrow-up text-slate-400 mb-1"></i>
+                                <span class="text-xs text-slate-400 block">Click to Upload</span>
+                            </div>
+                        </label>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1">Images converted to Base64 (Max 500KB recommended)</p>
+                </div>
+
+            </div>
+
+            <!-- Gumroad Simulator Info -->
+            <div class="mt-auto p-5 border-t border-slate-700 bg-slate-900">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-bold text-[#d4af37] uppercase">Live State Object</span>
+                    <span class="text-[10px] text-slate-500" id="state-size">0.5 KB</span>
+                </div>
+                <div class="h-16 bg-black rounded p-2 overflow-hidden relative group">
+                    <code class="text-[10px] text-green-400 font-mono break-all" id="json-preview">...</code>
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none">
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER: PREVIEW CANVAS -->
+        <div class="flex-1 bg-slate-900 flex flex-col relative">
+            <!-- Toolbar -->
+            <div class="h-10 bg-slate-800 border-b border-slate-700 flex items-center justify-center gap-4">
+                <button onclick="setPreviewMode('desktop')" class="text-slate-400 hover:text-white transition-colors"><i
+                        class="fa-solid fa-desktop"></i></button>
+                <button onclick="setPreviewMode('mobile')" class="text-slate-400 hover:text-white transition-colors"><i
+                        class="fa-solid fa-mobile-screen"></i></button>
+                <div class="w-px h-4 bg-slate-600 mx-2"></div>
+                <button onclick="resetTemplate()" class="text-xs text-red-400 hover:text-red-300">Reset
+                    Defaults</button>
+            </div>
+
+            <!-- Iframe Container -->
+            <div class="flex-1 flex items-center justify-center p-8 overflow-hidden bg-dots">
+                <div id="preview-wrapper"
+                    class="w-full h-full bg-white shadow-2xl transition-all duration-300 ease-in-out origin-top">
+                    <iframe id="preview-frame" class="w-full h-full border-none"
+                        sandbox="allow-scripts allow-same-origin"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- HIDDEN TEMPLATES (Source Code for Generation) -->
+
+    <!-- 1. THE WEBLING TEMPLATE (The Portfolio Site) -->
+    <script type="text/template" id="tpl-consultant">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{name}} | {{tagline}}</title>
+    <style>
+        /* Base Variables */
+        :root {
+            --primary: {{colors.primary}};
+            --bg: {{colors.background}};
+            --text: {{colors.text}};
+            --accent: {{colors.accent}};
+            --font-main: 'Helvetica Neue', sans-serif;
+        }
+
+        /* Reset & Base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Typography */
+        h1, h2, h3 { line-height: 1.2; font-weight: 700; margin-bottom: 1rem; }
+        h1 { font-size: 3.5rem; letter-spacing: -0.05em; }
+        h2 { font-size: 2.5rem; color: var(--primary); }
+        p { margin-bottom: 1.5rem; opacity: 0.9; }
+
+        /* Layout Utilities */
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 2rem; }
+        .section { padding: 6rem 0; }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: opacity 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { opacity: 0.8; }
+
+        /* Header */
+        header { padding: 2rem 0; position: absolute; width: 100%; top: 0; z-index: 10; }
+        nav { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -0.05em; }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .hero-content {
+            max-width: 600px;
+            z-index: 2;
+        }
+        .hero-img {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 400px;
+            height: 500px;
+            object-fit: cover;
+            opacity: 0.8;
+            filter: grayscale(100%);
+            z-index: 1;
+            box-shadow: 20px 20px 0 var(--primary);
+        }
+
+        /* Services Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+        .card {
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem;
+            transition: transform 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+        /* Contact */
+        .contact-box {
+            border: 2px solid var(--primary);
+            padding: 4rem;
+            text-align: center;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .hero-img { position: relative; width: 100%; height: 300px; margin-top: 2rem; transform: none; right: auto; top: auto; }
+            .hero { flex-direction: column; justify-content: center; padding-top: 6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">{{name}}</div>
+                <a href="#contact" style="color: var(--text); text-decoration: none;">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container" style="position: relative; width: 100%;">
+            <div class="hero-content">
+                <p style="color: var(--primary); font-weight: bold; letter-spacing: 0.2em; text-transform: uppercase;">{{tagline}}</p>
+                <h1>{{bio_short}}</h1>
+                <p>{{bio}}</p>
+                <a href="#contact" class="btn">{{cta}}</a>
+            </div>
+            <img src="{{profile_img}}" alt="Profile" class="hero-img">
+        </div>
+    </section>
+
+    <section class="section" style="background: rgba(255,255,255,0.03);">
+        <div class="container">
+            <h2>Expertise</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Strategy</h3>
+                    <p>Building roadmaps for complex digital transformation.</p>
+                </div>
+                <div class="card">
+                    <h3>Design</h3>
+                    <p>Crafting intuitive interfaces that delight users.</p>
+                </div>
+                <div class="card">
+                    <h3>Development</h3>
+                    <p>Clean, scalable code architecture for the modern web.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="contact">
+        <div class="container">
+            <div class="contact-box">
+                <h2>Ready to Start?</h2>
+                <p>Let's build something extraordinary together.</p>
+                <a href="mailto:contact@axxilak.com" class="btn">Get in Touch</a>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 2rem; font-size: 0.8rem; opacity: 0.5;">
+        &copy; {{year}} {{name}}. All rights reserved.
+    </footer>
+
+</body>
+</html>
+    </script>
+
+    <!-- 2. THE STANDALONE EDITOR SOURCE (The Tool in the Zip) -->
+    <script type="text/template" id="tpl-editor-source">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak Standalone Editor</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; display: flex; height: 100vh; overflow: hidden; background: #1a1a1a; color: white; }
+
+        /* Sidebar */
+        #editor-sidebar { width: 300px; background: #222; border-right: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #333; background: #111; display: flex; align-items: center; justify-content: space-between; }
+        .sidebar-brand { font-weight: bold; color: #d4af37; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+        /* Controls */
+        .control-group { margin-bottom: 20px; }
+        label { display: block; font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 5px; letter-spacing: 0.5px; }
+        input[type="text"], textarea { width: 100%; background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        input[type="text"]:focus, textarea:focus { border-color: #d4af37; outline: none; }
+        textarea { resize: vertical; min-height: 80px; }
+
+        .color-row { display: flex; align-items: center; gap: 10px; }
+        input[type="color"] { -webkit-appearance: none; border: none; width: 30px; height: 30px; padding: 0; background: none; cursor: pointer; }
+
+        .btn { display: block; width: 100%; background: #d4af37; color: #000; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn:hover { background: #c29f30; }
+        .btn-outline { background: transparent; border: 1px solid #555; color: #ccc; }
+        .btn-outline:hover { border-color: #fff; color: #fff; }
+
+        /* Preview Area */
+        #preview-container { flex: 1; background: #000; display: flex; flex-direction: column; }
+        #preview-header { height: 40px; background: #111; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #555; font-size: 12px; }
+        iframe { flex: 1; width: 100%; border: none; background: white; }
+
+        /* Notification */
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #d4af37; color: black; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; font-weight: bold; }
+        #toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <aside id="editor-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">Axxilak Editor</div>
+            <button id="btn-export" class="btn" style="width: auto; padding: 5px 10px; font-size: 12px;">EXPORT</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="control-group">
+                <label>Primary Color</label>
+                <div class="color-row">
+                    <input type="color" id="inp-primary">
+                    <input type="text" id="txt-primary" readonly style="flex:1; font-family: monospace;">
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Background Color</label>
+                <div class="color-row">
+                    <input type="color" id="inp-bg">
+                    <input type="text" id="txt-bg" readonly style="flex:1; font-family: monospace;">
+                </div>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+            <div class="control-group">
+                <label>Name</label>
+                <input type="text" id="inp-name">
+            </div>
+            <div class="control-group">
+                <label>Tagline</label>
+                <input type="text" id="inp-tagline">
+            </div>
+            <div class="control-group">
+                <label>Bio</label>
+                <textarea id="inp-bio"></textarea>
+            </div>
+            <div class="control-group">
+                <label>Button Text</label>
+                <input type="text" id="inp-cta">
+            </div>
+            <div class="control-group">
+                <label>Profile Image</label>
+                <button class="btn btn-outline" onclick="document.getElementById('inp-file').click()">Change Image</button>
+                <input type="file" id="inp-file" accept="image/*" style="display: none;">
+            </div>
+        </div>
+    </aside>
+
+    <div id="preview-container">
+        <div id="preview-header">LIVE PREVIEW MODE</div>
+        <iframe id="preview-frame"></iframe>
+    </div>
+
+    <div id="toast">Site Exported!</div>
+
+    <script>
+        // --- 1. CONFIGURATION & STATE ---
+        // This is injected by the generator, or defaults are used
+        const defaultConfig = {
+            colors: { primary: "#d4af37", background: "#0a0a0a", text: "#f5f5f5", accent: "#8b7355" },
+            text: { name: "Jane Doe", tagline: "Consultant", bio: "Building the future.", cta: "Contact Me" },
+            images: { profile: "https://via.placeholder.com/400x500/333/d4af37?text=Profile" }
+        };
+
+        // If 'initialState' is defined (baked in by Forge), use it. Otherwise defaults.
+        let state = (typeof initialState !== 'undefined') ? initialState : defaultConfig;
+
+        // The Template Source (Also baked in)
+        const templateSource = `__TEMPLATE_PLACEHOLDER__`;
+
+        // --- 2. EDITOR LOGIC ---
+        const frame = document.getElementById('preview-frame');
+
+        // Initialize
+        window.onload = function() {
+            renderPreview();
+            populateControls();
+            attachListeners();
+        };
+
+        function renderPreview() {
+            let html = templateSource;
+
+            // Replace text
+            html = html.replaceAll('{{name}}', state.text.name);
+            html = html.replaceAll('{{tagline}}', state.text.tagline);
+            html = html.replaceAll('{{bio}}', state.text.bio);
+            html = html.replaceAll('{{bio_short}}', state.text.bio.split('.')[0] + '.');
+            html = html.replaceAll('{{cta}}', state.text.cta);
+            html = html.replaceAll('{{year}}', new Date().getFullYear());
+
+            // Replace images
+            html = html.replaceAll('{{profile_img}}', state.images.profile);
+
+            // Replace colors
+            html = html.replaceAll('{{colors.primary}}', state.colors.primary);
+            html = html.replaceAll('{{colors.background}}', state.colors.background);
+            html = html.replaceAll('{{colors.text}}', state.colors.text);
+            html = html.replaceAll('{{colors.accent}}', state.colors.accent);
+
+            // Inject into iframe
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            doc.open();
+            doc.write(html);
+            doc.close();
+        }
+
+        function populateControls() {
+            document.getElementById('inp-primary').value = state.colors.primary;
+            document.getElementById('txt-primary').value = state.colors.primary;
+            document.getElementById('inp-bg').value = state.colors.background;
+            document.getElementById('txt-bg').value = state.colors.background;
+
+            document.getElementById('inp-name').value = state.text.name;
+            document.getElementById('inp-tagline').value = state.text.tagline;
+            document.getElementById('inp-bio').value = state.text.bio;
+            document.getElementById('inp-cta').value = state.text.cta;
+        }
+
+        function attachListeners() {
+            // Colors
+            const updateColor = (key, val) => {
+                state.colors[key] = val;
+                document.getElementById('txt-' + (key === 'primary' ? 'primary' : 'bg')).value = val;
+                renderPreview(); // Full re-render is safest for single file replacement
+            };
+            document.getElementById('inp-primary').addEventListener('input', (e) => updateColor('primary', e.target.value));
+            document.getElementById('inp-bg').addEventListener('input', (e) => updateColor('background', e.target.value));
+
+            // Text
+            const updateText = (key, val) => { state.text[key] = val; renderPreview(); };
+            document.getElementById('inp-name').addEventListener('input', (e) => updateText('name', e.target.value));
+            document.getElementById('inp-tagline').addEventListener('input', (e) => updateText('tagline', e.target.value));
+            document.getElementById('inp-bio').addEventListener('input', (e) => updateText('bio', e.target.value));
+            document.getElementById('inp-cta').addEventListener('input', (e) => updateText('cta', e.target.value));
+
+            // Image
+            document.getElementById('inp-file').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        state.images.profile = evt.target.result;
+                        renderPreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Export
+            document.getElementById('btn-export').addEventListener('click', function() {
+                const doc = frame.contentDocument || frame.contentWindow.document;
+                const cleanHTML = doc.documentElement.outerHTML;
+
+                const blob = new Blob([cleanHTML], {type: "text/html"});
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "index.html";
+                link.click();
+
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    <\/script>
+</body>
+</html>
+    </script>
+
+    <script>
+        // --- 3. FORGE LOGIC (Master Controller) ---
+
+        // Initial State
+        const defaultState = {
+            colors: {
+                primary: "#d4af37",
+                background: "#0a0a0a",
+                text: "#f5f5f5",
+                accent: "#8b7355"
+            },
+            text: {
+                name: "Alex Vayner",
+                tagline: "Strategic Consultant",
+                bio: "Helping businesses navigate complexity through data-driven strategies and intuitive design thinking. My approach combines technical rigor with creative problem solving.",
+                cta: "Work With Me",
+                bio_short: "Strategy Meets Design"
+            },
+            images: {
+                profile: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+            }
+        };
+
+        // Clone state to avoid ref issues
+        let currentState = JSON.parse(JSON.stringify(defaultState));
+
+        // Background pattern for the Forge UI
+        const dotStyle = document.createElement('style');
+        dotStyle.innerHTML = `
+            .bg-dots {
+                background-color: #0f172a;
+                background-image: radial-gradient(#1e293b 1px, transparent 1px);
+                background-size: 20px 20px;
+            }
+        `;
+        document.head.appendChild(dotStyle);
+
+        // -- Render Logic --
+        function renderLivePreview() {
+            let tpl = document.getElementById('tpl-consultant').innerHTML;
+
+            // Replace Placeholders
+            tpl = tpl.replace(/{{name}}/g, currentState.text.name);
+            tpl = tpl.replace(/{{tagline}}/g, currentState.text.tagline);
+            tpl = tpl.replace(/{{bio}}/g, currentState.text.bio);
+            tpl = tpl.replace(/{{bio_short}}/g, currentState.text.bio.substring(0, 50) + (currentState.text.bio.length > 50 ? '...' : ''));
+            tpl = tpl.replace(/{{cta}}/g, currentState.text.cta);
+            tpl = tpl.replace(/{{year}}/g, new Date().getFullYear());
+
+            tpl = tpl.replace(/{{profile_img}}/g, currentState.images.profile);
+
+            tpl = tpl.replace(/{{colors.primary}}/g, currentState.colors.primary);
+            tpl = tpl.replace(/{{colors.background}}/g, currentState.colors.background);
+            tpl = tpl.replace(/{{colors.text}}/g, currentState.colors.text);
+            tpl = tpl.replace(/{{colors.accent}}/g, currentState.colors.accent);
+
+            const frame = document.getElementById('preview-frame');
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            doc.open();
+            doc.write(tpl);
+            doc.close();
+
+            // Update JSON Preview
+            updateJsonPreview();
+        }
+
+        function updateState(path, value) {
+            const parts = path.split('.');
+            if (parts.length === 2) {
+                currentState[parts[0]][parts[1]] = value;
+            }
+            renderLivePreview();
+        }
+
+        function handleImageUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    currentState.images.profile = e.target.result;
+                    renderLivePreview();
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateJsonPreview() {
+            const json = JSON.stringify(currentState);
+            const size = new Blob([json]).size;
+            document.getElementById('state-size').innerText = (size / 1024).toFixed(2) + " KB";
+
+            // Simulate Serialization
+            const b64 = btoa(json);
+            document.getElementById('json-preview').innerText = `?custom=${b64.substring(0, 50)}...`;
+        }
+
+        function setPreviewMode(mode) {
+            const wrapper = document.getElementById('preview-wrapper');
+            if (mode === 'mobile') {
+                wrapper.style.maxWidth = '375px';
+                wrapper.style.maxHeight = '667px';
+                wrapper.style.borderRadius = '20px';
+                wrapper.style.border = '8px solid #333';
+            } else {
+                wrapper.style.maxWidth = '100%';
+                wrapper.style.maxHeight = '100%';
+                wrapper.style.borderRadius = '0';
+                wrapper.style.border = 'none';
+            }
+        }
+
+        function resetTemplate() {
+            if (confirm("Discard all changes?")) {
+                currentState = JSON.parse(JSON.stringify(defaultState));
+                // Update Inputs
+                document.getElementById('ctrl-name').value = defaultState.text.name;
+                document.getElementById('ctrl-tagline').value = defaultState.text.tagline;
+                document.getElementById('ctrl-bio').value = defaultState.text.bio;
+                document.getElementById('ctrl-primary').value = defaultState.colors.primary;
+                // ... (Update other inputs visually if needed, skipped for brevity)
+                renderLivePreview();
+            }
+        }
+
+        // --- 4. GENERATION LOGIC (The Magic) ---
+        async function downloadDistribution() {
+            const zip = new JSZip();
+
+            // 1. Get Source Code Templates
+            const rawTemplate = document.getElementById('tpl-consultant').innerHTML;
+            let editorCode = document.getElementById('tpl-editor-source').innerHTML;
+
+            // 2. Bake current state into editor.html
+            // This is the "Self-Replicating" part. We inject the user's current JSON
+            // directly into the 'initialState' variable of the downloaded tool.
+            const stateString = JSON.stringify(currentState);
+            const injectionCode = `const initialState = ${stateString};`;
+
+            // Inject State
+            editorCode = editorCode.replace('let state = (typeof initialState', `${injectionCode}\n        let state = (typeof initialState`);
+
+            // Inject Template (Handling backticks for string literal)
+            // We use a safe replacement to put the raw HTML template into the editor's source variable
+            const cleanTemplateForString = rawTemplate.replace(/`/g, '\\`').replace(/\${/g, '\\${');
+            editorCode = editorCode.replace('__TEMPLATE_PLACEHOLDER__', cleanTemplateForString);
+
+            // 3. Create Files
+            zip.file("editor.html", editorCode);
+            zip.file("webling-template.html", rawTemplate); // Pure raw template
+            zip.file("config.json", JSON.stringify(currentState, null, 2)); // The JSON file
+
+            zip.file("README.md", `# Axxilak Webing: The Consultant
+
+Thank you for your purchase!
+
+## Quick Start
+1. Double-click **editor.html** to open the Visual Editor.
+2. Your customizations have been restored automatically.
+3. Make any final changes.
+4. Click **EXPORT** in the sidebar to generate your final 'index.html'.
+
+## Deployment
+Upload the exported 'index.html' (and any images) to GitHub Pages, Netlify Drop, or any hosting provider.
+            `);
+
+            // 4. Generate Zip
+            const content = await zip.generateAsync({ type: "blob" });
+
+            // 5. Trigger Download
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(content);
+            link.download = "Axxilak_Consultant_Webling.zip";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Start
+        renderLivePreview();
+
+    </script>
+</body>
+
+</html>

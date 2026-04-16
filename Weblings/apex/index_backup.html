@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX | Professional Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #0a0a0a;
+            --accent: #2563eb; /* Electric Blue */
+            --gray: #f4f4f5;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .btn-apex {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-apex:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .border-apex {
+            border: 1px solid #e4e4e7;
+        }
+
+        .bg-apex {
+            background-color: var(--gray);
+        }
+
+        .card-apex {
+            background: white;
+            border: 1px solid #e4e4e7;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .card-apex:hover {
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        /* === THEME TOGGLE === */
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --text: #0a0a0a;
+            --accent: #1d4ed8;
+            --gray: #f4f4f5;
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Nav -->
+    <nav class="sticky top-0 w-full bg-white/80 backdrop-blur-md border-b border-zinc-200 z-50">
+        <div class="max-w-7xl mx-auto p-4 md:p-6 flex justify-between items-center relative">
+            <div class="text-xl font-extrabold tracking-tighter">APEX<span class="text-[var(--accent)]">.</span></div>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex gap-8 items-center text-sm font-medium">
+                <a href="#solutions" class="hover:text-[var(--accent)] transition">Solutions</a>
+                <a href="#about" class="hover:text-[var(--accent)] transition">About</a>
+                <a href="#contact" class="btn-apex rounded-sm">Get Started</a>
+                <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                    <span id="theme-icon">☀️</span>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-2xl focus:outline-none" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                &#9776;
+            </button>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden absolute w-full bg-white border-b border-zinc-200 p-4 flex flex-col gap-4 shadow-xl">
+            <a href="#solutions" class="text-sm font-medium hover:text-[var(--accent)]" onclick="this.parentElement.classList.add('hidden')">Solutions</a>
+            <a href="#about" class="text-sm font-medium hover:text-[var(--accent)]" onclick="this.parentElement.classList.add('hidden')">About</a>
+            <a href="#contact" class="btn-apex rounded-sm text-center" onclick="this.parentElement.classList.add('hidden')">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="py-24 md:py-32 px-6">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="inline-block px-3 py-1 bg-blue-50 text-[var(--accent)] text-xs font-bold rounded-full mb-6">VERSION 2.0 IS LIVE</div>
+            <h1 class="text-5xl md:text-8xl font-extrabold tracking-tight mb-8 leading-[1.1]">
+                Scale Your <br>
+                <span class="text-[var(--accent)]">Digital Authority.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-zinc-500 mb-12 max-w-2xl mx-auto">
+                High-performance architecture for startups and consultants. 
+                Built for speed, optimized for conversion, crystallized for the future.
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="#contact" class="btn-apex rounded-sm text-lg">Initialize Project</a>
+                <a href="#solutions" class="px-8 py-3 border border-zinc-200 hover:bg-zinc-50 transition rounded-sm text-lg font-medium">View Solutions</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats (About) -->
+    <section id="about" class="bg-apex py-20 border-y border-zinc-200">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+            <div>
+                <div class="text-4xl font-extrabold mb-2 text-[var(--accent)]">100%</div>
+                <div class="text-xs uppercase font-bold text-zinc-400">Precision</div>
+            </div>
+            <div>
+                <div class="text-4xl font-extrabold mb-2 text-[var(--accent)]">0.2s</div>
+                <div class="text-xs uppercase font-bold text-zinc-400">Latency</div>
+            </div>
+            <div>
+                <div class="text-4xl font-extrabold mb-2 text-[var(--accent)]">500+</div>
+                <div class="text-xs uppercase font-bold text-zinc-400">Deployments</div>
+            </div>
+            <div>
+                <div class="text-4xl font-extrabold mb-2 text-[var(--accent)]">∞</div>
+                <div class="text-xs uppercase font-bold text-zinc-400">Scalability</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solutions -->
+    <section id="solutions" class="py-24 px-6 max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="card-apex p-10 rounded-sm">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Fast-Track Build</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Rapid deployment architecture for time-sensitive missions. No bloat, just performance.</p>
+            </div>
+            <div class="card-apex p-10 rounded-sm">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Sovereign Security</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Built-in privacy and data integrity. Your presence is your own, locked and secure.</p>
+            </div>
+            <div class="card-apex p-10 rounded-sm">
+                <div class="w-12 h-12 bg-blue-50 text-[var(--accent)] flex items-center justify-center rounded-lg mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 012 2v3H7v-3z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Global Reach</h3>
+                <p class="text-zinc-500 text-sm leading-relaxed">Responsive across all devices and regions. Your authority knows no boundaries.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="py-24 bg-zinc-950 text-white px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
+            <div class="max-w-sm">
+                <div class="text-2xl font-extrabold mb-6">APEX<span class="text-[var(--accent)]">.</span></div>
+                <p class="text-zinc-500 text-sm">Elevating digital presence for the world's most ambitious leaders.</p>
+            </div>
+            <div class="w-full md:w-1/3">
+                <div class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-6">Connect</div>
+                <form action="mailto:apex@axxilak.com" method="POST" enctype="text/plain" class="flex flex-col gap-4">
+                    <input type="text" name="name" placeholder="Full Name" required class="bg-zinc-900 border border-zinc-800 p-3 outline-none focus:border-[var(--accent)] transition text-sm">
+                    <input type="email" name="email" placeholder="Email Address" required class="bg-zinc-900 border border-zinc-800 p-3 outline-none focus:border-[var(--accent)] transition text-sm">
+                    <textarea name="message" rows="3" placeholder="Your Message (Optional)" class="bg-zinc-900 border border-zinc-800 p-3 outline-none focus:border-[var(--accent)] transition text-sm"></textarea>
+                    <button type="submit" onclick="showThanks(event)" class="btn-apex text-sm rounded-sm">Initiate Partnership</button>
+                    <div id="form-success" class="hidden text-center p-3 border border-green-500 text-green-500 bg-green-500/10 text-xs rounded">
+                        <p class="font-bold">Message Sent!</p>
+                        <p class="opacity-80">We'll be in touch within 24 hours.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-24 pt-8 border-t border-zinc-900 text-[10px] text-zinc-600 uppercase tracking-widest">
+            © 2026 APEX WEBLING // AXXILAK STUDIO
+        </div>
+    </footer>
+
+    <!-- TEMPLATE: PRICING (Hidden) -->
+    <template id="tmpl-pricing" data-name="PRICING">
+    <section class="py-24 px-6 max-w-7xl mx-auto border-t border-zinc-200">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">Investment Protocols.</h2>
+            <p class="text-zinc-500 max-w-2xl mx-auto">Transparent architecture. No hidden dependencies.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8 items-center">
+            <div class="p-8 border border-zinc-200 rounded-sm">
+                <div class="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-4">Starter</div>
+                <div class="text-4xl font-extrabold mb-6">$500</div>
+                <ul class="space-y-4 text-sm text-zinc-600 mb-8">
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> Single Architecture</li>
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> 48h Turnaround</li>
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> Standard Support</li>
+                </ul>
+                <a href="#" class="block w-full py-3 text-center border border-zinc-200 hover:bg-zinc-50 font-bold rounded-sm text-sm">Select Protocol</a>
+            </div>
+            <div class="p-10 bg-zinc-900 text-white rounded-sm shadow-xl transform md:scale-105">
+                <div class="text-sm font-bold text-[var(--accent)] uppercase tracking-widest mb-4">Sovereign</div>
+                <div class="text-5xl font-extrabold mb-6">$1,500</div>
+                <ul class="space-y-4 text-sm text-zinc-300 mb-8">
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> Custom Architecture</li>
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> Priority Deployment</li>
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> 24/7 Command Line</li>
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> Lifetime Updates</li>
+                </ul>
+                <a href="#" class="block w-full py-4 text-center btn-apex rounded-sm font-bold text-sm">Initialize</a>
+            </div>
+            <div class="p-8 border border-zinc-200 rounded-sm">
+                <div class="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-4">Enterprise</div>
+                <div class="text-4xl font-extrabold mb-6">Custom</div>
+                <ul class="space-y-4 text-sm text-zinc-600 mb-8">
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> Multi-Node Systems</li>
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> Dedicated Engineer</li>
+                    <li class="flex gap-3"><span class="text-[var(--accent)]">✓</span> SLA Guarantee</li>
+                </ul>
+                <a href="#" class="block w-full py-3 text-center border border-zinc-200 hover:bg-zinc-50 font-bold rounded-sm text-sm">Contact Command</a>
+            </div>
+        </div>
+    </section>
+    </template>
+
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+                icon.innerText = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                icon.innerText = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+    </script>
+</body>
+</html>
+

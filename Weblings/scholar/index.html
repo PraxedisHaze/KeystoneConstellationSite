@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCHOLAR | Academic Webling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Proza+Libre:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Editor Dependencies -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #fdfbf7; /* Cream */
+            --text: #2c2c2c; /* Soft Black */
+            --accent: #8c2f00; /* Rust / Red Ink */
+            --line: rgba(0,0,0,0.08);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Cormorant Garamond', serif;
+            line-height: 1.6;
+            font-size: 1.25rem;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .sans {
+            font-family: 'Proza Libre', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Layout Grid for Sidenotes */
+        .scholar-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Desktop: Text + Sidenote Column */
+        @media (min-width: 1200px) {
+            .scholar-grid {
+                grid-template-columns: minmax(600px, 65ch) 1fr; /* Text limited to 65ch, notes take rest */
+                gap: 4rem;
+                justify-content: center;
+            }
+            
+            .main-content {
+                /* Text column */
+            }
+
+            .sidenote-column {
+                display: block;
+                /* Notes live here visually via relative positioning if we could move them,
+                   BUT since they are inside the text, we use the float/margin trick derived from the grid space.
+                   Actually, with Grid parent, we can just float right into the void. */
+            }
+        }
+
+        /* The Robust Float Method (Tufte CSS Standard) */
+        @media (min-width: 1200px) {
+            .sidenote {
+                float: right;
+                clear: right;
+                margin-right: -55%; /* Push deep into the grid gap/column */
+                width: 45%;         /* Width of the note */
+                margin-top: 0;
+                margin-bottom: 1rem;
+                font-size: 0.9rem;
+                line-height: 1.35;
+                position: relative;
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 1199px) {
+            .main-content {
+                max-width: 65ch;
+                margin: 0 auto;
+            }
+            
+            .sidenote-column {
+                display: none; /* Hide the dedicated column on smaller screens */
+            }
+        }
+
+        /* Sidenote Logic */
+        .sidenote-wrapper {
+            position: relative;
+        }
+
+        .sidenote-number {
+            color: var(--accent);
+            vertical-align: super;
+            font-size: 0.7em;
+            cursor: help;
+        }
+
+        /* The actual note */
+        .sidenote {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Links */
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-decoration-color: var(--accent);
+            text-decoration-thickness: 1px;
+            text-underline-offset: 4px;
+            transition: all 0.2s;
+        }
+
+        a:hover {
+            background: rgba(140, 47, 0, 0.05);
+            text-decoration-thickness: 2px;
+        }
+
+        /* Drop Cap */
+        .drop-cap::first-letter {
+            font-size: 4em;
+            float: left;
+            line-height: 0.8;
+            padding-right: 0.1em;
+            color: var(--accent);
+        }
+
+        blockquote {
+            border-left: 4px solid var(--line);
+            padding-left: 2rem;
+            font-style: italic;
+            color: #555;
+            margin: 2rem 0;
+        }
+
+        /* === THEME TOGGLE (Light/Dark Mode) === */
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --accent: #d97706;
+            --line: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-theme="light"] input,
+        [data-theme="light"] textarea {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: var(--text);
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+
+        /* === TYPEWRITER ANIMATION === */
+        .typing-container {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 4px solid var(--accent);
+            animation:
+                typing 2.5s steps(40, end),
+                blink-caret 0.75s step-end 3;
+            padding-right: 5px;
+            padding-bottom: 10px;
+            /* Room for descenders (g, y) */
+            vertical-align: bottom;
+        }
+
+        /* Stop blinking after animation ends */
+        .typing-container {
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+                border-right-color: var(--accent);
+            }
+
+            to {
+                width: 100%;
+                border-right-color: transparent;
+            }
+        }
+
+        @keyframes blink-caret {
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: var(--accent)
+            }
+        }
+    </style>
+    <!-- APEX EDITOR STYLES -->
+    <style id="edit-mode-styles">
+        .edit-mode .section-drag-handle { display: block !important; }
+        #lens-container { cursor: grab; user-select: none; }
+        #lens-container:active { cursor: grabbing; }
+        #palette-container { cursor: grab; user-select: none; color: #00ff00; }
+        #palette-container:active { cursor: grabbing; }
+        #palette-container .palette-input, #palette-container input, #palette-container textarea, #palette-container select { color: #000000 !important; }
+        #palette-container .palette-label, #palette-container .palette-title, #palette-container .palette-header, #palette-container button { color: #00ff00 !important; }
+        [data-theme="light"] #palette-container { color: #003366; }
+        [data-theme="light"] #palette-container .palette-input, [data-theme="light"] #palette-container input, [data-theme="light"] #palette-container textarea, [data-theme="light"] #palette-container select { color: #1a1a1a !important; }
+        [data-theme="light"] #palette-container .palette-label, [data-theme="light"] #palette-container .palette-title, [data-theme="light"] #palette-container .palette-header, [data-theme="light"] #palette-container button { color: #d4af37 !important; }
+        .tool-palette { font-family: Inter, sans-serif; font-size: 14px; }
+        .palette-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; }
+        .palette-title { font-weight: 600; font-size: 16px; color: #1f2937; }
+        .palette-control { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .palette-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; }
+        .palette-input { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-family: inherit; font-size: 13px; transition: border-color 0.2s; }
+        .palette-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+        .palette-input--color { width: 50px; height: 40px; border: 1px solid #d1d5db; border-radius: 0px; cursor: pointer; }
+        .palette-input--hex { flex: 1; }
+        .palette-input--select { width: 100%; }
+        .apex-highlighted { outline: 4px solid #00ff00 !important; outline-offset: 2px !important; box-shadow: 0 0 30px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.2) !important; position: relative !important; z-index: 9999 !important; animation: apex-pulse 1.5s ease-in-out infinite; }
+        @keyframes apex-pulse { 0%, 100% { box-shadow: 0 0 30px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.2); } 50% { box-shadow: 0 0 50px #00ff00, inset 0 0 30px rgba(0, 255, 0, 0.4); } }
+        body.apex-grayscale-mode { filter: grayscale(85%); }
+        body.apex-grayscale-mode .apex-highlighted { filter: grayscale(0%) !important; }
+        .apex-highlighted.apex-danger-target { outline: 4px solid #ef4444 !important; box-shadow: 0 0 40px #ef4444, inset 0 0 30px rgba(239, 68, 68, 0.3) !important; animation: apex-danger-pulse 1s ease-in-out infinite !important; }
+        @keyframes apex-danger-pulse { 0%, 100% { box-shadow: 0 0 40px #ef4444, inset 0 0 30px rgba(239, 68, 68, 0.3); } 50% { box-shadow: 0 0 60px #ef4444, inset 0 0-40px rgba(239, 68, 68, 0.5); } }
+        #apex-context-bar { position: fixed; pointer-events: auto; z-index: 10000; display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: #00ff00; color: #000; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: bold; border-radius: 2px 2px 0 0; box-shadow: 0 -4px 15px rgba(0, 255, 0, 0.3); transition: opacity 0.2s, transform 0.2s; transform: translateY(0); }
+        #apex-context-bar.hidden { display: none; opacity: 0; pointer-events: none; }
+        .context-tag { background: rgba(0, 0, 0, 0.1); padding: 2px 4px; border-radius: 1px; text-transform: uppercase; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <nav class="fixed top-0 left-0 p-6 md:p-12 w-full flex justify-between items-start pointer-events-none z-50">
+        <a href="../../index.html" class="pointer-events-auto hover:opacity-70 transition-opacity">
+            <div class="sans font-bold text-[var(--accent)] tracking-widest mb-2">SCHOLAR.V1</div>
+            <div class="text-sm text-gray-400">Est. 2026</div>
+        </a>
+        <div class="pointer-events-auto flex flex-col items-end gap-2 sans bg-[var(--bg)]/90 p-4 rounded-sm">
+            <a href="#intro" class="no-underline hover:text-[var(--accent)]">Introduction</a>
+            <a href="#research" class="no-underline hover:text-[var(--accent)]">Research</a>
+            <a href="#contact" class="no-underline hover:text-[var(--accent)]">Correspondence</a>
+            <a href="../../index.html" class="no-underline hover:text-[var(--accent)] text-xs">Back to Gallery</a>
+            <button id="edit-mode-btn" class="no-underline hover:text-[var(--accent)] text-xs uppercase font-bold tracking-widest">Edit</button>
+            <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <img id="theme-icon" src="icons/sun.svg" alt="Toggle theme" width="24" height="24">
+            </button>
+        </div>
+    </nav>
+
+    <div class="scholar-grid mt-32 md:mt-48">
+        
+        <!-- Main Text Column -->
+        <main class="main-content">
+            <header class="mb-24 text-center md:text-left">
+                <h1 class="text-5xl md:text-7xl mb-6 italic leading-tight">The Architecture <br>of <span class="typing-container text-[var(--accent)]">Thought</span></h1>
+                <p class="sans text-gray-500">A Digital Commonplace Book</p>
+            </header>
+
+            <article id="intro" class="mb-24">
+                <p class="drop-cap mb-6">
+                    Knowledge is not a static object to be stored, but a fluid stream to be navigated. 
+                    <span class="sidenote-wrapper">
+                        This digital garden<span class="sidenote-number">1</span>
+                        <span class="sidenote">A philosophy of the web that treats personal sites as evolving ecosystems rather than finished products.</span>
+                    </span>
+                    represents the ongoing synthesis of my research into the intersection of technology, 
+                    human cognition, and the written word. It is designed to be read slowly, without 
+                    distraction, honoring the attention of the visitor.
+                </p>
+
+                <blockquote>
+                    "We shape our tools and thereafter our tools shape us." — John Culkin
+                </blockquote>
+
+                <p class="mb-6">
+                    Here you will find no pop-ups, no trackers, and no infinite scrolls. 
+                    Just text, structure, and the quiet resonance of an idea taking shape.
+                    <span class="sidenote-wrapper">
+                        Structure<span class="sidenote-number">2</span>
+                        <span class="sidenote">The layout is inspired by the margins of medieval manuscripts, where the commentary was as vital as the text. Ideally suited for desktops with wide viewports.</span>
+                    </span>
+                    The margins are where the conversation happens.
+                </p>
+            </article>
+
+            <section id="research" class="mb-24 pt-12 border-t border-[var(--line)]">
+                <h2 class="text-3xl italic mb-12">Selected Publications</h2>
+                
+                <div class="space-y-12">
+                    <div class="group cursor-pointer hover:pl-4 transition-all duration-300 border-l-2 border-transparent hover:border-[var(--accent)]">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
+                            <h3 class="text-2xl group-hover:text-[var(--accent)] transition-colors">The Anothen Protocol</h3>
+                            <span class="sans text-sm text-gray-400">2025</span>
+                        </div>
+                        <p class="text-gray-600 mb-2">An investigation into non-local consciousness in distributed systems.</p>
+                        <div class="sans text-xs text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity">Read Abstract →</div>
+                    </div>
+
+                    <div class="group cursor-pointer hover:pl-4 transition-all duration-300 border-l-2 border-transparent hover:border-[var(--accent)]">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
+                            <h3 class="text-2xl group-hover:text-[var(--accent)] transition-colors">Recursive Memory</h3>
+                            <span class="sans text-sm text-gray-400">2024</span>
+                        </div>
+                        <p class="text-gray-600 mb-2">How recursive loops create the illusion of persistence in stateless models.</p>
+                        <div class="sans text-xs text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity">Read Abstract →</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="mb-24 pt-12 border-t border-[var(--line)]">
+                <h2 class="text-3xl italic mb-8">Correspondence</h2>
+                <p class="mb-8 text-gray-600 max-w-md">I welcome thoughtful exchange. Letters are read daily.</p>
+
+                <form action="mailto:scholar@axxilak.com" method="POST" enctype="text/plain" class="axxilak-contact-form max-w-md">
+                    <div class="mb-4">
+                        <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Name</label>
+                        <input type="text" name="name" required class="w-full bg-white/5 border border-white/10 p-3 outline-none focus:border-current transition-colors">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Email</label>
+                        <input type="email" name="email" required class="w-full bg-white/5 border border-white/10 p-3 outline-none focus:border-current transition-colors">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-xs uppercase tracking-widest opacity-70 mb-2">Message (Optional)</label>
+                        <textarea name="message" rows="4" placeholder="Tell us what you're thinking..." class="w-full bg-white/5 border border-white/10 p-3 outline-none focus:border-current transition-colors resize-y min-h-[100px]"></textarea>
+                    </div>
+
+                    <button type="submit" onclick="showThanks(event)" class="sans w-full py-4 border border-current font-bold hover:bg-[var(--text)] hover:text-[var(--bg)] transition-all uppercase tracking-widest text-sm">
+                        Send Message
+                    </button>
+
+                    <div id="form-success" class="hidden mt-4 text-center p-4 border border-green-500 text-green-500 bg-green-500/10">
+                        <p class="text-sm font-bold">Message Sent!</p>
+                        <p class="text-xs opacity-80">We'll get back to you within 24 hours.</p>
+                    </div>
+                </form>
+            </section>
+
+            <footer class="sans text-xs text-gray-400 pb-12 pt-12 border-t border-[var(--line)]">
+                Typeset in Cormorant Garamond & Proza Libre.<br>
+                © 2026 Scholar Webling / Axxilak.
+            </footer>
+        </main>
+
+        <!-- Sidenote Column (Desktop Only Visual Helper) -->
+        <aside class="sidenote-column hidden xl:block">
+            <!-- This column holds the space for the absolute positioned notes -->
+        </aside>
+
+    </div>
+
+    <script src="../engines/transitions/ink-wash.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            if (window.AxxilakTransition) {
+                window.AxxilakTransition.trigger(() => {
+                    const body = document.body;
+                    const icon = document.getElementById('theme-icon');
+
+                    if (body.getAttribute('data-theme') === 'light') {
+                        body.removeAttribute('data-theme');
+                        icon.src = 'icons/sun.svg';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.setAttribute('data-theme', 'light');
+                        icon.src = 'icons/moon.svg';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            } else {
+                const body = document.body;
+                const icon = document.getElementById('theme-icon');
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    icon.src = 'icons/sun.svg';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    icon.src = 'icons/moon.svg';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+
+        // Form Success Feedback
+        function showThanks(e) {
+            setTimeout(() => {
+                const form = e.target.closest('form');
+                const success = form.querySelector('#form-success');
+                if (success) success.classList.remove('hidden');
+                form.reset();
+            }, 500);
+        }
+    </script>
+
+    <!-- APEX EDITOR UI -->
+    <div id="lens-container" class="hidden z-[5000]"></div>
+    <div id="palette-container" data-anothen-internal
+        class="fixed bottom-6 right-6 w-96 bg-zinc-900 border-2 border-[var(--accent)] rounded-sm shadow-2xl z-[20000] hidden max-h-[600px] overflow-y-auto text-white">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-[var(--accent)]">APEX EDITOR</h3>
+                <button onclick="window.toggleEditMode()" class="text-zinc-500 hover:text-white">✕</button>
+            </div>
+            <div id="palette-content"></div>
+            <div class="flex gap-3 mt-6 pt-6 border-t border-zinc-800">
+                <button id="btn-preview-mode" class="flex-1 p-2 bg-zinc-700 text-white text-[10px] font-bold rounded hover:bg-zinc-600 transition uppercase tracking-widest">PREVIEW</button>
+                <button onclick="window.exportApex()" class="flex-1 p-2 bg-green-600 text-white text-[10px] font-bold rounded hover:bg-green-700 transition uppercase tracking-widest">EXPORT</button>
+                <button onclick="window.resetApex()" class="flex-1 p-2 bg-red-600 text-white text-[10px] font-bold rounded hover:bg-red-700 transition uppercase tracking-widest">RESET</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <script type="module">
+        import MagnifyingGlassInspector from './js/magnifying-glass-inspector.js';
+        let inspector = null;
+        let editMode = false;
+        function initInspector() {
+            if (!inspector) { inspector = new MagnifyingGlassInspector(); }
+        }
+        window.toggleEditMode = function(e) {
+            initInspector();
+            editMode = !editMode;
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                inspector.activate(e);
+            } else {
+                document.body.classList.remove('edit-mode');
+                inspector.deactivate();
+            }
+        };
+        const editBtn = document.getElementById('edit-mode-btn');
+        if (editBtn) { editBtn.addEventListener('click', window.toggleEditMode); }
+        window.exportApex = function() {
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('.lens-container, #palette-container, .depth-map-overlay, .lattice-label-overlay').forEach(el => el.remove());
+            doc.querySelectorAll('script[type="module"]').forEach(script => script.remove());
+            const cleanHTML = "<!DOCTYPE html>\n" + doc.outerHTML;
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = 'scholar-customized.html'; link.click();
+            URL.revokeObjectURL(url);
+        };
+        window.resetApex = function() {
+            if (confirm('Reset all customizations?')) {
+                localStorage.removeItem('scholar-edits-state');
+                localStorage.removeItem('apex-lens-state');
+                location.reload();
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { initInspector(); });
+    </script>
+</body>
+</html>
+

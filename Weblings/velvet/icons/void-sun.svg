@@ -1,0 +1,12 @@
+<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Void Sun - Mysterious, dark, elegant -->
+  <circle cx="12" cy="12" r="5" stroke="#8b7ba8" opacity="0.8"/>
+  <!-- Subtle, whispered rays -->
+  <line x1="12" y1="3" x2="12" y2="4.5" stroke="#8b7ba8" opacity="0.6"/>
+  <line x1="12" y1="19.5" x2="12" y2="21" stroke="#8b7ba8" opacity="0.6"/>
+  <line x1="3" y1="12" x2="4.5" y2="12" stroke="#8b7ba8" opacity="0.6"/>
+  <line x1="19.5" y1="12" x2="21" y2="12" stroke="#8b7ba8" opacity="0.6"/>
+  <!-- Ethereal accents -->
+  <circle cx="4.5" cy="4.5" r="0.7" fill="#8b7ba8" opacity="0.4"/>
+  <circle cx="19.5" cy="19.5" r="0.7" fill="#8b7ba8" opacity="0.4"/>
+</svg>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxilak Webling Editor System | Architecture Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f5f5f5;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        /* Chart Container Utilities */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        /* Architecture Flow Styles */
+        .flow-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .flow-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+        }
+
+        .flow-node.active {
+            background-color: rgba(212, 175, 55, 0.1);
+            border-color: #d4af37;
+        }
+
+        .arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #333;
+            margin: 0 auto;
+        }
+
+        /* Utility specific to the 'Gold' theme */
+        .text-gold {
+            color: #d4af37;
+        }
+
+        .bg-gold {
+            background-color: #d4af37;
+        }
+
+        .border-gold {
+            border-color: #d4af37;
+        }
+
+        .text-bronze {
+            color: #8b7355;
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+    <!-- Chosen Palette: Axxilak Premium (Dark #0a0a0a, Gold #d4af37, Bronze #8b7355, Text #f5f5f5) -->
+    <!-- Application Structure Plan: Dashboard layout. Top: Strategic Vision (Hero). Middle: Split view. Left is an Interactive System Map (The 'Source Report' architecture logic). Right is a Dynamic Detail Pane that updates based on the map selection. Bottom: Phased Roadmap and Constraints. This structure allows the user to mentally map the user journey (Map) to the technical requirements (Detail Pane) without being overwhelmed by text. -->
+    <!-- Visualization & Content Choices:
+        1. Flow Diagram (HTML/CSS Grid): To visualize the multi-step user journey (Edit -> Buy -> Download). Interaction: Clicking steps updates the details. Justification: Shows the system complexity simply. No SVG used.
+        2. State Object Tree (HTML/JS): Interactive JSON viewer. Goal: Inform about the 'Magic' data structure.
+        3. Phase Progress (Chart.js): A simple donut or bar chart to visualize the deliverables count or complexity per phase.
+        4. Constraints Grid: Cards for technical limitations.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation / Header -->
+    <header class="border-b border-gray-800 bg-[#050505] sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-8 h-8 bg-gradient-to-br from-[#d4af37] to-[#8b7355] rounded-lg flex items-center justify-center font-bold text-black">
+                    A</div>
+                <h1 class="text-xl font-bold tracking-tight text-white">Axxilak <span
+                        class="text-gray-500 font-light">Architecture Blueprint</span></h1>
+            </div>
+            <nav class="hidden md:flex gap-6 text-sm text-gray-400">
+                <button onclick="scrollToSection('vision')"
+                    class="hover:text-[#d4af37] transition-colors">Vision</button>
+                <button onclick="scrollToSection('architecture')" class="hover:text-[#d4af37] transition-colors">System
+                    Flow</button>
+                <button onclick="scrollToSection('data')" class="hover:text-[#d4af37] transition-colors">Data
+                    Model</button>
+                <button onclick="scrollToSection('roadmap')"
+                    class="hover:text-[#d4af37] transition-colors">Roadmap</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
+
+        <!-- Vision Section -->
+        <section id="vision" class="grid md:grid-cols-12 gap-6 items-center">
+            <div class="md:col-span-8 space-y-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-white"><span class="text-[#d4af37]">Zero Code.</span>
+                    Pure Creation.</h2>
+                <p class="text-gray-400 text-lg leading-relaxed">
+                    The Axxilak Webling Editor System is a frictionless infrastructure allowing non-technical users to
+                    customize, purchase, and deploy beautiful portfolio sites.
+                    <span class="text-gray-300 block mt-2">Core concept: <strong class="text-[#d4af37]">Try before you
+                            buy, keep what you create.</strong></span>
+                </p>
+                <div class="flex flex-wrap gap-2 pt-2">
+                    <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-900 border border-gray-700 text-gray-300">Client-Side
+                        Only</span>
+                    <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-900 border border-gray-700 text-gray-300">No
+                        Build Tools</span>
+                    <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-900 border border-gray-700 text-gray-300">Offline
+                        Capable</span>
+                </div>
+            </div>
+            <div class="md:col-span-4 bg-[#111] p-6 rounded-xl border border-gray-800">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Success Metrics</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-300 text-sm">Time to Customize</span>
+                        <span class="text-[#d4af37] font-bold font-mono">&lt; 3 mins</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-300 text-sm">Download Size</span>
+                        <span class="text-[#d4af37] font-bold font-mono">&lt; 2 MB</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-300 text-sm">HTML Output</span>
+                        <span class="text-[#d4af37] font-bold font-mono">Production Ready</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <hr class="border-gray-800">
+
+        <!-- Architecture Explorer -->
+        <section id="architecture">
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-white mb-2">System Architecture Flow</h3>
+                <p class="text-gray-400 text-sm">Click on any node in the diagram below to explore the technical logic
+                    and requirements for that stage.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-8">
+                <!-- Left Column: The Map -->
+                <div class="lg:col-span-5 space-y-2">
+
+                    <!-- Node 1: Live Studio -->
+                    <div id="node-1"
+                        class="flow-node active glass-panel p-5 rounded-lg border-l-4 border-l-[#d4af37] relative group"
+                        onclick="showDetail(1)">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-white">1. Live Preview Editor</h4>
+                                <p class="text-xs text-gray-400 mt-1">/studio/studio.html</p>
+                            </div>
+                            <span class="text-2xl opacity-50">🎨</span>
+                        </div>
+                    </div>
+
+                    <!-- Connector -->
+                    <div class="flex justify-center py-2"><span class="text-gray-600 text-xl">↓</span></div>
+
+                    <!-- Node 2: State & Buy -->
+                    <div id="node-2"
+                        class="flow-node glass-panel p-5 rounded-lg border-l-4 border-l-transparent hover:border-l-gray-500 relative"
+                        onclick="showDetail(2)">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-200">2. State Capture & Purchase</h4>
+                                <p class="text-xs text-gray-500 mt-1">Serialization & Gumroad</p>
+                            </div>
+                            <span class="text-2xl opacity-50">💳</span>
+                        </div>
+                    </div>
+
+                    <!-- Connector -->
+                    <div class="flex justify-center py-2"><span class="text-gray-600 text-xl">↓</span></div>
+
+                    <!-- Node 3: Download System -->
+                    <div id="node-3"
+                        class="flow-node glass-panel p-5 rounded-lg border-l-4 border-l-transparent hover:border-l-gray-500 relative"
+                        onclick="showDetail(3)">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-200">3. Download & Generator</h4>
+                                <p class="text-xs text-gray-500 mt-1">/download.html + JSZip</p>
+                            </div>
+                            <span class="text-2xl opacity-50">📦</span>
+                        </div>
+                    </div>
+
+                    <!-- Connector -->
+                    <div class="flex justify-center py-2"><span class="text-gray-600 text-xl">↓</span></div>
+
+                    <!-- Node 4: Standalone Editor -->
+                    <div id="node-4"
+                        class="flow-node glass-panel p-5 rounded-lg border-l-4 border-l-transparent hover:border-l-gray-500 relative"
+                        onclick="showDetail(4)">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-200">4. Standalone Editor</h4>
+                                <p class="text-xs text-gray-500 mt-1">editor.html (Offline)</p>
+                            </div>
+                            <span class="text-2xl opacity-50">🖥️</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Detail Pane -->
+                <div class="lg:col-span-7">
+                    <div
+                        class="h-full glass-panel rounded-xl p-6 border border-gray-800 flex flex-col relative overflow-hidden">
+
+                        <!-- Background decoration -->
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-[#d4af37] opacity-5 rounded-full blur-3xl pointer-events-none">
+                        </div>
+
+                        <!-- Dynamic Content Area -->
+                        <div id="detail-content">
+                            <!-- Content injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-8">
+
+            <!-- Data Model Section -->
+            <section id="data" class="glass-panel rounded-xl p-6 border border-gray-800">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">The "Magic" State Object</h3>
+                    <span class="text-xs font-mono bg-gray-900 px-2 py-1 rounded text-[#d4af37]">config.json</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">The entire application state is stored in a single JSON object.
+                    Try modifying the values below to see how the logic reacts.</p>
+
+                <div class="grid grid-cols-12 gap-4 h-full">
+                    <!-- Controls -->
+                    <div class="col-span-12 md:col-span-5 space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-500 uppercase font-bold">Primary Color</label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="color" id="demo-color" value="#d4af37"
+                                    class="h-8 w-8 bg-transparent border-none cursor-pointer"
+                                    onchange="updateStateDemo()">
+                                <input type="text" id="demo-color-text" value="#d4af37"
+                                    class="bg-[#111] border border-gray-700 text-gray-300 text-xs rounded px-2 w-full font-mono"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 uppercase font-bold">User Name</label>
+                            <input type="text" id="demo-name" value="Jane Doe"
+                                class="mt-1 bg-[#111] border border-gray-700 text-gray-300 text-sm rounded px-2 py-1 w-full"
+                                oninput="updateStateDemo()">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 uppercase font-bold">Image State</label>
+                            <select id="demo-image"
+                                class="mt-1 bg-[#111] border border-gray-700 text-gray-300 text-sm rounded px-2 py-1 w-full"
+                                onchange="updateStateDemo()">
+                                <option value="default">Default Placeholder</option>
+                                <option value="uploaded">User Uploaded (Base64)</option>
+                            </select>
+                        </div>
+                        <div class="pt-4">
+                            <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">Encoded URL Param</div>
+                            <div id="demo-encoded"
+                                class="text-[10px] text-gray-600 font-mono break-all bg-black p-2 rounded h-16 overflow-hidden">
+                                %7B%22colors%22%3A%7B%22primary...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- JSON Viewer -->
+                    <div
+                        class="col-span-12 md:col-span-7 bg-[#050505] rounded-lg p-4 border border-gray-800 font-mono text-xs overflow-auto relative">
+                        <div class="absolute top-2 right-2 text-[10px] text-gray-600">LIVE PREVIEW</div>
+                        <pre id="json-preview" class="text-green-500"></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Constraints -->
+            <section class="glass-panel rounded-xl p-6 border border-gray-800 flex flex-col">
+                <h3 class="text-xl font-bold text-white mb-4">Technical Constraints</h3>
+                <div class="flex-grow space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-red-500 mt-2"></div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-200">No Build Tools</h4>
+                            <p class="text-xs text-gray-500">Pure HTML/CSS/JS. Must run directly in browser on
+                                double-click.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-red-500 mt-2"></div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-200">No Server Side</h4>
+                            <p class="text-xs text-gray-500">FileReader for images, localStorage for session, Base64 for
+                                transfer.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2"></div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-200">Security</h4>
+                            <p class="text-xs text-gray-500">No <code>eval()</code>. Use DOMPurify. No inline event
+                                handlers in output.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-800">
+                    <h4 class="text-sm font-bold text-gray-400 mb-2">Editor Component Breakdown</h4>
+                    <div class="chart-container h-48">
+                        <canvas id="componentsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Roadmap -->
+        <section id="roadmap" class="pt-8 pb-12">
+            <h3 class="text-2xl font-bold text-white mb-6">Implementation Roadmap</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+
+                <!-- Phase 1 -->
+                <div class="glass-panel p-6 rounded-xl border-t-4 border-t-blue-500 hover:bg-[#111] transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-bold text-lg">Phase 1: Core (MVP)</h4>
+                        <span class="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">Foundation</span>
+                    </div>
+                    <ul class="text-sm text-gray-400 space-y-2 marker:text-blue-500 list-disc pl-4">
+                        <li><strong>Standalone Editor.html:</strong> Offline functionality.</li>
+                        <li><strong>Config.json Reader:</strong> Ingest state logic.</li>
+                        <li><strong>Base Template:</strong> "The Consultant" design.</li>
+                        <li><strong>Export Engine:</strong> Generate clean HTML.</li>
+                    </ul>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#d4af37] hover:bg-[#111] transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-bold text-lg">Phase 2: Live System</h4>
+                        <span class="text-xs bg-yellow-900 text-yellow-300 px-2 py-1 rounded">Interactive</span>
+                    </div>
+                    <ul class="text-sm text-gray-400 space-y-2 marker:text-[#d4af37] list-disc pl-4">
+                        <li><strong>Studio Page:</strong> Live iframe preview.</li>
+                        <li><strong>State Serialization:</strong> Base64 encoding.</li>
+                        <li><strong>LocalStorage:</strong> Session persistence.</li>
+                        <li><strong>Gumroad Integration:</strong> URL Parameter pass-through.</li>
+                    </ul>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="glass-panel p-6 rounded-xl border-t-4 border-t-green-500 hover:bg-[#111] transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-bold text-lg">Phase 3: Delivery</h4>
+                        <span class="text-xs bg-green-900 text-green-300 px-2 py-1 rounded">Automation</span>
+                    </div>
+                    <ul class="text-sm text-gray-400 space-y-2 marker:text-green-500 list-disc pl-4">
+                        <li><strong>Download Page:</strong> <code>/download.html</code> logic.</li>
+                        <li><strong>JSZip Integration:</strong> Client-side ZIP creation.</li>
+                        <li><strong>Dynamic Config Injection:</strong> Writing the JSON file.</li>
+                        <li><strong>Documentation:</strong> README generation.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // --- DATA STORE ---
+        // Content for the Detail Pane based on selection
+        const detailData = {
+            1: {
+                title: "1. Live Preview Editor",
+                subtitle: "On axxilak.com/studio",
+                icon: "🎨",
+                content: `
+                    <div class="space-y-4 animate-in fade-in duration-500">
+                        <p class="text-gray-300 text-sm">The entry point for the customer. A web-based version of the editor hosted on the main domain.</p>
+
+                        <div class="bg-[#050505] p-3 rounded border border-gray-800">
+                            <h5 class="text-[#d4af37] text-xs font-bold uppercase mb-2">Core Mechanics</h5>
+                            <ul class="text-xs text-gray-400 space-y-2">
+                                <li class="flex items-center gap-2"><span class="text-green-500">✓</span> <strong>Iframe Preview:</strong> Isolates template CSS from editor UI.</li>
+                                <li class="flex items-center gap-2"><span class="text-green-500">✓</span> <strong>Real-time Updates:</strong> DOM manipulation on input events.</li>
+                                <li class="flex items-center gap-2"><span class="text-green-500">✓</span> <strong>Session Save:</strong> Autosaves to localStorage.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-[#050505] p-3 rounded border border-gray-800">
+                            <h5 class="text-[#d4af37] text-xs font-bold uppercase mb-2">User Action</h5>
+                            <p class="text-xs text-gray-400">User customizes > Clicks "Buy Now" > System triggers State Serialization.</p>
+                        </div>
+                    </div>
+                `
+            },
+            2: {
+                title: "2. State Capture & Purchase",
+                subtitle: "Data Hand-off Logic",
+                icon: "💳",
+                content: `
+                    <div class="space-y-4 animate-in fade-in duration-500">
+                        <p class="text-gray-300 text-sm">Transferring the user's custom design through the payment gateway without a database.</p>
+
+                        <div class="bg-[#050505] p-3 rounded border border-gray-800">
+                            <h5 class="text-[#d4af37] text-xs font-bold uppercase mb-2">Serialization Process</h5>
+                            <code class="block text-[10px] text-green-400 font-mono bg-black p-2 rounded mb-2">
+                                const state = { colors: {...}, text: {...} };<br>
+                                const json = JSON.stringify(state);<br>
+                                const param = btoa(json); // Base64
+                            </code>
+                            <p class="text-xs text-gray-400">Result is appended to Gumroad URL: <code>?custom=eyJjb2xv...</code></p>
+                        </div>
+
+                         <div class="bg-[#050505] p-3 rounded border border-gray-800">
+                            <h5 class="text-[#d4af37] text-xs font-bold uppercase mb-2">Gumroad Config</h5>
+                            <ul class="text-xs text-gray-400 space-y-2">
+                                <li><strong>Redirect URL:</strong> https://axxilak.com/download</li>
+                                <li><strong>Param Forwarding:</strong> Gumroad passes <code>?custom</code> through to redirect.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            3: {
+                title: "3. Download & Generator",
+                subtitle: "Client-side Zip Creation",
+                icon: "📦",
+                content: `
+                    <div class="space-y-4 animate-in fade-in duration-500">
+                        <p class="text-gray-300 text-sm">The /download.html page receives the user back from Gumroad and packages their product.</p>
+
+                        <div class="bg-[#050505] p-3 rounded border border-gray-800">
+                            <h5 class="text-[#d4af37] text-xs font-bold uppercase mb-2">Execution Flow</h5>
+                            <ol class="list-decimal pl-4 text-xs text-gray-400 space-y-1">
+                                <li>Read <code>window.location.search</code> for 'custom' param.</li>
+                                <li>Decode Base64 back to JSON string.</li>
+                                <li>Initialize <strong>JSZip</strong> instance.</li>
+                                <li>Add <code>editor.html</code>, <code>styles.css</code>, etc.</li>
+                                <li>Add dynamic <code>config.json</code> with user data.</li>
+                                <li>Trigger <code>zip.generateAsync()</code> and saveAs.</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            4: {
+                title: "4. Standalone Editor",
+                subtitle: "The Product (Offline)",
+                icon: "🖥️",
+                content: `
+                    <div class="space-y-4 animate-in fade-in duration-500">
+                        <p class="text-gray-300 text-sm">The final deliverable. A self-contained HTML file that runs anywhere.</p>
+
+                        <div class="bg-[#050505] p-3 rounded border border-gray-800">
+                            <h5 class="text-[#d4af37] text-xs font-bold uppercase mb-2">Initialization Logic</h5>
+                            <code class="block text-[10px] text-blue-400 font-mono bg-black p-2 rounded mb-2">
+                                fetch('config.json')<br>
+                                .then(res => res.json())<br>
+                                .then(state => applyToPreview(state));
+                            </code>
+                            <p class="text-xs text-gray-400">If config.json is missing, it loads defaults. If present, it restores the user's design.</p>
+                        </div>
+
+                        <div class="bg-[#050505] p-3 rounded border border-gray-800">
+                            <h5 class="text-[#d4af37] text-xs font-bold uppercase mb-2">Export Feature</h5>
+                            <p class="text-xs text-gray-400">The "Export" button strips the editor UI and scripts, leaving only the clean, styled HTML for the portfolio.</p>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // --- INTERACTION LOGIC ---
+
+        function showDetail(id) {
+            // Update Visuals on Map
+            document.querySelectorAll('.flow-node').forEach(node => {
+                node.classList.remove('active', 'border-l-[#d4af37]', 'bg-opacity-10');
+                node.classList.add('border-l-transparent');
+                // Reset background to glass default roughly
+                node.style.backgroundColor = '';
+            });
+
+            const activeNode = document.getElementById(`node-${id}`);
+            activeNode.classList.add('active', 'border-l-[#d4af37]');
+            activeNode.classList.remove('border-l-transparent');
+
+            // Inject Content
+            const data = detailData[id];
+            const contentContainer = document.getElementById('detail-content');
+
+            contentContainer.innerHTML = `
+                <div class="flex items-center gap-4 mb-6 border-b border-gray-800 pb-4">
+                    <div class="text-4xl filter drop-shadow-lg">${data.icon}</div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">${data.title}</h2>
+                        <p class="text-[#d4af37] text-sm font-mono">${data.subtitle}</p>
+                    </div>
+                </div>
+                ${data.content}
+            `;
+        }
+
+        // --- STATE DEMO LOGIC ---
+        function updateStateDemo() {
+            const color = document.getElementById('demo-color').value;
+            const name = document.getElementById('demo-name').value;
+            const imgState = document.getElementById('demo-image').value;
+
+            document.getElementById('demo-color-text').value = color;
+
+            let imageString = "default-path.jpg";
+            if (imgState === 'uploaded') {
+                imageString = "data:image/png;base64,iVBORw0KGgo...";
+            }
+
+            const state = {
+                colors: {
+                    primary: color,
+                    accent: "#8b7355",
+                    background: "#0a0a0a",
+                    text: "#f5f5f5"
+                },
+                text: {
+                    name: name,
+                    tagline: "Designer & Developer",
+                    bio: "I create beautiful things..."
+                },
+                images: {
+                    profile: imageString
+                },
+                font: "Inter"
+            };
+
+            const jsonStr = JSON.stringify(state, null, 2);
+            document.getElementById('json-preview').innerText = jsonStr;
+
+            // Update Encoded Param Demo
+            const minified = JSON.stringify(state);
+            const encoded = btoa(minified);
+            const urlSafe = encodeURIComponent(encoded);
+            document.getElementById('demo-encoded').innerText = "?custom=" + urlSafe.substring(0, 100) + "...";
+        }
+
+        // --- SCROLLING ---
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- CHART INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load Default View
+            showDetail(1);
+            updateStateDemo();
+
+            // Render Chart
+            const ctx = document.getElementById('componentsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Editor UI Logic', 'Template HTML', 'State Management', 'Export Logic'],
+                    datasets: [{
+                        data: [40, 30, 15, 15],
+                        backgroundColor: [
+                            '#d4af37', // Gold
+                            '#333333', // Dark Grey
+                            '#8b7355', // Bronze
+                            '#f5f5f5'  // White
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#999',
+                                font: { family: 'Inter', size: 10 },
+                                boxWidth: 10
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            titleColor: '#d4af37',
+                            bodyColor: '#fff',
+                            borderColor: '#333',
+                            borderWidth: 1
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>
