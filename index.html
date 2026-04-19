@@ -40,8 +40,21 @@
             100% { opacity: 1; transform: translateY(0) scale(1.0); }
         }
 
+        @keyframes reverse-spin-fast {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
         .animate-blub {
             animation: blub-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .animate-spin-slow {
+            animation: spin 12s linear infinite;
+        }
+
+        .animate-spin-reverse-fast {
+            animation: reverse-spin-fast 4s linear infinite;
         }
 
         * {
@@ -407,21 +420,22 @@
     <div id="space-background" style="position: fixed; inset: 0; z-index: -2; background: url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=2560&auto=format&fit=crop') center center / cover no-repeat; opacity: 0; transition: opacity 2s ease-in-out;"></div>
     <div id="strucity-container" style="position: fixed; inset: 0; z-index: -1;"></div>
 
-    <!-- Navigation -->
-    <header class="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
+    <!-- Navigation (Isolated to preserve position: fixed during animation) -->
+    <header id="cinematic-header" class="fixed top-0 left-0 right-0 z-50 mix-blend-difference" style="opacity: 0; transform: translateY(10vh);">
         <nav class="flex items-center justify-between px-6 md:px-12 py-6">
             <a href="#" class="flex items-center gap-4 hover:opacity-80 transition group">
-                <img src="favicon.png" alt="Axxilak Logo" class="h-[50px] w-auto drop-shadow-[0_0_15px_rgba(212,175,55,0.6)] group-hover:scale-105 transition duration-500">
+                <img src="keystone_logo.jpg" alt="Keystone Logo" class="h-[50px] w-auto group-hover:scale-105 transition duration-500 rounded-lg">
                 <div class="flex flex-col justify-center items-start animate-blub text-left">
                     <div class="serif font-bold text-2xl tracking-[0.05em] text-white leading-none">
                         KEYSTONE <span class="font-light opacity-80">Constellation</span>
                     </div>
-                    <div class="text-[10px] tracking-[0.3em] text-amber-400/60 font-light mt-1" style="font-family: 'Outfit', sans-serif;">
-                        Calculus of Presence.
+                    <div class="text-[8px] tracking-[0.2em] text-amber-400/80 font-bold mt-1 uppercase" style="font-family: 'Outfit', sans-serif;">
+                        Working together to make the world a better place.
                     </div>
                 </div>
             </a>
             <div class="flex gap-8 items-center">
+                <a href="#physics" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">Physics</a>
                 <a href="free-stuff.html" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">Free Stuff</a>
                 <a href="#contact" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">Contact</a>
                 <a href="axxilak_portfolio/index.html" class="text-sm uppercase tracking-widest hover:text-amber-400 transition">About Me</a>
@@ -429,22 +443,24 @@
         </nav>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Cinematic UI Wrapper -->
+    <div id="cinematic-ui-layer" style="opacity: 0; transform: translateY(10vh);">
+        <!-- Hero Section -->
     <section class="min-h-screen flex flex-col items-center justify-center gap-8 text-center">
         <div class="max-w-3xl">
             <h1 class="text-6xl md:text-8xl font-light serif leading-tight mb-8">
-                Architectural <span class="gold-text">PRESENCE</span>
+                Geometric <span class="gold-text">VISUALIZATION</span>
             </h1>
             <p class="text-lg md:text-xl text-slate-300 mb-6 font-light max-w-3xl mx-auto">
-                The structure of reality is non-coercive.<br>We build tools that match the physics of sovereign creation.
+                The architecture of our codebase is deterministic.<br>We build tools that can be run exclusively on local hardware.
             </p>
             <p class="text-base text-slate-200 mb-8 font-light max-w-3xl mx-auto">
-                <span class="serif">APPLINGS:</span> Small, sharp, local-first tools for the ADHD mind. Built to serve exactly one function perfectly. Download once, own forever, use offline. The architecture of harmlessness.
+                <span class="serif">APPLINGS:</span> Small, sharp, zero-telemetry tools. Built to serve exactly one function perfectly. Download once, own forever, use offline.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <a href="#tools"
                     class="inline-block px-8 py-4 bg-white text-black font-semibold hover:bg-amber-400 transition">
-                    View Instrumentation
+                    View Tools
                 </a>
                 <a href="#contact"
                     class="inline-block px-8 py-4 border-2 border-white text-white font-semibold hover:bg-white hover:text-black transition">
@@ -453,17 +469,10 @@
             </div>
             </div>
             <h1 class="text-6xl md:text-8xl font-light serif leading-tight mt-16 mb-8 text-white">
-                Working together<br>to make the world a <span class="gold-text">better place.</span>
+                Local COMPUTATION<br>Zero TELEMETRY<br><span class="gold-text">Absolute SOVEREIGNTY.</span>
             </h1>
         </div>
 
-        <!-- Scroll Indicator -->
-        <div class="absolute bottom-8 animate-bounce">
-            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3">
-                </path>
-            </svg>
-        </div>
     </section>
 
     <!-- Marquee Separator -->
@@ -471,17 +480,21 @@
         <div class="marquee-content">
             <span>RESPONSIVE DESIGN</span>
             <span>FULLY CUSTOMIZABLE</span>
-            <span>PROFESSIONAL WEBLINGS</span>
+            <span>PROFESSIONAL MAIZONS</span>
             <span>RESPONSIVE DESIGN</span>
             <span>FULLY CUSTOMIZABLE</span>
-            <span>PROFESSIONAL WEBLINGS</span>
+            <span>PROFESSIONAL MAIZONS</span>
         </div>
     </div>
 
     <!-- Value Proposition -->
-    <section class="py-20">
+    <section class="py-20 relative overflow-hidden group">
+        <!-- In Development Watermark -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-12 pointer-events-none z-0 opacity-[0.03] group-hover:opacity-[0.06] transition duration-1000 select-none flex justify-center items-center w-full">
+            <h1 class="text-[120px] md:text-[200px] font-black uppercase text-amber-500/80 whitespace-nowrap tracking-tighter" style="font-family: impact, sans-serif;">IN DEVELOPMENT</h1>
+        </div>
         <div class="max-w-6xl mx-auto">
-            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">How Weblings Work</h2>
+            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">How Maizons Work</h2>
             <p class="text-center text-slate-400 mb-16 font-light italic">Designed for actual ownership. Your vision,
                 your terms, forever.</p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -530,11 +543,11 @@
         <div class="max-w-6xl mx-auto">
             <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4">The Applings</h2>
             <p class="text-center text-slate-400 text-sm mb-12 font-light italic">
-                Sovereign instrumentation. Built to run locally. Built to last forever.
+                Targeted tools. Built to run locally. Built to last forever.
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Context Counter -->
+                <!-- Context Counter (Hidden for Launch) 
                 <div class="glass-panel p-8 rounded-sm hover-trigger reveal">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="serif text-2xl text-white">Context Counter</h3>
@@ -545,29 +558,161 @@
                     </p>
                     <a href="products/context_counter/index.html" class="inline-block px-6 py-2 bg-white/10 text-white text-xs uppercase tracking-widest hover:bg-amber-400 hover:text-black transition">Open Tool</a>
                 </div>
+                -->
 
                 <!-- Edge Electrify -->
                 <div class="glass-panel p-8 rounded-sm hover-trigger reveal" style="transition-delay: 100ms;">
                     <div class="flex justify-between items-start mb-4">
-                        <h3 class="serif text-2xl text-white">Edge Electrify</h3>
+                        <h3 class="serif text-2xl text-white">Edge Electrify & Line Art</h3>
                         <span class="text-xs uppercase tracking-widest text-amber-400 border border-amber-400/30 px-2 py-1 rounded-sm">Free</span>
                     </div>
                     <p class="text-slate-300 font-light mb-6">
-                        A brutalist UI proving ground. Drop any element inside, hook the CSS, and watch the event loop spin.
+                        Turn any image into electric line art locally in your browser. Uses Sobel edge detection with configurable neon glow, running entirely without cloud uploads.
                     </p>
-                    <a href="products/edge_electrify/index.html" class="inline-block px-6 py-2 bg-white/10 text-white text-xs uppercase tracking-widest hover:bg-amber-400 hover:text-black transition">Open Tool</a>
+                    <a href="https://keystoneconstellation.lemonsqueezy.com/checkout/buy/7a39cda5-be40-42e6-81a9-f5dad78c12c1" class="inline-block px-6 py-2 bg-amber-400/10 text-amber-400 font-bold border border-amber-400/30 text-xs uppercase tracking-widest hover:bg-amber-400 hover:text-black transition">Download (Free)</a>
                 </div>
 
                 <!-- Anothen Bolt Generator -->
                 <div class="glass-panel p-8 rounded-sm hover-trigger reveal border-l-2 border-l-amber-400 md:col-span-2" style="transition-delay: 200ms;">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="serif text-2xl text-white">Anothen Bolt Generator</h3>
-                        <span class="text-xs uppercase tracking-widest text-slate-400">$100.00</span>
+                        <span class="text-xs uppercase tracking-widest text-slate-400">$50.00</span>
+                    </div>
+                    <div class="flex items-center gap-4 mb-4 text-[10px] uppercase tracking-widest text-slate-400 font-bold">
+                        <span><i class="fas fa-desktop mr-1.5 text-amber-400/70"></i> Desktop</span>
+                        <span><i class="fab fa-android mr-1.5 text-amber-400/70"></i> Android</span>
                     </div>
                     <p class="text-slate-300 font-light mb-6">
-                        Deterministic context assembly protocol for sovereign architectures. Generates perfectly isolated Anothen instruction frames for LLM ingestion. The true zero-loss bridge.
+                        A cinematic 3D WebGL lightning generator. Create procedural strikes with fractal displacement, bloom, and distance-aware thunder, then export directly to PNG.
                     </p>
-                    <a href="#" class="inline-block px-6 py-2 bg-amber-400 text-black text-xs uppercase tracking-widest font-bold hover:bg-white transition relative z-10">Purchase</a>
+                    <a href="applings/anothen_bolt/index.html" class="inline-block px-6 py-2 bg-white/10 text-white hover:bg-amber-400 hover:text-black text-xs uppercase tracking-widest transition relative z-10 font-bold border border-white/5 hover:border-amber-400 rounded-sm">View Architecture</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terrence Howard Physics Anchor -->
+    <section id="physics" class="py-20 relative z-10 overflow-hidden">
+        <div class="max-w-6xl mx-auto px-6 mb-16">
+            <h2 class="text-4xl md:text-5xl serif font-light text-center mb-4"><span class="text-amber-400">1x1=2</span> <span class="opacity-50">/</span> LYNCHPIN MATRIX</h2>
+            <p class="text-center text-slate-400 text-sm font-light italic uppercase tracking-widest">
+                Our mathematical architecture natively computes deterministic flow.
+            </p>
+        </div>
+
+        <!-- The Infographic Matrix -->
+        <div class="max-w-7xl mx-auto px-4 md:px-12 relative mb-16 group">
+            <!-- Asset Wrapper -->
+            <div class="relative w-full aspect-[16/9] md:aspect-[21/9] bg-[#050505] border border-white/10 rounded-sm overflow-hidden flex items-center justify-center drop-shadow-2xl">
+                
+                <!-- Base AI Mathematical Rendering -->
+                <img src="vortex_physics.png" alt="Kinematic SDF Simulation" class="absolute w-full h-full object-cover mix-blend-screen scale-110 group-hover:scale-100 transition-transform duration-[3s] ease-out opacity-80">
+                
+                <!-- Overlays -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDBMMCA0MEw0MCA0MEw0MCAwWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz4KPC9zdmc+')] opacity-20 pointer-events-none"></div>
+
+                <!-- HUD Overlay Data -->
+                <div class="absolute inset-0 p-6 md:p-12 flex flex-col justify-between pointer-events-none">
+                    <div class="flex justify-between items-start w-full font-mono text-[8px] md:text-[10px] text-white/50 tracking-[0.3em]">
+                        <div class="flex flex-col gap-3">
+                            <span class="text-red-500/80 leading-none">>>> ERROR: EUCLIDEAN MESH BOUNDARY [DISCRETIZATION FAILED]</span>
+                            <span class="text-amber-400 leading-none">>>> CONNECTED: SDF QUATERNARY FLOW COMPUTATION [LOCKED]</span>
+                        </div>
+                        <div class="text-right leading-relaxed border-r border-amber-400/30 pr-4">
+                            LOCAL KINEMATICS : ACTIVE<br>
+                            TANGENTIAL VECTOR : VERIFIED<br>
+                            TELEMETRY : 0.00%
+                        </div>
+                    </div>
+                    
+                    <div class="self-start relative border-l border-b border-white/20 p-4 w-48">
+                        <div class="absolute top-[-2px] left-[-2px] w-1 h-1 bg-amber-400"></div>
+                        <div class="absolute bottom-[-2px] right-[-2px] w-1 h-1 bg-amber-400"></div>
+                        <div class="font-mono text-[9px] text-slate-400 uppercase tracking-widest text-left">
+                            Continuous Geometry rendering engaged. Bypassing standard polygon physics.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Targeting Reticle (Pure Math Geometry) -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-64 md:h-64 border border-white/5 rounded-full flex items-center justify-center animate-spin-slow pointer-events-none">
+                    <div class="w-full h-[1px] bg-white/20 absolute top-1/2 left-0 mix-blend-screen"></div>
+                    <div class="w-[1px] h-full bg-white/20 absolute top-0 left-1/2 mix-blend-screen"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-400 animate-blub shadow-[0_0_20px_rgba(251,191,36,1)]"></div>
+                </div>
+                
+                <!-- Inner Orbit -->
+                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-32 md:h-32 border-2 border-dashed border-amber-400/20 rounded-full animate-spin-reverse-fast pointer-events-none"></div>
+            </div>
+            
+            <!-- Diagnosis Data Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 px-4 max-w-5xl mx-auto relative z-10">
+                <div class="glass-panel p-8 text-left border-l-2 border-l-red-500/50 hover-trigger reveal">
+                    <h3 class="serif text-xl tracking-wide mb-4 text-white">The Euclidean Trap</h3>
+                    <p class="text-slate-400 font-light text-sm md:text-base leading-relaxed">
+                        Commercial aerodynamic software natively relies on Euclidean algorithms, forcing true curves into rigid polygon meshes. This architectural gridlock mathematically rejects fluid geometries, crushing compounding tangential vectors before they leave the simulation.
+                    </p>
+                </div>
+                <div class="glass-panel p-8 text-left border-l-2 border-l-amber-400 hover-trigger reveal" style="transition-delay: 100ms;">
+                    <h3 class="serif text-xl tracking-wide mb-4 text-amber-400">The Quaternary Parameter</h3>
+                    <p class="text-slate-300 font-light text-sm md:text-base leading-relaxed">
+                        Keystone Constellation calculates via Signed Distance Fields (SDF). Our sovereign engine natively renders continuous curves and calculates magnetic flex directly against local processing cores, bypassing the polygon cage completely.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+            <div class="glass-panel p-10 text-center text-slate-300 font-light border-t-2 border-t-amber-400/50 mx-auto group">
+                <p class="mb-6">We are engineering the foundational sandbox required to validate kinematic geometry with absolute security. To bypass telemetry and request a dedicated offline physics engine calibrated to your coordinates, execute the protocol below.</p>
+                <a href="#contact" class="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/20 text-white uppercase text-xs tracking-[0.2em] hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all duration-300 font-bold">
+                    INITIATE LOG
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Zero-Loss Architecture -->
+    <section class="py-20 relative z-10 bg-black/40 border-t border-b border-white/5 drop-shadow-2xl">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="text-3xl mb-4 text-amber-400 opacity-80">
+                    <i class="fas fa-balance-scale-right"></i>
+                </div>
+                <h2 class="text-4xl md:text-5xl serif font-light mb-6">The Zero-Loss Architecture</h2>
+                <p class="text-slate-300 font-light text-lg md:text-xl leading-relaxed italic max-w-3xl mx-auto">
+                    As engineers, we prioritize deterministic systems. Keystone Constellation was built on an offline-first architecture: mathematically contained software that eliminates data extraction and preserves the user's processing cycle.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Open Architecture -->
+                <div class="glass-panel p-10 rounded-sm hover-trigger">
+                    <h3 class="serif text-xl text-white mb-4">The Unrestricted Protocol</h3>
+                    <p class="text-slate-300 font-light text-sm md:text-base leading-relaxed">
+                        Our code is compiled logically. If a peer is facing a catastrophic deadline and this algorithm solves their immediate block—transfer the local binary. We do not enforce digital rights management or hardware locks.
+                    </p>
+                </div>
+                
+                <!-- The 20% Forward Protocol -->
+                <div class="glass-panel p-10 rounded-sm hover-trigger">
+                    <h3 class="serif text-xl text-amber-400 mb-4">The 20% Protocol</h3>
+                    <p class="text-slate-300 font-light text-sm md:text-base leading-relaxed">
+                        You can buy an instrument for a stranger. If you pay 20% of the cost, we set aside a full license. The next person who arrives at checkout and faces financial friction will find their cart completely covered. The sale will just go through.
+                    </p>
+                </div>
+
+                <!-- Bad Day Reversal -->
+                <div class="glass-panel p-10 rounded-sm md:col-span-2 border-l-2 border-l-amber-400 hover-trigger">
+                    <div class="flex items-center gap-4 mb-4">
+                        <i class="text-2xl text-amber-400 fas fa-bolt"></i>
+                        <h3 class="serif text-2xl text-white">The Reversal of a Bad Day</h3>
+                    </div>
+                    <p class="text-slate-300 font-light text-base leading-relaxed max-w-3xl">
+                        Operating a studio under extreme economic constraints? Detail your block in the engineering log below. If selected for review, we will provision a multi-tier bundle of our flagship tools entirely off-ledger to restore your studio baseline.
+                    </p>
                 </div>
             </div>
         </div>
@@ -623,14 +768,14 @@
                 <div>
                     <h4 class="serif text-xl mb-4">KEYSTONE <span class="font-light opacity-60">Constellation</span></h4>
                     <p class="text-slate-400 text-sm font-light">
-                        Weblings are designed for creators who believe ownership matters.<br><br>
+                        Maizons are designed for creators who believe ownership matters.<br><br>
                         <span class="text-amber-400">Your voice. Your site. Your terms.</span>
                     </p>
                 </div>
                 <div>
                     <h4 class="text-sm uppercase tracking-widest mb-4">Explore</h4>
                     <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a href="#weblings" class="hover:text-amber-400 transition">Browse Weblings</a></li>
+                        <li><a href="#maizons" class="hover:text-amber-400 transition">Browse Maizons</a></li>
                         <li><a href="free-stuff.html" class="hover:text-amber-400 transition">Free Stuff</a></li>
                         <li><a href="#contact" class="hover:text-amber-400 transition">Get in Touch</a></li>
                         <li><a href="axxilak_portfolio/index.html" class="hover:text-amber-400 transition">Our Story</a></li>
@@ -649,11 +794,29 @@
             <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
                 <p class="mb-4">&copy; 2026 Keystone Constellation. All rights reserved.</p>
                 <p class="text-xs text-slate-600 italic">
-                    Explore each webling. You might notice some thoughtful details along the way.
+                    Explore each maizon. You might notice some thoughtful details along the way.
                 </p>
             </div>
         </div>
     </footer>
+    </div> <!-- End Cinematic UI Wrapper -->
+
+    <!-- Focus Slider -->
+    <div class="fixed bottom-8 right-8 z-[100] flex flex-col items-center gap-2 group mix-blend-difference">
+        <label for="opacitySlider" class="text-[10px] uppercase tracking-widest text-slate-500 group-hover:text-amber-400 transition cursor-pointer">UI Focus</label>
+        <input type="range" id="opacitySlider" min="0" max="1" step="0.01" value="1" class="w-24 accent-amber-400 opacity-30 hover:opacity-100 transition cursor-pointer">
+    </div>
+
+    <script>
+        window.uiFocusLevel = 1.0;
+        document.getElementById('opacitySlider').addEventListener('input', (e) => {
+            window.uiFocusLevel = parseFloat(e.target.value);
+            const uiLayer = document.getElementById('cinematic-ui-layer');
+            const uiHeader = document.getElementById('cinematic-header');
+            if (uiLayer) uiLayer.style.opacity = window.uiFocusLevel;
+            if (uiHeader) uiHeader.style.opacity = window.uiFocusLevel;
+        });
+    </script>
 
     <script type="importmap">
     {

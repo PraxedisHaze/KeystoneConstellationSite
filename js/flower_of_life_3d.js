@@ -95,6 +95,28 @@ class CinematicStrucity3D {
         this.planet.receiveShadow = true;
         this.planet.castShadow = true; 
         
+        // 1.5. The Polar Hexagon Graft (Restored)
+        // Bypassing spherical UV pinching by mathematically grafting a flat, additive-blended circular plane hovering 0.05 units above the Saturn North Pole.
+        const capGeo = new THREE.CircleGeometry(16, 64); // Cover the pole beneath the geometry
+        const capTex = textureLoader.load('polar_hex.jpg');
+        capTex.center.set(0.5, 0.5);
+        capTex.rotation = Math.PI * 0.5;   // rotate until the hex sits perfectly centered top-down
+        
+        if (THREE.SRGBColorSpace) capTex.colorSpace = THREE.SRGBColorSpace;
+        else if (THREE.sRGBEncoding) capTex.encoding = THREE.sRGBEncoding;
+        
+        const capMat = new THREE.MeshBasicMaterial({
+            map: capTex,
+            transparent: true,
+            opacity: 1.0,
+            depthWrite: false, // Prevents z-fighting against the native sphere
+            blending: THREE.AdditiveBlending
+        });
+        this.polarCap = new THREE.Mesh(capGeo, capMat);
+        this.polarCap.position.set(0, this.planetRadius + 0.05, 0);
+        this.polarCap.rotation.x = -Math.PI / 2; // Flat on the pole
+        this.planet.add(this.polarCap);
+        
         // 2. The Magnificent Rings
         const innerRad = this.planetRadius * 1.2;
         const outerRad = this.planetRadius * 2.3;
@@ -112,93 +134,106 @@ class CinematicStrucity3D {
         }
         
         const ringColorTex = textureLoader.load(window.SATURN_RING_COLOR);
+        if (THREE.SRGBColorSpace) ringColorTex.colorSpace = THREE.SRGBColorSpace;
+        else if (THREE.sRGBEncoding) ringColorTex.encoding = THREE.sRGBEncoding;
+        
         const ringAlphaTex = textureLoader.load(window.SATURN_RING_ALPHA);
         
-        // --- The One-Way Shadow Valve ---
-        //
-        // Two meshes, one geometry. The shadow map pass and the color pass are
-        // completely separate in WebGL — colorWrite: false makes a mesh invisible
-        // to the eye without removing it from the shadow map.
-        //
-        // shadowRings  — invisible, castShadow only. Puts the ring pattern into the
-        // shadow map so the planet receives the ring's shadow. Never
-        // renders to the color or depth buffer, so canvas punch-through
-        // is impossible and it cannot receive its own shadow.
-        //
-        // rings        — visible, receiveShadow only. DoubleSide so it survives planet
-        // tilt and rotation from any camera angle. Never casts, so it
-        // cannot appear in the shadow map and cannot produce acne on itself.
+        // Legacy ringShadowCaster stripped entirely.
 
-        const shadowRingMat = new THREE.MeshBasicMaterial({
-            alphaMap: ringAlphaTex,
-            alphaTest: 0.1,       // Cast shadow only where the dust is actually present
-            transparent: false,   // Not needed — alphaTest handles the gaps
-            colorWrite: false,    // Invisible to the eye
-            depthWrite: false,    // Invisible to the depth buffer
-            side: THREE.DoubleSide,
-        });
-        const shadowRings = new THREE.Mesh(ringGeo, shadowRingMat);
-        shadowRings.rotation.x = -Math.PI / 2;
-        shadowRings.castShadow = true;
-        shadowRings.receiveShadow = false;
-        this.planet.add(shadowRings);
+        // --- Brick 3: Aletheia Analytical Shader Injection ---
+        this.ringUniforms = {
+            planetRadius: { value: this.planetRadius }, 
+            sunDirection: { value: new THREE.Vector3(1, 0, 0) }
+        };
 
+        const altheaCompile = (shader) => {
+            shader.uniforms.planetRadius = this.ringUniforms.planetRadius;
+            shader.uniforms.sunDirection = this.ringUniforms.sunDirection;
+
+            shader.vertexShader = shader.vertexShader.replace(
+                '#include <common>',
+                `#include <common>
+                 varying vec3 vWorldPosition;`
+            );
+            shader.vertexShader = shader.vertexShader.replace(
+                '#include <worldpos_vertex>',
+                `#include <worldpos_vertex>
+                 vWorldPosition = worldPosition.xyz;`
+            );
+
+            shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <common>',
+                `#include <common>
+                 varying vec3 vWorldPosition;
+                 uniform float planetRadius;
+                 uniform vec3 sunDirection;`
+            );
+
+            shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <emissivemap_fragment>',
+                `#include <emissivemap_fragment>
+                 vec3 dirToSun = normalize(sunDirection);
+                 vec3 toPlanetCenter = -vWorldPosition;
+                 float t = dot(toPlanetCenter, dirToSun);
+
+                 float shadowFactor = 1.0;
+                 
+                 // 1. The Core Eclipse: Absolute black cylinder projection
+                 if (t > 0.0) {
+                   vec3 closest = toPlanetCenter - dirToSun * t;
+                   if (dot(closest, closest) < planetRadius * planetRadius) {
+                     shadowFactor = 0.0; 
+                   }
+                 }
+                 
+                 // 2. The Night-Side Void: Soft penumbra fade for the deep orbit
+                 vec3 fragOrbitDir = normalize(-toPlanetCenter); // Outward vector
+                 float dayNightDot = dot(fragOrbitDir, dirToSun); 
+                 if (dayNightDot < 0.0) {
+                     // Smooth, gentle 15-degree fall-off rather than an instant hard cut
+                     float nightFade = smoothstep(-0.25, 0.0, dayNightDot);
+                     shadowFactor *= nightFade;
+                 }
+
+                 totalEmissiveRadiance *= shadowFactor;`
+            );
+        };
+
+        // --- Layer 0: The Single Root Ring Mesh ---
+        // All false layers and shadow reinforces have been wiped. Pure native DoubleSide rules remaining.
         const ringMat = new THREE.MeshStandardMaterial({
             map: ringColorTex,
             alphaMap: ringAlphaTex,
+            alphaTest: 0.1, 
             transparent: true,
-            depthWrite: false,
-            side: THREE.DoubleSide,
-            color: 0xbbbbbb,
+            depthWrite: true, // Forces back-rings to be legally occluded by the opaque planet sphere 
+            side: THREE.DoubleSide, 
+            color: 0xffffff,
             roughness: 0.8,
+            emissive: new THREE.Color(0xffcc88), 
+            emissiveIntensity: 0.35, 
+            emissiveMap: ringAlphaTex
         });
+        ringMat.onBeforeCompile = altheaCompile;
 
         const rings = new THREE.Mesh(ringGeo, ringMat);
         rings.rotation.x = -Math.PI / 2;
-        rings.castShadow = false;
-        rings.receiveShadow = false;
-        this.planet.add(rings);
-
-        // Transmission layer — quaternary complement to the sunlit face.
-        // BackSide only: geometrically invisible from above, so it never bleeds
-        // onto the planet dark side. Simulates forward-scattered sunlight through
-        // ring particles as seen from below. Alpha texture drives density — dense
-        // rings glow, gaps stay dark. Exactly the physics.
-        const underRingMat = new THREE.MeshBasicMaterial({
-            color: 0xffcc88,
+        rings.castShadow = true; // Reinstituted native shadow casting on the only ring
+        rings.receiveShadow = true; 
+        rings.frustumCulled = false;
+        
+        // Exact depth packing to cast exact particle-level shadows correctly
+        rings.customDepthMaterial = new THREE.MeshDepthMaterial({
+            depthPacking: THREE.RGBADepthPacking,
             alphaMap: ringAlphaTex,
-            transparent: true,
-            opacity: 0.25,
-            depthWrite: false,
-            side: THREE.BackSide,
-        });
-
-        const underRings = new THREE.Mesh(ringGeo, underRingMat);
-        underRings.rotation.x = -Math.PI / 2;
-        this.planet.add(underRings);
-        
-        // 3. The Physical Polar Hexagon Graft (Bypassing Spherical UV Pinching)
-        // Grafting a flat circular geometry directly over the pole
-        const hexGeo = new THREE.CircleGeometry(this.planetRadius * 0.32, 64);
-        const hexTex = textureLoader.load(window.SATURN_HEX_CAP);
-        if (THREE.SRGBColorSpace) hexTex.colorSpace = THREE.SRGBColorSpace;
-        else if (THREE.sRGBEncoding) hexTex.encoding = THREE.sRGBEncoding;
-
-        const hexMat = new THREE.MeshStandardMaterial({
-            map: hexTex,
-            transparent: true,
-            opacity: 0.95,
-            blending: THREE.AdditiveBlending, // Deep blacks fade out, natively feathering the storm borders into the planet
-            depthWrite: false, // Prevents depth collisions with geometry
-            color: 0xffffff, // Max vibrance to let the raw Cassini spectrum show through
-            roughness: 0.9
+            alphaTest: 0.1,
+            side: THREE.DoubleSide
         });
         
-        this.polarCap = new THREE.Mesh(hexGeo, hexMat);
-        this.polarCap.position.set(0, this.planetRadius + 0.05, 0); // Sits underneath the golden Flower of Life (which is at +0.1)
-        this.polarCap.rotation.x = -Math.PI / 2;
-        this.polarCap.renderOrder = 2; // Under the eclipse overlay
-        this.planet.add(this.polarCap);
+        this.planet.add(rings);
+        
+        // The 'false record' polarCap graft has been utterly eradicated.
         
         // Planet remains strictly upright (Z=0) so the top-down 2D illusion is mathematically perfect
         // The tilt will be simulated by the camera swoop trajectory
@@ -245,6 +280,8 @@ class CinematicStrucity3D {
         this.dirLight.shadow.normalBias = 0; // Must stay 0: positive value inverts backface normals on DoubleSide rings
         
         this.scene.add(this.dirLight);
+        
+        // Demolished Layer 1 Mirror Light and Ghost Planet (Analytical eclipse executed instead).
         
         // The Deep Space Starfield has been fully stripped to permanently eliminate driver TDR loading spikes.
         // It is replaced by a zero-cost CSS static backdrop honoring the Law of the Living context limits.
@@ -374,10 +411,10 @@ class CinematicStrucity3D {
             }
         } 
         
-        // Contemplation Phase: Hold the camera rigidly on the polar alignment for 7 seconds
+        // Contemplation Phase: Hold the camera rigidly on the polar alignment for 3 seconds
         if (this.state === 'HOLD') {
             this.holdTimer += dt;
-            if (this.holdTimer >= 7.0) {
+            if (this.holdTimer >= 3.0) {
                 this.state = 'SWOOP';
             }
         }
@@ -418,6 +455,26 @@ class CinematicStrucity3D {
 
             // Shift focus down slightly so Saturn dominates the screen
             this.camera.lookAt(0, this.planetRadius * 0.4, 0); 
+            
+            // Sync HTML UI layers mathematically to the exact planetary swoop
+            const uiLayer = document.getElementById('cinematic-ui-layer');
+            const uiHeader = document.getElementById('cinematic-header');
+            
+            const focusVal = typeof window.uiFocusLevel !== 'undefined' ? window.uiFocusLevel : 1.0;
+
+            if (uiLayer) {
+                uiLayer.style.opacity = t * focusVal;
+                if (uiHeader) uiHeader.style.opacity = t * focusVal;
+                
+                if (t >= 1) {
+                    uiLayer.style.transform = 'none'; // Un-break DOM containment on completion
+                    if (uiHeader) uiHeader.style.transform = 'none';
+                } else {
+                    let transStr = `translateY(${(1 - t) * 10}vh)`;
+                    uiLayer.style.transform = transStr;
+                    if (uiHeader) uiHeader.style.transform = transStr;
+                }
+            }
         }
 
         // Dissolve the empirical Cassini photograph to leave only the theoretical Anothen math.
@@ -429,6 +486,12 @@ class CinematicStrucity3D {
                     this.polarCap.visible = false;
                 }
             }
+        }
+
+        // --- Brick 3: Aletheia Analytical Shadow Binding ---
+        if (this.ringUniforms && this.dirLight) {
+            // Continually pass the absolute vector of the main sun to perfectly trace the cylinder
+            this.ringUniforms.sunDirection.value.copy(this.dirLight.position).normalize();
         }
 
         this.renderer.render(this.scene, this.camera);
