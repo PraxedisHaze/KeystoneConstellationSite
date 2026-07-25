@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge Electrify | Picture Factory</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #06b6d4;
+            --text: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 70%);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #22d3ee, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: #94a3b8;
+        }
+
+        .container {
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(30, 41, 59, 0.7);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            flex-wrap: wrap;
+        }
+
+        .preview-section {
+            flex: 2;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .controls-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        #drop-zone {
+            width: 100%;
+            aspect-ratio: 4/3;
+            border: 2px dashed rgba(6, 182, 212, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #drop-zone:hover {
+            border-color: var(--primary);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        #drop-zone.has-image {
+            border: none;
+            background: transparent;
+        }
+
+        .drop-hint {
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+            color: var(--primary);
+        }
+
+        #output-canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.1);
+            object-fit: contain;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .color-pickers {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .color-picker {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-upload {
+            background: #334155;
+            color: white;
+        }
+
+        .btn-upload:hover {
+            background: #475569;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+            margin-top: auto;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.6);
+        }
+
+        #hidden-input {
+            display: none;
+        }
+
+        #status {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            z-index: 100;
+        }
+
+        #status.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Edge Electrify</h1>
+    <p>Convert any photo into brilliant neon line art.</p>
+</header>
+
+<div class="container">
+    <div class="preview-section">
+        <div id="drop-zone" onclick="if(!window.demoActive && !sourceImage) hiddenInput.click();">
+            <div class="drop-hint">
+                <span class="drop-icon">⚡</span>
+                <div class="drop-text">
+                    <strong>Drop Image Here</strong><br>
+                    or click to browse
+                </div>
+            </div>
+            <canvas id="output-canvas"></canvas>
+        </div>
+        <button class="btn btn-upload" id="btn-upload" onclick="hiddenInput.click();">
+            Upload Picture
+        </button>
+    </div>
+
+    <div class="controls-section">
+        <div class="control-group">
+            <label for="threshold">Detail Level <span id="val-threshold">50</span></label>
+            <input type="range" id="threshold" min="5" max="200" value="50">
+        </div>
+
+        <div class="control-group">
+            <label for="intensity">Glow Intensity <span id="val-intensity">5</span></label>
+            <input type="range" id="intensity" min="1" max="10" value="5">
+        </div>
+
+        <div class="color-pickers">
+            <div class="color-picker">
+                <label>Line Gradient</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="color" id="fg-color1" value="#00ffff" title="Gradient Start">
+                    <input type="color" id="fg-color2" value="#ff00a6" title="Gradient End">
+                </div>
+            </div>
+            <div class="color-picker">
+                <label>BG Gradient</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="color" id="bg-color1" value="#000000" title="Core">
+                    <input type="color" id="bg-color2" value="#0a0a2a" title="Edge">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-download" id="btn-download">
+            Save Electrified Photo
+        </button>
+    </div>
+</div>
+
+<div id="status">Applying Electrify...</div>
+<input type="file" id="hidden-input" accept="image/*">
+
+<script>
+    let sourceImage = null;
+    let processing = false;
+    let pendingProcess = false;
+
+    const canvas = document.getElementById('output-canvas');
+    const ctx = canvas.getContext('2d');
+    const dropZone = document.getElementById('drop-zone');
+    const hiddenInput = document.getElementById('hidden-input');
+    const statusEl = document.getElementById('status');
+
+    // UI Updates
+    document.getElementById('threshold').addEventListener('input', e => {
+        document.getElementById('val-threshold').textContent = e.target.value;
+        process();
+    });
+    document.getElementById('intensity').addEventListener('input', e => {
+        document.getElementById('val-intensity').textContent = e.target.value;
+        process();
+    });
+    document.getElementById('fg-color1').addEventListener('input', process);
+    document.getElementById('fg-color2').addEventListener('input', process);
+    document.getElementById('bg-color1').addEventListener('input', process);
+    document.getElementById('bg-color2').addEventListener('input', process);
+
+    hiddenInput.addEventListener('change', e => {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => loadCanvas(img);
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    function loadCanvas(img, skipProcess = false) {
+        sourceImage = img;
+        dropZone.classList.add('has-image');
+        document.querySelector('.drop-hint').style.display = 'none';
+        canvas.style.display = 'block';
+        
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        ctx.drawImage(img, 0, 0);
+
+        if (!skipProcess) process();
+    }
+
+    // ─── WEB WORKER (Off-Main-Thread Processing) ──────────────────────────────
+    const workerCode = `
+        function computeSobel(pixels, w, h) {
+            const edges = new Float32Array(w * h);
+            const gray = new Float32Array(w * h);
+            for (let i = 0; i < w * h; i++) {
+                gray[i] = 0.299 * pixels[i*4] + 0.587 * pixels[i*4+1] + 0.114 * pixels[i*4+2];
+            }
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    const tl = gray[(y-1)*w+(x-1)], tc = gray[(y-1)*w+x], tr = gray[(y-1)*w+(x+1)];
+                    const ml = gray[y*w+(x-1)],                            mr = gray[y*w+(x+1)];
+                    const bl = gray[(y+1)*w+(x-1)], bc = gray[(y+1)*w+x], br = gray[(y+1)*w+(x+1)];
+                    const Gx = -tl - 2*ml - bl + tr + 2*mr + br;
+                    const Gy = -tl - 2*tc - tr + bl + 2*bc + br;
+                    edges[y*w+x] = Math.sqrt(Gx*Gx + Gy*Gy);
+                }
+            }
+            return edges;
+        }
+
+        self.onmessage = function(e) {
+            const { data, w, h, threshold } = e.data;
+            const edges = computeSobel(data, w, h);
+            let maxEdge = 0;
+            for (let i = 0; i < edges.length; i++) if (edges[i] > maxEdge) maxEdge = edges[i];
+            
+            const edgeData = new Uint8ClampedArray(w * h * 4);
+            if (maxEdge > 0) {
+                for (let i = 0; i < w * h; i++) {
+                    const norm = (edges[i] / maxEdge) * 255;
+                    if (norm > threshold) {
+                        const strength = Math.min((norm - threshold) / (255 - threshold + 0.001), 1.0);
+                        edgeData[i*4]   = 255;
+                        edgeData[i*4+1] = 255;
+                        edgeData[i*4+2] = 255;
+                        edgeData[i*4+3] = Math.round(strength * 255);
+                    }
+                }
+            }
+            self.postMessage({ edgeData }, [edgeData.buffer]);
+        };
+    `;
+    const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+    const edgeWorker = new Worker(URL.createObjectURL(workerBlob));
+
+    edgeWorker.onmessage = function(e) {
+        const { edgeData } = e.data;
+        const w = sourceImage.naturalWidth;
+        const h = sourceImage.naturalHeight;
+        
+        const edgeCanvas = document.createElement('canvas');
+        edgeCanvas.width = w; edgeCanvas.height = h;
+        const edgeCtx = edgeCanvas.getContext('2d');
+        const edgeImg = edgeCtx.createImageData(w, h);
+        edgeImg.data.set(edgeData);
+        edgeCtx.putImageData(edgeImg, 0, 0);
+
+        const intensity = parseInt(document.getElementById('intensity').value);
+        const spread = intensity * 3;
+        
+        const fgColor1 = document.getElementById('fg-color1').value;
+        const fgColor2 = document.getElementById('fg-color2').value;
+        edgeCtx.globalCompositeOperation = 'source-in';
+        const fgGrad = edgeCtx.createLinearGradient(0, 0, w, h);
+        fgGrad.addColorStop(0, fgColor1);
+        fgGrad.addColorStop(1, fgColor2);
+        edgeCtx.fillStyle = fgGrad;
+        edgeCtx.fillRect(0, 0, w, h);
+        edgeCtx.globalCompositeOperation = 'source-over';
+
+        const bgColor1 = document.getElementById('bg-color1').value;
+        const bgColor2 = document.getElementById('bg-color2').value;
+        const bgGrad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h));
+        bgGrad.addColorStop(0, bgColor1);
+        bgGrad.addColorStop(1, bgColor2);
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        const glowLayers = intensity * 2;
+        for (let i = glowLayers; i >= 1; i--) {
+            const blurRadius = (i / glowLayers) * spread;
+            const alpha = (0.15 + 0.85 * (1 - i / glowLayers)) * 0.65;
+            ctx.save();
+            ctx.filter = `blur(${blurRadius.toFixed(1)}px)`;
+            ctx.globalAlpha = alpha;
+            ctx.drawImage(edgeCanvas, 0, 0);
+            ctx.restore();
+        }
+
+        ctx.filter = 'none';
+        ctx.globalAlpha = 1.0;
+        ctx.drawImage(edgeCanvas, 0, 0);
+
+        processing = false;
+        statusEl.classList.remove('show');
+        if (pendingProcess) { pendingProcess = false; process(); }
+    };
+
+    function process() {
+        if (!sourceImage) return;
+        if (processing) { pendingProcess = true; return; }
+        processing = true;
+        statusEl.classList.add('show');
+
+        const threshold = parseInt(document.getElementById('threshold').value);
+
+        const w = sourceImage.naturalWidth;
+        const h = sourceImage.naturalHeight;
+        canvas.width = w;
+        canvas.height = h;
+
+        const src = document.createElement('canvas');
+        src.width = w; src.height = h;
+        src.getContext('2d').drawImage(sourceImage, 0, 0);
+        
+        try {
+            const { data } = src.getContext('2d').getImageData(0, 0, w, h);
+            edgeWorker.postMessage({ data, w, h, threshold }, [data.buffer]);
+        } catch (err) {
+            console.error("Canvas read failed:", err);
+            processing = false;
+            statusEl.innerText = "ERROR: " + err.message;
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+                statusEl.innerText = "Applying Electrify...";
+            }, 3000);
+        }
+    }
+
+    // ─── DOWNLOAD ─────────────────────────────────────────────────────────────
+    document.getElementById('btn-download').addEventListener('click', () => {
+        if (!sourceImage) return;
+        const a = document.createElement('a');
+        a.download = 'electrified.png';
+        a.href = canvas.toDataURL('image/png');
+        if (window.demoActive) {
+            console.log("Demo save completed (intercepted to prevent file accumulation).");
+            return;
+        }
+        a.click();
+    });
+
+    // ─── PICTURE FACTORY MACRO (MVP DEMO) ─────────────────────────────────────
+    window.demoActive = true;
+    let demoTimeout = null;
+    let currentStep = 0;
+
+    const demoCursor = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    demoCursor.setAttribute("viewBox", "0 0 24 24");
+    demoCursor.setAttribute("width", "40");
+    demoCursor.setAttribute("height", "40");
+    demoCursor.style.cssText = "position:fixed; top:-100px; left:-100px; z-index:9999; pointer-events:none; transition: top 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.2s; fill:#ffffff; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); opacity:0;";
+    demoCursor.innerHTML = '<path d="M7,2l12,11.2l-5.8,0.5l3.3,7.3l-2.2,1.1L11,14.9L6.5,19V2z" stroke="black" stroke-width="1"/>';
+    document.body.appendChild(demoCursor);
+
+    const demoSteps = [
+        { type: "wait", duration: 1500 },
+        { type: "move", target: "#btn-upload", duration: 800 },
+        { type: "click", target: "#btn-upload" },
+        { type: "loadPhoto", url: "demo_photo.png" },
+        { type: "wait", duration: 1500 },
+        { type: "move", target: "#threshold", duration: 800 },
+        { type: "drag", target: "#threshold", value: 30, duration: 800 },
+        { type: "wait", duration: 1000 },
+        { type: "move", target: "#intensity", duration: 800 },
+        { type: "drag", target: "#intensity", value: 8, duration: 800 },
+        { type: "wait", duration: 1000 },
+        { type: "move", target: "#fg-color1", duration: 800 },
+        { type: "drag", target: "#fg-color1", value: "#00ffff", duration: 800 },
+        { type: "move", target: "#fg-color2", duration: 400 },
+        { type: "drag", target: "#fg-color2", value: "#ff00a6", duration: 800 },
+        { type: "wait", duration: 1000 },
+        { type: "move", target: "#bg-color2", duration: 800 },
+        { type: "drag", target: "#bg-color2", value: "#1a0b2e", duration: 800 },
+        { type: "wait", duration: 1500 },
+        { type: "move", target: "#btn-download", duration: 1000 },
+        { type: "click", target: "#btn-download" }
+    ];
+
+    function stopDemo() {
+        if (!window.demoActive) return;
+        window.demoActive = false;
+        clearTimeout(demoTimeout);
+        demoCursor.style.opacity = "0";
+    }
+
+    // Hard interrupt on any user touch/click/key
+    window.addEventListener('mousedown', stopDemo, {capture: true});
+    window.addEventListener('touchstart', stopDemo, {capture: true});
+    window.addEventListener('keydown', stopDemo, {capture: true});
+
+    function getCenter(el) {
+        const rect = el.getBoundingClientRect();
+        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    }
+
+    function runDemoStep() {
+        if (!window.demoActive || currentStep >= demoSteps.length) {
+            demoCursor.style.opacity = "0";
+            return;
+        }
+
+        const step = demoSteps[currentStep++];
+        demoCursor.style.opacity = "1";
+
+        if (step.type === "wait") {
+            demoTimeout = setTimeout(runDemoStep, step.duration);
+        } else if (step.type === "move") {
+            const el = document.querySelector(step.target);
+            if (el) {
+                const {x, y} = getCenter(el);
+                demoCursor.style.left = x + "px";
+                demoCursor.style.top = y + "px";
+            }
+            demoTimeout = setTimeout(runDemoStep, step.duration || 800);
+        } else if (step.type === "click") {
+            demoCursor.style.transform = "scale(0.8)";
+            setTimeout(() => {
+                demoCursor.style.transform = "scale(1)";
+                const el = document.querySelector(step.target);
+                if (el && step.target !== "#btn-upload") {
+                    el.click();
+                }
+                demoTimeout = setTimeout(runDemoStep, 300);
+            }, 150);
+        } else if (step.type === "loadPhoto") {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                loadCanvas(img, true);
+                demoTimeout = setTimeout(runDemoStep, 2000); // Let them see the raw image
+            };
+            img.src = step.url;
+        } else if (step.type === "drag") {
+            demoCursor.style.transform = "scale(0.8)";
+            setTimeout(() => {
+                const el = document.querySelector(step.target);
+                if (el) {
+                    el.value = step.value;
+                    const event = new Event('input', { bubbles: true });
+                    const {x, y} = getCenter(el);
+                    demoCursor.style.left = (x + 30) + "px"; 
+                    el.dispatchEvent(event);
+                }
+                setTimeout(() => {
+                    demoCursor.style.transform = "scale(1)";
+                    runDemoStep();
+                }, Math.max(step.duration - 150, 0));
+            }, 150);
+        }
+    }
+
+    window.addEventListener('load', () => {
+        runDemoStep();
+    });
+</script>
+
+</body>
+</html>
