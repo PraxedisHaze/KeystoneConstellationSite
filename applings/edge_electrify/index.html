@@ -259,15 +259,14 @@
             .preview-section { flex: 2; min-width: 300px; }
             .controls-section { flex: 1; min-width: 300px; }
         }
-
-        /* Compact in-panel title (2026-08-04) */
-        .controls-section { gap: 1rem; }
-        .controls-heading { padding-bottom: .15rem; }
-        .controls-heading h1 { font-size: clamp(1.75rem, 3vw, 2.35rem); line-height: 1.05; margin-bottom: .35rem; text-align: left; }
-        .controls-heading p { font-size: .95rem; }
     </style>
 </head>
 <body>
+
+<header>
+    <h1>Edge Electrify</h1>
+    <p>Convert any photo into brilliant neon line art.</p>
+</header>
 
 <div class="container">
     <div class="preview-section">
@@ -287,10 +286,6 @@
     </div>
 
     <div class="controls-section">
-        <div class="controls-heading">
-            <h1>Edge Electrify</h1>
-            <p>Convert any photo into brilliant neon line art.</p>
-        </div>
         <div class="control-group">
             <label for="threshold">Detail Level <span id="val-threshold">50</span></label>
             <input type="range" id="threshold" min="5" max="200" value="50">
