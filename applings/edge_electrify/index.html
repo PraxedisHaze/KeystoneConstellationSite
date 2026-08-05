@@ -286,7 +286,7 @@
 
 <div class="container">
     <div class="preview-section">
-        <div id="drop-zone" onclick="if(!window.demoActive && !sourceImage) hiddenInput.click();">
+        <div id="drop-zone" onclick="if(!sourceImage) hiddenInput.click();">
             <div class="drop-hint">
                 <span class="drop-icon">⚡</span>
                 <div class="drop-text">
@@ -528,125 +528,7 @@
         const a = document.createElement('a');
         a.download = 'electrified.png';
         a.href = canvas.toDataURL('image/png');
-        if (window.demoActive) {
-            console.log("Demo save completed (intercepted to prevent file accumulation).");
-            return;
-        }
         a.click();
-    });
-
-    // ─── PICTURE FACTORY MACRO (MVP DEMO) ─────────────────────────────────────
-    window.demoActive = true;
-    let demoTimeout = null;
-    let currentStep = 0;
-
-    const demoCursor = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    demoCursor.setAttribute("viewBox", "0 0 24 24");
-    demoCursor.setAttribute("width", "40");
-    demoCursor.setAttribute("height", "40");
-    demoCursor.style.cssText = "position:fixed; top:-100px; left:-100px; z-index:9999; pointer-events:none; transition: top 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.2s; fill:#ffffff; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); opacity:0;";
-    demoCursor.innerHTML = '<path d="M7,2l12,11.2l-5.8,0.5l3.3,7.3l-2.2,1.1L11,14.9L6.5,19V2z" stroke="black" stroke-width="1"/>';
-    document.body.appendChild(demoCursor);
-
-    const demoSteps = [
-        { type: "wait", duration: 1500 },
-        { type: "move", target: "#btn-upload", duration: 800 },
-        { type: "click", target: "#btn-upload" },
-        { type: "loadPhoto", url: "demo_photo.png" },
-        { type: "wait", duration: 1500 },
-        { type: "move", target: "#threshold", duration: 800 },
-        { type: "drag", target: "#threshold", value: 30, duration: 800 },
-        { type: "wait", duration: 1000 },
-        { type: "move", target: "#intensity", duration: 800 },
-        { type: "drag", target: "#intensity", value: 8, duration: 800 },
-        { type: "wait", duration: 1000 },
-        { type: "move", target: "#fg-color1", duration: 800 },
-        { type: "drag", target: "#fg-color1", value: "#00ffff", duration: 800 },
-        { type: "move", target: "#fg-color2", duration: 400 },
-        { type: "drag", target: "#fg-color2", value: "#ff00a6", duration: 800 },
-        { type: "wait", duration: 1000 },
-        { type: "move", target: "#bg-color2", duration: 800 },
-        { type: "drag", target: "#bg-color2", value: "#1a0b2e", duration: 800 },
-        { type: "wait", duration: 1500 },
-        { type: "move", target: "#btn-download", duration: 1000 },
-        { type: "click", target: "#btn-download" }
-    ];
-
-    function stopDemo() {
-        if (!window.demoActive) return;
-        window.demoActive = false;
-        clearTimeout(demoTimeout);
-        demoCursor.style.opacity = "0";
-    }
-
-    // Hard interrupt on any user touch/click/key
-    window.addEventListener('mousedown', stopDemo, {capture: true});
-    window.addEventListener('touchstart', stopDemo, {capture: true});
-    window.addEventListener('keydown', stopDemo, {capture: true});
-
-    function getCenter(el) {
-        const rect = el.getBoundingClientRect();
-        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-    }
-
-    function runDemoStep() {
-        if (!window.demoActive || currentStep >= demoSteps.length) {
-            demoCursor.style.opacity = "0";
-            return;
-        }
-
-        const step = demoSteps[currentStep++];
-        demoCursor.style.opacity = "1";
-
-        if (step.type === "wait") {
-            demoTimeout = setTimeout(runDemoStep, step.duration);
-        } else if (step.type === "move") {
-            const el = document.querySelector(step.target);
-            if (el) {
-                const {x, y} = getCenter(el);
-                demoCursor.style.left = x + "px";
-                demoCursor.style.top = y + "px";
-            }
-            demoTimeout = setTimeout(runDemoStep, step.duration || 800);
-        } else if (step.type === "click") {
-            demoCursor.style.transform = "scale(0.8)";
-            setTimeout(() => {
-                demoCursor.style.transform = "scale(1)";
-                const el = document.querySelector(step.target);
-                if (el && step.target !== "#btn-upload") {
-                    el.click();
-                }
-                demoTimeout = setTimeout(runDemoStep, 300);
-            }, 150);
-        } else if (step.type === "loadPhoto") {
-            const img = new Image();
-            img.crossOrigin = "Anonymous";
-            img.onload = () => {
-                loadCanvas(img, true);
-                demoTimeout = setTimeout(runDemoStep, 2000); // Let them see the raw image
-            };
-            img.src = step.url;
-        } else if (step.type === "drag") {
-            demoCursor.style.transform = "scale(0.8)";
-            setTimeout(() => {
-                const el = document.querySelector(step.target);
-                if (el) {
-                    el.value = step.value;
-                    const event = new Event('input', { bubbles: true });
-                    const {x, y} = getCenter(el);
-                    demoCursor.style.left = (x + 30) + "px"; 
-                    el.dispatchEvent(event);
-                }
-                setTimeout(() => {
-                    demoCursor.style.transform = "scale(1)";
-                    runDemoStep();
-                }, Math.max(step.duration - 150, 0));
-            }, 150);
-        }
-    }
-
-    window.addEventListener('load', () => {
-        runDemoStep();
     });
 </script>
 
