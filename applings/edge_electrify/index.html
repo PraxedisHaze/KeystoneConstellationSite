@@ -241,6 +241,24 @@
                 flex-direction: column;
             }
         }
+
+        /* Mobile-first layout repair (2026-08-04) */
+        body { padding: 1rem; }
+        header { margin-bottom: 1.5rem; }
+        h1 { font-size: clamp(1.9rem, 10vw, 2.5rem); line-height: 1.05; }
+        .container { flex-direction: column; gap: 1.25rem; padding: 1rem; border-radius: 12px; }
+        .preview-section, .controls-section { min-width: 0; width: 100%; }
+        #output-canvas { width: 100%; height: auto; }
+        .btn { min-height: 48px; }
+        #status { width: min(calc(100vw - 2rem), 24rem); bottom: 1rem; padding: .75rem 1rem; text-align: center; }
+
+        @media (min-width: 769px) {
+            body { padding: 2rem; }
+            header { margin-bottom: 2rem; }
+            .container { flex-direction: row; gap: 2rem; padding: 2rem; border-radius: 16px; }
+            .preview-section { flex: 2; min-width: 300px; }
+            .controls-section { flex: 1; min-width: 300px; }
+        }
     </style>
 </head>
 <body>
