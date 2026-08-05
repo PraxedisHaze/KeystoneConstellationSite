@@ -265,6 +265,21 @@
         .controls-heading { padding-bottom: .15rem; }
         .controls-heading h1 { font-size: clamp(1.75rem, 3vw, 2.35rem); line-height: 1.05; margin-bottom: .35rem; text-align: left; }
         .controls-heading p { font-size: .95rem; }
+
+        /* Phone viewport compaction (2026-08-04) */
+        html, body { overflow-y: auto; }
+        @media (max-width: 768px) {
+            body { min-height: 100dvh; padding: .7rem; align-items: stretch; overflow-x: hidden; overflow-y: auto; }
+            .container { gap: .75rem; padding: .7rem; }
+            #drop-zone { aspect-ratio: 16 / 9; }
+            .controls-section { gap: .7rem; }
+            .controls-heading h1 { font-size: 1.5rem; }
+            .controls-heading p { font-size: .85rem; }
+            .control-group { gap: .25rem; }
+            .color-pickers { gap: .6rem; }
+            input[type="color"] { height: 36px; }
+            .btn { min-height: 44px; padding: .75rem; }
+        }
     </style>
 </head>
 <body>
